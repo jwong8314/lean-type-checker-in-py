@@ -22,5 +22,5 @@ add a (succ b) --> succ (add a b)
 Try it:
 
 ```bash
-python3 -B phases/03_rewrites/solution.py
+python3 -B tutorial_type_checker.py 03
 ```

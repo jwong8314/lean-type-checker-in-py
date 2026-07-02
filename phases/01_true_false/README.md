@@ -18,10 +18,11 @@ Implement:
 3. `infer(expr)` for `Sort` and `Const`.
 4. `check(expr, expected)` by comparing the inferred type with the expected type.
 
-Try it:
+The checks live in [script.lean](script.lean). Run them through the top-level
+runner:
 
 ```bash
-python3 -B phases/01_true_false/solution.py
+python3 -B tutorial_type_checker.py 01
 ```
 
 Expected result:
@@ -30,5 +31,5 @@ Expected result:
 True : Prop
 False : Prop
 true_intro : True
-true_intro : False rejected
+rejected true_intro_as_false
 ```

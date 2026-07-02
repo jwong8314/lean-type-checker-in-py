@@ -242,30 +242,43 @@ def atom(expr: p2.Expr) -> str:
     return f"({pretty(expr)})"
 
 
-def main() -> None:
-    tc = phase3_checker()
+def add_zero_case() -> tuple[p2.Expr, p2.Expr, bool]:
+    a = p2.Var("a")
+    proof = Lam("a", p2.Nat, Refl(p2.Nat, a))
+    expected = p2.Pi("a", p2.Nat, Eq(p2.Nat, p2.apps(add, a, p2.zero), a))
+    return proof, expected, True
+
+
+def add_succ_case() -> tuple[p2.Expr, p2.Expr, bool]:
+    a = p2.Var("a")
+    n = p2.Var("n")
+    proof = Lam("a", p2.Nat, Lam("n", p2.Nat, Refl(p2.Nat, p2.apps(p2.succ, p2.apps(add, a, n)))))
+    expected = p2.Pi("a", p2.Nat, p2.Pi("n", p2.Nat, Eq(p2.Nat, p2.apps(add, a, p2.apps(p2.succ, n)), p2.apps(p2.succ, p2.apps(add, a, n)))))
+    return proof, expected, True
+
+
+def rewrite_step_case() -> tuple[p2.Expr, p2.Expr, bool]:
     a = p2.Var("a")
     n = p2.Var("n")
     ih = p2.Var("ih")
-
-    add_zero_type = p2.Pi("a", p2.Nat, Eq(p2.Nat, p2.apps(add, a, p2.zero), a))
-    add_zero_proof = Lam("a", p2.Nat, Refl(p2.Nat, a))
-    tc.check(add_zero_proof, add_zero_type)
-
-    add_succ_type = p2.Pi("a", p2.Nat, p2.Pi("n", p2.Nat, Eq(p2.Nat, p2.apps(add, a, p2.apps(p2.succ, n)), p2.apps(p2.succ, p2.apps(add, a, n)))))
-    add_succ_proof = Lam("a", p2.Nat, Lam("n", p2.Nat, Refl(p2.Nat, p2.apps(p2.succ, p2.apps(add, a, n)))))
-    tc.check(add_succ_proof, add_succ_type)
-
     premise = Eq(p2.Nat, p2.apps(add, p2.apps(p2.succ, a), n), p2.apps(p2.succ, p2.apps(add, a, n)))
     goal = Eq(p2.Nat, p2.apps(add, p2.apps(p2.succ, a), p2.apps(p2.succ, n)), p2.apps(p2.succ, p2.apps(p2.succ, p2.apps(add, a, n))))
-    rewrite_proof = Lam("a", p2.Nat, Lam("n", p2.Nat, Lam("ih", premise, CongSucc(ih))))
-    rewrite_type = p2.Pi("a", p2.Nat, p2.Pi("n", p2.Nat, p2.arrow(premise, goal)))
-    tc.check(rewrite_proof, rewrite_type)
-
-    print("add_zero checked by rfl")
-    print("add_succ checked by rfl")
-    print("rewrite_step checked by congr_succ")
+    proof = Lam("a", p2.Nat, Lam("n", p2.Nat, Lam("ih", premise, CongSucc(ih))))
+    expected = p2.Pi("a", p2.Nat, p2.Pi("n", p2.Nat, p2.arrow(premise, goal)))
+    return proof, expected, True
 
 
-if __name__ == "__main__":
-    main()
+DEFAULT_CHECKER = phase3_checker()
+SCRIPT = {
+    "add_zero": add_zero_case(),
+    "add_succ": add_succ_case(),
+    "rewrite_step": rewrite_step_case(),
+}
+
+
+def infer(expr: p2.Expr, ctx: dict[str, p2.Expr] | None = None) -> p2.Expr:
+    return DEFAULT_CHECKER.infer(expr, ctx)
+
+
+def check(expr: p2.Expr, expected: p2.Expr, ctx: dict[str, p2.Expr] | None = None) -> None:
+    DEFAULT_CHECKER.check(expr, expected, ctx)

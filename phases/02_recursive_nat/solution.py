@@ -4,20 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-
-@dataclass(frozen=True)
-class Expr:
-    pass
-
-
-@dataclass(frozen=True)
-class Sort(Expr):
-    level: int
-
-
-@dataclass(frozen=True)
-class Const(Expr):
-    name: str
+from expressions import Const, Expr, Prop, Sort, Type
 
 
 @dataclass(frozen=True)
@@ -136,8 +123,6 @@ class TypeChecker:
             raise TypeError(f"expected {pretty(expected)}, got {pretty(actual)}")
 
 
-Prop = Sort(0)
-Type = Sort(1)
 Nat = Const("Nat")
 zero = Const("zero")
 succ = Const("succ")
@@ -194,23 +179,23 @@ def spine(expr: Expr) -> tuple[Expr, list[Expr]]:
     return expr, args
 
 
-def main() -> None:
-    tc = phase2_checker()
-    one = apps(succ, zero)
-    two = apps(succ, one)
-    tc.check(Nat, Type)
-    tc.check(zero, Nat)
-    tc.check(succ, arrow(Nat, Nat))
-    tc.check(one, Nat)
-    tc.check(two, Nat)
-
-    print("declared recursive type: Nat := zero | succ Nat")
-    print("Nat : Type")
-    print("zero : Nat")
-    print("succ : Nat -> Nat")
-    print("succ zero : Nat")
-    print("succ (succ zero) : Nat")
+one = apps(succ, zero)
+two = apps(succ, one)
+DEFAULT_CHECKER = phase2_checker()
 
 
-if __name__ == "__main__":
-    main()
+def infer(expr: Expr, ctx: dict[str, Expr] | None = None) -> Expr:
+    return DEFAULT_CHECKER.infer(expr, ctx)
+
+
+def check(expr: Expr, expected: Expr, ctx: dict[str, Expr] | None = None) -> None:
+    DEFAULT_CHECKER.check(expr, expected, ctx)
+
+
+SCRIPT = {
+    "Nat": (Nat, Type, True),
+    "zero": (zero, Nat, True),
+    "succ": (succ, arrow(Nat, Nat), True),
+    "one": (one, Nat, True),
+    "two": (two, Nat, True),
+}

@@ -2,22 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-
-
-@dataclass(frozen=True)
-class Expr:
-    pass
-
-
-@dataclass(frozen=True)
-class Sort(Expr):
-    level: int
-
-
-@dataclass(frozen=True)
-class Const(Expr):
-    name: str
+from expressions import Const, Expr, Prop, Sort, Type
 
 
 class TypeError(Exception):
@@ -48,8 +33,6 @@ class TypeChecker:
             raise TypeError(f"expected {pretty(expected)}, got {pretty(actual)}")
 
 
-Prop = Sort(0)
-Type = Sort(1)
 TrueProp = Const("True")
 FalseProp = Const("False")
 true_intro = Const("true_intro")
@@ -85,18 +68,20 @@ def rejected(action) -> bool:
     return False
 
 
-def main() -> None:
-    tc = phase1_checker()
-    tc.check(TrueProp, Prop)
-    tc.check(FalseProp, Prop)
-    tc.check(true_intro, TrueProp)
-    assert rejected(lambda: tc.check(true_intro, FalseProp))
-
-    print("True : Prop")
-    print("False : Prop")
-    print("true_intro : True")
-    print("true_intro : False rejected")
+DEFAULT_CHECKER = phase1_checker()
 
 
-if __name__ == "__main__":
-    main()
+def infer(expr: Expr) -> Expr:
+    return DEFAULT_CHECKER.infer(expr)
+
+
+def check(expr: Expr, expected: Expr) -> None:
+    DEFAULT_CHECKER.check(expr, expected)
+
+
+SCRIPT = {
+    "True": (TrueProp, Prop, True),
+    "False": (FalseProp, Prop, True),
+    "true_intro": (true_intro, TrueProp, True),
+    "true_intro_as_false": (true_intro, FalseProp, False),
+}

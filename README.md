@@ -1,33 +1,40 @@
 # Lean-Style Type Checker in Python
 
-This is now structured as a small workshop. Each phase is its own directory
-with:
+This is a small workshop for building a Lean-like kernel step by step.
+
+Each phase has:
 
 ```text
-README.md    # what to build and why
-solution.py  # one working implementation for that phase
+README.md    # what to implement
+solution.py  # the kernel implementation for that phase
+script.lean  # Lean-like checks kept separate from the implementation
 ```
 
-The idea is to implement step by step. Read a phase README, try writing the
-checker yourself, then compare against `solution.py`.
+The top-level [expressions.py](expressions.py) defines the shared `Expr`, `Sort`,
+`Prop`, and `Type`. Every phase-specific expression node inherits from that
+same top-level `Expr`.
+
+## Run
+
+Run every phase:
+
+```bash
+python3 -B tutorial_type_checker.py all
+```
+
+Run one phase:
+
+```bash
+python3 -B tutorial_type_checker.py 01
+python3 -B tutorial_type_checker.py 02
+python3 -B tutorial_type_checker.py 03
+python3 -B tutorial_type_checker.py 04
+```
+
+The runner imports `infer` and `check` from the selected phase’s `solution.py`,
+then runs the separate `script.lean` file for that phase.
 
 ## Phases
-
-```text
-phases/
-  01_true_false/
-    README.md
-    solution.py
-  02_recursive_nat/
-    README.md
-    solution.py
-  03_rewrites/
-    README.md
-    solution.py
-  04_induction/
-    README.md
-    solution.py
-```
 
 Phase 1 builds a tiny checker for `True`, `False`, and proof terms.
 
@@ -42,31 +49,8 @@ Phase 4 adds induction over recursive type declarations and proves:
 forall a b : Nat, succ a + b = succ (a + b)
 ```
 
-## Run Everything
+## Current Limitation
 
-```bash
-python3 -B tutorial_type_checker.py
-```
-
-Or run one phase directly:
-
-```bash
-python3 -B phases/01_true_false/solution.py
-python3 -B phases/02_recursive_nat/solution.py
-python3 -B phases/03_rewrites/solution.py
-python3 -B phases/04_induction/solution.py
-```
-
-Expected final phase output:
-
-```text
-bare rfl rejected
-succ_add : forall (a : Nat), forall (b : Nat), (succ a) + b = succ (a + b)
-```
-
-## Note
-
-The implementations are intentionally small and pedagogical. They are not a
-full Lean parser or kernel; they isolate the kernel ideas needed for the final
-proof: inference, conversion, recursive type declarations, computation,
-rewriting, and induction.
+`script.lean` is intentionally tiny. It supports named `#check` and `#reject`
+directives, and the actual ASTs live in each phase’s `SCRIPT` table. That keeps
+the scripts separate from the kernel while avoiding a full Lean parser for now.

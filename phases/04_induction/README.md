@@ -25,5 +25,5 @@ New implementation pieces:
 Try it:
 
 ```bash
-python3 -B phases/04_induction/solution.py
+python3 -B tutorial_type_checker.py 04
 ```

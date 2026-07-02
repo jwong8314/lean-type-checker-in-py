@@ -20,5 +20,5 @@ New implementation pieces:
 Try it:
 
 ```bash
-python3 -B phases/02_recursive_nat/solution.py
+python3 -B tutorial_type_checker.py 02
 ```

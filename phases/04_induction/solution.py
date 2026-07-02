@@ -150,16 +150,16 @@ def pretty(expr: p2.Expr) -> str:
             return p3.pretty(expr)
 
 
-def main() -> None:
-    tc = phase4_checker()
-    target = theorem_type()
-    proof = theorem_proof()
-    tc.check(proof, target)
-    assert rejected(lambda: tc.check(rfl_only_proof(), target))
-
-    print("bare rfl rejected")
-    print(f"succ_add : {pretty(target)}")
+DEFAULT_CHECKER = phase4_checker()
+SCRIPT = {
+    "by_rfl": (rfl_only_proof(), theorem_type(), False),
+    "succ_add": (theorem_proof(), theorem_type(), True),
+}
 
 
-if __name__ == "__main__":
-    main()
+def infer(expr: p2.Expr, ctx: dict[str, p2.Expr] | None = None) -> p2.Expr:
+    return DEFAULT_CHECKER.infer(expr, ctx)
+
+
+def check(expr: p2.Expr, expected: p2.Expr, ctx: dict[str, p2.Expr] | None = None) -> None:
+    DEFAULT_CHECKER.check(expr, expected, ctx)
