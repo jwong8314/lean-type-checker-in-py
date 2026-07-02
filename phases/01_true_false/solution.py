@@ -70,10 +70,3 @@ def infer(expr: Expr) -> Expr:
 def check(expr: Expr, expected: Expr) -> None:
     DEFAULT_CHECKER.check(expr, expected)
 
-
-DECLARATIONS = {
-    "True": (TrueProp, Prop),
-    "False": (FalseProp, Prop),
-    "true_intro": (true_intro, TrueProp),
-    "true_is_true": (true_intro, TrueProp),
-}

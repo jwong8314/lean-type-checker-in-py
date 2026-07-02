@@ -47,6 +47,19 @@ def load_solution(phase_dir: Path) -> ModuleType:
     return module
 
 
+def load_declarations(phase_dir: Path, solution: ModuleType) -> ModuleType:
+    path = phase_dir / "declarations.py"
+    module_name = f"{phase_dir.name}_declarations"
+    spec = importlib.util.spec_from_file_location(module_name, path)
+    if spec is None or spec.loader is None:
+        raise RunnerError(f"cannot load {path}")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    sys.modules["solution"] = solution
+    spec.loader.exec_module(module)
+    return module
+
+
 def strip_block_comments(text: str) -> str:
     while "/-" in text:
         start = text.index("/-")
@@ -86,18 +99,20 @@ def declaration_names(phase_dir: Path) -> list[str]:
 
 def run_phase(phase_dir: Path) -> None:
     solution = load_solution(phase_dir)
+    declarations_module = load_declarations(phase_dir, solution)
     infer = solution.infer
     check = solution.check
-    declarations = solution.DECLARATIONS
+    declaration = declarations_module.declaration
     pretty = solution.pretty
     checker = solution.fresh_checker() if hasattr(solution, "fresh_checker") else None
     register = getattr(solution, "register_declaration", None)
 
     print(phase_dir.relative_to(ROOT))
     for name in declaration_names(phase_dir):
-        if name not in declarations:
-            raise RunnerError(f"{phase_dir / 'script.lean'}: no DECLARATIONS case named {name!r}")
-        expr, expected = declarations[name]
+        try:
+            expr, expected = declaration(name)
+        except KeyError as exc:
+            raise RunnerError(f"{phase_dir / 'script.lean'}: no declaration case named {name!r}") from exc
         if checker is None:
             infer(expr)
             check(expr, expected)

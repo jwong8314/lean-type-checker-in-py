@@ -191,11 +191,3 @@ def infer(expr: Expr, ctx: dict[str, Expr] | None = None) -> Expr:
 def check(expr: Expr, expected: Expr, ctx: dict[str, Expr] | None = None) -> None:
     DEFAULT_CHECKER.check(expr, expected, ctx)
 
-
-DECLARATIONS = {
-    "Nat": (Nat, Type),
-    "zero": (zero, Nat),
-    "succ": (succ, arrow(Nat, Nat)),
-    "one": (one, Nat),
-    "two": (two, Nat),
-}

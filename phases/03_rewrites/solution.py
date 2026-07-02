@@ -225,7 +225,12 @@ def register_declaration(tc: TypeChecker, name: str) -> None:
         tc.add("congr_succ", congr_succ_type())
     elif name in {"add_zero", "add_succ", "rewrite_step"}:
         # Theorems do not add new computation behavior in this toy kernel.
-        tc.add(name, DECLARATIONS[name][1])
+        if name == "add_zero":
+            tc.add(name, add_zero_case()[1])
+        elif name == "add_succ":
+            tc.add(name, add_succ_case()[1])
+        elif name == "rewrite_step":
+            tc.add(name, rewrite_step_case()[1])
 
 
 def phase3_checker() -> TypeChecker:
@@ -349,18 +354,6 @@ def rewrite_step_case() -> tuple[p2.Expr, p2.Expr]:
     return proof, expected
 
 
-DECLARATIONS = {
-    "Eq": eq_decl_case(),
-    "rfl_nat": rfl_nat_case(),
-    "add": add_decl_case(),
-    "add_zero_rule": add_zero_rule_case(),
-    "add_succ_rule": add_succ_rule_case(),
-    "congr_succ": congr_succ_case(),
-    "add_zero": add_zero_case(),
-    "add_succ": add_succ_case(),
-    "rewrite_step": rewrite_step_case(),
-}
-
 REGISTER_BEFORE_CHECK = {
     "Eq",
     "rfl_nat",
@@ -372,7 +365,17 @@ REGISTER_BEFORE_CHECK = {
 
 
 DEFAULT_CHECKER = phase3_checker()
-for _name in DECLARATIONS:
+for _name in (
+    "Eq",
+    "rfl_nat",
+    "add",
+    "add_zero_rule",
+    "add_succ_rule",
+    "congr_succ",
+    "add_zero",
+    "add_succ",
+    "rewrite_step",
+):
     register_declaration(DEFAULT_CHECKER, _name)
 
 

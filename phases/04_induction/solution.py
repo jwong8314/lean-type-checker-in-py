@@ -136,9 +136,6 @@ def pretty(expr: p2.Expr) -> str:
 
 
 DEFAULT_CHECKER = phase4_checker()
-DECLARATIONS = {
-    "succ_add": (theorem_proof(), theorem_type()),
-}
 
 
 def infer(expr: p2.Expr, ctx: dict[str, p2.Expr] | None = None) -> p2.Expr:

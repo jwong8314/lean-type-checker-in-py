@@ -8,6 +8,7 @@ Each phase has:
 README.md    # what to implement
 solution.py  # the kernel implementation for that phase
 script.lean  # Lean-like declarations kept separate from the implementation
+declarations.py # temporary AST bridge from script names to Python terms
 ```
 
 The top-level [expressions.py](expressions.py) defines the shared `Expr`, `Sort`,
@@ -55,5 +56,6 @@ forall a b : Nat, succ a + b = succ (a + b)
 `script.lean` is intentionally tiny. It contains ordinary-looking `constant`,
 `inductive`, `def`, and `theorem` declarations, but this project still does not
 parse full Lean terms. For now, the runner extracts declaration names, and the
-actual ASTs live in each phase’s `DECLARATIONS` table. That keeps scripts
-separate from the kernel while avoiding a full Lean parser too early.
+actual ASTs are produced by each phase’s separate `declarations.py` bridge.
+That keeps scripts separate from the kernel implementation while avoiding a
+full Lean parser too early.
