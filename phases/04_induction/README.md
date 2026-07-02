@@ -13,7 +13,7 @@ second argument. The proof is by induction on `b`:
 
 ```text
 base: rfl
-step: fun n ih => congr_succ ih
+step: fun n ih => rw ih
 ```
 
 New implementation pieces:

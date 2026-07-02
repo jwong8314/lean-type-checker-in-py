@@ -10,7 +10,7 @@ introduces each ingredient before using it:
 3. `add`, a natural-number function.
 4. `add_zero a : a + zero = a`, the first computation rule.
 5. `add_succ a b : a + succ b = succ (a + b)`, the second computation rule.
-6. `congr_succ`, a rewrite principle under `succ`.
+6. `rw`, a tiny rewrite tactic/principle under `succ`.
 7. Theorems that use those pieces.
 
 The computation rules are:

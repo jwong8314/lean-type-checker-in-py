@@ -16,8 +16,8 @@ def declaration(name: str):
         return solution.add_zero_case()
     if name == "add_succ":
         return solution.add_succ_case()
-    if name == "congr_succ":
-        return solution.congr_succ_case()
+    if name == "rw":
+        return solution.rw_case()
     if name == "add_zero_by_rfl":
         return solution.add_zero_by_rfl_case()
     if name == "add_succ_by_rfl":

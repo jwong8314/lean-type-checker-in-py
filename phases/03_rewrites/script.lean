@@ -19,11 +19,11 @@ def add_zero : forall a : Nat, a + zero = a
 
 def add_succ : forall a b : Nat, a + succ b = succ (a + b)
 
-theorem congr_succ :
+theorem rw :
     forall x y : Nat,
       x = y ->
       succ x = succ y :=
-  fun x y h => congr_succ h
+  fun x y h => rw h
 
 theorem add_zero_by_rfl : forall a : Nat, a + zero = a :=
   fun a => rfl
@@ -35,4 +35,4 @@ theorem rewrite_step :
     forall a n : Nat,
       (succ a + n = succ (a + n)) ->
       succ a + succ n = succ (succ (a + n)) :=
-  fun a n ih => congr_succ ih
+  fun a n ih => rw ih

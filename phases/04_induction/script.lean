@@ -7,5 +7,5 @@ theorem succ_add : forall a b : Nat, succ a + b = succ (a + b) :=
     Nat.ind
       (fun b => succ a + b = succ (a + b))
       rfl
-      (fun n ih => congr_succ ih)
+      (fun n ih => rw ih)
       b

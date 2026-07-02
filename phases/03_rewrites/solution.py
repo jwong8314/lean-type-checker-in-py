@@ -43,7 +43,7 @@ class Refl(p2.Expr):
 
 
 @dataclass(frozen=True)
-class CongSucc(p2.Expr):
+class Rw(p2.Expr):
     proof: p2.Expr
 
 
@@ -74,13 +74,13 @@ class TypeChecker(p2.TypeChecker):
                 self.check(ty, p2.Type, ctx)
                 self.check(value, ty, ctx)
                 return Eq(ty, value, value)
-            case CongSucc(proof):
+            case Rw(proof):
                 proof_ty = self.whnf(self.infer(proof, ctx))
                 if not isinstance(proof_ty, Eq):
-                    raise p2.TypeError("congr_succ expected an equality proof")
+                    raise p2.TypeError("rw expected an equality proof")
                 self.check(proof_ty.ty, p2.Type, ctx)
                 if not self.defeq(proof_ty.ty, p2.Nat):
-                    raise p2.TypeError("congr_succ only handles Nat equalities in this tutorial")
+                    raise p2.TypeError("rw only handles Nat equalities in this tutorial")
                 return Eq(p2.Nat, p2.apps(p2.succ, proof_ty.lhs), p2.apps(p2.succ, proof_ty.rhs))
             case _:
                 return super().infer(expr, ctx)
@@ -120,8 +120,8 @@ class TypeChecker(p2.TypeChecker):
                 return Eq(self.normalize(ty), self.normalize(lhs), self.normalize(rhs))
             case Refl(ty, value):
                 return Refl(self.normalize(ty), self.normalize(value))
-            case CongSucc(proof):
-                return CongSucc(self.normalize(proof))
+            case Rw(proof):
+                return Rw(self.normalize(proof))
             case _:
                 return expr
 
@@ -161,8 +161,8 @@ def subst(expr: p2.Expr, var: str, replacement: p2.Expr) -> p2.Expr:
             return Eq(subst(ty, var, replacement), subst(lhs, var, replacement), subst(rhs, var, replacement))
         case Refl(ty, value):
             return Refl(subst(ty, var, replacement), subst(value, var, replacement))
-        case CongSucc(proof):
-            return CongSucc(subst(proof, var, replacement))
+        case Rw(proof):
+            return Rw(subst(proof, var, replacement))
         case _:
             raise p2.TypeError(f"cannot substitute in {expr!r}")
 
@@ -186,7 +186,7 @@ def alpha_equal(left: p2.Expr, right: p2.Expr, env: dict[str, str] | None = None
             return alpha_equal(t1, t2, env) and alpha_equal(l1, l2, env) and alpha_equal(r1, r2, env)
         case Refl(t1, v1), Refl(t2, v2):
             return alpha_equal(t1, t2, env) and alpha_equal(v1, v2, env)
-        case CongSucc(p1), CongSucc(p2_):
+        case Rw(p1), Rw(p2_):
             return alpha_equal(p1, p2_, env)
         case _:
             return False
@@ -221,8 +221,8 @@ def register_declaration(tc: TypeChecker, name: str) -> None:
     elif name == "add_succ":
         tc.add("add_succ", add_succ_type())
         tc.add_reducer("add", nat_add_reducer)
-    elif name == "congr_succ":
-        tc.add("congr_succ", congr_succ_type())
+    elif name == "rw":
+        tc.add("rw", rw_type())
     elif name in {"add_zero_by_rfl", "add_succ_by_rfl", "rewrite_step"}:
         # Theorems do not add new computation behavior in this toy kernel.
         if name == "add_zero_by_rfl":
@@ -249,8 +249,8 @@ def pretty(expr: p2.Expr) -> str:
             return f"{pretty(lhs)} = {pretty(rhs)}"
         case Refl(ty, value):
             return f"rfl@{pretty(ty)} {atom(value)}"
-        case CongSucc(proof):
-            return f"congr_succ {atom(proof)}"
+        case Rw(proof):
+            return f"rw {atom(proof)}"
         case Lam(var, domain, body):
             return f"fun ({var} : {pretty(domain)}) => {pretty(body)}"
         case p2.Pi("_", domain, body):
@@ -311,7 +311,7 @@ def add_succ_case() -> tuple[p2.Expr, p2.Expr]:
     return add_succ, add_succ_type()
 
 
-def congr_succ_type() -> p2.Expr:
+def rw_type() -> p2.Expr:
     x = p2.Var("x")
     y = p2.Var("y")
     premise = Eq(p2.Nat, x, y)
@@ -319,13 +319,13 @@ def congr_succ_type() -> p2.Expr:
     return p2.Pi("x", p2.Nat, p2.Pi("y", p2.Nat, p2.arrow(premise, conclusion)))
 
 
-def congr_succ_case() -> tuple[p2.Expr, p2.Expr]:
+def rw_case() -> tuple[p2.Expr, p2.Expr]:
     x = p2.Var("x")
     y = p2.Var("y")
     h = p2.Var("h")
     premise = Eq(p2.Nat, x, y)
-    proof = Lam("x", p2.Nat, Lam("y", p2.Nat, Lam("h", premise, CongSucc(h))))
-    return proof, congr_succ_type()
+    proof = Lam("x", p2.Nat, Lam("y", p2.Nat, Lam("h", premise, Rw(h))))
+    return proof, rw_type()
 
 
 def add_zero_by_rfl_case() -> tuple[p2.Expr, p2.Expr]:
@@ -349,7 +349,7 @@ def rewrite_step_case() -> tuple[p2.Expr, p2.Expr]:
     ih = p2.Var("ih")
     premise = Eq(p2.Nat, p2.apps(add, p2.apps(p2.succ, a), n), p2.apps(p2.succ, p2.apps(add, a, n)))
     goal = Eq(p2.Nat, p2.apps(add, p2.apps(p2.succ, a), p2.apps(p2.succ, n)), p2.apps(p2.succ, p2.apps(p2.succ, p2.apps(add, a, n))))
-    proof = Lam("a", p2.Nat, Lam("n", p2.Nat, Lam("ih", premise, CongSucc(ih))))
+    proof = Lam("a", p2.Nat, Lam("n", p2.Nat, Lam("ih", premise, Rw(ih))))
     expected = p2.Pi("a", p2.Nat, p2.Pi("n", p2.Nat, p2.arrow(premise, goal)))
     return proof, expected
 
@@ -360,7 +360,7 @@ REGISTER_BEFORE_CHECK = {
     "add",
     "add_zero",
     "add_succ",
-    "congr_succ",
+    "rw",
 }
 
 
@@ -371,7 +371,7 @@ for _name in (
     "add",
     "add_zero",
     "add_succ",
-    "congr_succ",
+    "rw",
     "add_zero_by_rfl",
     "add_succ_by_rfl",
     "rewrite_step",

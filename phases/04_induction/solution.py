@@ -121,7 +121,7 @@ def theorem_proof() -> p2.Expr:
 
     motive = p3.Lam("b", p2.Nat, motive_at(p2.Var("b")))
     base = p3.Refl(p2.Nat, p2.apps(p2.succ, a))
-    step = p3.Lam("n", p2.Nat, p3.Lam("ih", motive_at(n), p3.CongSucc(ih)))
+    step = p3.Lam("n", p2.Nat, p3.Lam("ih", motive_at(n), p3.Rw(ih)))
     body = Induction("Nat", motive, (base, step), p2.Var("b"))
     return p3.Lam("a", p2.Nat, p3.Lam("b", p2.Nat, body))
 
