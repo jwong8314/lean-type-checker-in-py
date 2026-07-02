@@ -8,6 +8,11 @@ constant Eq : Type -> Nat -> Nat -> Prop
 theorem rfl_nat : forall x : Nat, Eq Nat x x :=
   fun x => rfl
 
+/-
+At this point `add` is only given its type.  That is sensible because the next
+two declarations are the only introduction/computation rules for it: they say
+what `add a zero` and `add a (succ b)` reduce to.
+-/
 def add : Nat -> Nat -> Nat
 
 def add_zero : forall a : Nat, a + zero = a
