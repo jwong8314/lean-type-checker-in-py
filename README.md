@@ -7,7 +7,7 @@ Each phase has:
 ```text
 README.md    # what to implement
 solution.py  # the kernel implementation for that phase
-script.lean  # Lean-like checks kept separate from the implementation
+script.lean  # Lean-like declarations kept separate from the implementation
 ```
 
 The top-level [expressions.py](expressions.py) defines the shared `Expr`, `Sort`,
@@ -32,7 +32,8 @@ python3 -B tutorial_type_checker.py 04
 ```
 
 The runner imports `infer` and `check` from the selected phase’s `solution.py`,
-then runs the separate `script.lean` file for that phase.
+then type-checks each declaration in that phase’s separate `script.lean` file.
+If anything fails to type check, the runner crashes with an error.
 
 ## Phases
 
@@ -51,6 +52,8 @@ forall a b : Nat, succ a + b = succ (a + b)
 
 ## Current Limitation
 
-`script.lean` is intentionally tiny. It supports named `#check` and `#reject`
-directives, and the actual ASTs live in each phase’s `SCRIPT` table. That keeps
-the scripts separate from the kernel while avoiding a full Lean parser for now.
+`script.lean` is intentionally tiny. It contains ordinary-looking `constant`,
+`inductive`, `def`, and `theorem` declarations, but this project still does not
+parse full Lean terms. For now, the runner extracts declaration names, and the
+actual ASTs live in each phase’s `DECLARATIONS` table. That keeps scripts
+separate from the kernel while avoiding a full Lean parser too early.

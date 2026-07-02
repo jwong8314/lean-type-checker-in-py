@@ -242,22 +242,22 @@ def atom(expr: p2.Expr) -> str:
     return f"({pretty(expr)})"
 
 
-def add_zero_case() -> tuple[p2.Expr, p2.Expr, bool]:
+def add_zero_case() -> tuple[p2.Expr, p2.Expr]:
     a = p2.Var("a")
     proof = Lam("a", p2.Nat, Refl(p2.Nat, a))
     expected = p2.Pi("a", p2.Nat, Eq(p2.Nat, p2.apps(add, a, p2.zero), a))
-    return proof, expected, True
+    return proof, expected
 
 
-def add_succ_case() -> tuple[p2.Expr, p2.Expr, bool]:
+def add_succ_case() -> tuple[p2.Expr, p2.Expr]:
     a = p2.Var("a")
     n = p2.Var("n")
     proof = Lam("a", p2.Nat, Lam("n", p2.Nat, Refl(p2.Nat, p2.apps(p2.succ, p2.apps(add, a, n)))))
     expected = p2.Pi("a", p2.Nat, p2.Pi("n", p2.Nat, Eq(p2.Nat, p2.apps(add, a, p2.apps(p2.succ, n)), p2.apps(p2.succ, p2.apps(add, a, n)))))
-    return proof, expected, True
+    return proof, expected
 
 
-def rewrite_step_case() -> tuple[p2.Expr, p2.Expr, bool]:
+def rewrite_step_case() -> tuple[p2.Expr, p2.Expr]:
     a = p2.Var("a")
     n = p2.Var("n")
     ih = p2.Var("ih")
@@ -265,11 +265,11 @@ def rewrite_step_case() -> tuple[p2.Expr, p2.Expr, bool]:
     goal = Eq(p2.Nat, p2.apps(add, p2.apps(p2.succ, a), p2.apps(p2.succ, n)), p2.apps(p2.succ, p2.apps(p2.succ, p2.apps(add, a, n))))
     proof = Lam("a", p2.Nat, Lam("n", p2.Nat, Lam("ih", premise, CongSucc(ih))))
     expected = p2.Pi("a", p2.Nat, p2.Pi("n", p2.Nat, p2.arrow(premise, goal)))
-    return proof, expected, True
+    return proof, expected
 
 
 DEFAULT_CHECKER = phase3_checker()
-SCRIPT = {
+DECLARATIONS = {
     "add_zero": add_zero_case(),
     "add_succ": add_succ_case(),
     "rewrite_step": rewrite_step_case(),

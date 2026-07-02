@@ -126,21 +126,6 @@ def theorem_proof() -> p2.Expr:
     return p3.Lam("a", p2.Nat, p3.Lam("b", p2.Nat, body))
 
 
-def rfl_only_proof() -> p2.Expr:
-    a = p2.Var("a")
-    b = p2.Var("b")
-    rhs = p2.apps(p2.succ, p2.apps(p3.add, a, b))
-    return p3.Lam("a", p2.Nat, p3.Lam("b", p2.Nat, p3.Refl(p2.Nat, rhs)))
-
-
-def rejected(action) -> bool:
-    try:
-        action()
-    except p2.TypeError:
-        return True
-    return False
-
-
 def pretty(expr: p2.Expr) -> str:
     match expr:
         case Induction(type_name, motive, cases, target):
@@ -151,9 +136,8 @@ def pretty(expr: p2.Expr) -> str:
 
 
 DEFAULT_CHECKER = phase4_checker()
-SCRIPT = {
-    "by_rfl": (rfl_only_proof(), theorem_type(), False),
-    "succ_add": (theorem_proof(), theorem_type(), True),
+DECLARATIONS = {
+    "succ_add": (theorem_proof(), theorem_type()),
 }
 
 

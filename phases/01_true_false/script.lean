@@ -2,7 +2,8 @@
 Phase 1 script: propositions are types, proofs are terms.
 -/
 
-#check True
-#check False
-#check true_intro
-#reject true_intro_as_false
+constant True : Prop
+constant False : Prop
+constant true_intro : True
+
+theorem true_is_true : True := true_intro

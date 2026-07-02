@@ -192,10 +192,10 @@ def check(expr: Expr, expected: Expr, ctx: dict[str, Expr] | None = None) -> Non
     DEFAULT_CHECKER.check(expr, expected, ctx)
 
 
-SCRIPT = {
-    "Nat": (Nat, Type, True),
-    "zero": (zero, Nat, True),
-    "succ": (succ, arrow(Nat, Nat), True),
-    "one": (one, Nat, True),
-    "two": (two, Nat, True),
+DECLARATIONS = {
+    "Nat": (Nat, Type),
+    "zero": (zero, Nat),
+    "succ": (succ, arrow(Nat, Nat)),
+    "one": (one, Nat),
+    "two": (two, Nat),
 }

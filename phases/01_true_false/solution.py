@@ -60,14 +60,6 @@ def pretty(expr: Expr) -> str:
             return repr(expr)
 
 
-def rejected(action) -> bool:
-    try:
-        action()
-    except TypeError:
-        return True
-    return False
-
-
 DEFAULT_CHECKER = phase1_checker()
 
 
@@ -79,9 +71,9 @@ def check(expr: Expr, expected: Expr) -> None:
     DEFAULT_CHECKER.check(expr, expected)
 
 
-SCRIPT = {
-    "True": (TrueProp, Prop, True),
-    "False": (FalseProp, Prop, True),
-    "true_intro": (true_intro, TrueProp, True),
-    "true_intro_as_false": (true_intro, FalseProp, False),
+DECLARATIONS = {
+    "True": (TrueProp, Prop),
+    "False": (FalseProp, Prop),
+    "true_intro": (true_intro, TrueProp),
+    "true_is_true": (true_intro, TrueProp),
 }

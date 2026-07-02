@@ -31,5 +31,5 @@ Expected result:
 True : Prop
 False : Prop
 true_intro : True
-rejected true_intro_as_false
+true_is_true : True
 ```

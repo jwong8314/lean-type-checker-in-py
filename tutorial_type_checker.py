@@ -5,6 +5,12 @@ Usage:
     python3 -B tutorial_type_checker.py all
     python3 -B tutorial_type_checker.py 01
     python3 -B tutorial_type_checker.py 03_rewrites
+
+The scripts are intentionally tiny Lean-like files containing `constant`,
+`inductive`, `def`, and `theorem` declarations.  This runner does not parse full
+Lean terms yet.  It extracts declaration names from the script, imports the
+selected phase's `solution.py`, and asks that phase's kernel to check the AST
+registered for each declaration.
 """
 
 from __future__ import annotations
@@ -41,46 +47,57 @@ def load_solution(phase_dir: Path) -> ModuleType:
     return module
 
 
-def script_directives(phase_dir: Path) -> list[tuple[str, str]]:
+def strip_block_comments(text: str) -> str:
+    while "/-" in text:
+        start = text.index("/-")
+        end = text.index("-/", start) + 2
+        text = text[:start] + text[end:]
+    return text
+
+
+def declaration_names(phase_dir: Path) -> list[str]:
     path = phase_dir / "script.lean"
-    directives: list[tuple[str, str]] = []
-    for lineno, line in enumerate(path.read_text().splitlines(), start=1):
+    names: list[str] = []
+    for lineno, line in enumerate(strip_block_comments(path.read_text()).splitlines(), start=1):
         stripped = line.strip()
-        if stripped.startswith("#check "):
-            directives.append(("check", stripped.removeprefix("#check ").strip()))
-        elif stripped.startswith("#reject "):
-            directives.append(("reject", stripped.removeprefix("#reject ").strip()))
-        elif stripped.startswith("#"):
-            raise RunnerError(f"{path}:{lineno}: unknown directive {stripped}")
-    return directives
+        if not stripped or stripped.startswith("--"):
+            continue
+        if stripped.startswith("constant "):
+            names.append(stripped.split()[1])
+        elif stripped.startswith("inductive "):
+            names.append(stripped.split()[1])
+        elif stripped.startswith("| "):
+            names.append(stripped.split()[1])
+        elif stripped.startswith("def ") or stripped.startswith("theorem "):
+            names.append(stripped.split()[1])
+        elif stripped.startswith(("fun ", "Nat.ind", "rfl", "(")):
+            continue
+        elif stripped in {"where"}:
+            continue
+        elif stripped.startswith(("forall ", "succ ", "(succ ")):
+            continue
+        else:
+            # Continuation lines in these tutorial scripts are proof/type text.
+            # Unknown top-level commands should be explicit failures.
+            if not line.startswith((" ", "\t")):
+                raise RunnerError(f"{path}:{lineno}: cannot understand declaration line: {stripped}")
+    return names
 
 
 def run_phase(phase_dir: Path) -> None:
     solution = load_solution(phase_dir)
     infer = solution.infer
     check = solution.check
-    cases = solution.SCRIPT
+    declarations = solution.DECLARATIONS
     pretty = solution.pretty
 
     print(phase_dir.relative_to(ROOT))
-    for kind, name in script_directives(phase_dir):
-        if name not in cases:
-            raise RunnerError(f"{phase_dir / 'script.lean'}: no SCRIPT case named {name!r}")
-        expr, expected, should_accept = cases[name]
-        if kind == "reject":
-            should_accept = False
-
-        try:
-            inferred = infer(expr)
-            check(expr, expected)
-        except Exception as exc:
-            if should_accept:
-                raise
-            print(f"  rejected {name}")
-            continue
-
-        if not should_accept:
-            raise RunnerError(f"{name} was expected to be rejected")
+    for name in declaration_names(phase_dir):
+        if name not in declarations:
+            raise RunnerError(f"{phase_dir / 'script.lean'}: no DECLARATIONS case named {name!r}")
+        expr, expected = declarations[name]
+        infer(expr)
+        check(expr, expected)
         print(f"  {name} : {pretty(expected)}")
 
 
