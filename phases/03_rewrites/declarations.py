@@ -12,16 +12,16 @@ def declaration(name: str):
         return solution.rfl_nat_case()
     if name == "add":
         return solution.add_decl_case()
-    if name == "add_zero_rule":
-        return solution.add_zero_rule_case()
-    if name == "add_succ_rule":
-        return solution.add_succ_rule_case()
-    if name == "congr_succ":
-        return solution.congr_succ_case()
     if name == "add_zero":
         return solution.add_zero_case()
     if name == "add_succ":
         return solution.add_succ_case()
+    if name == "congr_succ":
+        return solution.congr_succ_case()
+    if name == "add_zero_by_rfl":
+        return solution.add_zero_by_rfl_case()
+    if name == "add_succ_by_rfl":
+        return solution.add_succ_by_rfl_case()
     if name == "rewrite_step":
         return solution.rewrite_step_case()
     raise KeyError(name)

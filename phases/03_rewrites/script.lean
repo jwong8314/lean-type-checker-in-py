@@ -10,9 +10,9 @@ theorem rfl_nat : forall x : Nat, Eq Nat x x :=
 
 def add : Nat -> Nat -> Nat
 
-def add_zero_rule : forall a : Nat, add a zero = a
+def add_zero : forall a : Nat, a + zero = a
 
-def add_succ_rule : forall a b : Nat, add a (succ b) = succ (add a b)
+def add_succ : forall a b : Nat, a + succ b = succ (a + b)
 
 theorem congr_succ :
     forall x y : Nat,
@@ -20,10 +20,10 @@ theorem congr_succ :
       succ x = succ y :=
   fun x y h => congr_succ h
 
-theorem add_zero : forall a : Nat, a + zero = a :=
+theorem add_zero_by_rfl : forall a : Nat, a + zero = a :=
   fun a => rfl
 
-theorem add_succ : forall a n : Nat, a + succ n = succ (a + n) :=
+theorem add_succ_by_rfl : forall a n : Nat, a + succ n = succ (a + n) :=
   fun a n => rfl
 
 theorem rewrite_step :

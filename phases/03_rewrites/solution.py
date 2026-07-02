@@ -137,8 +137,8 @@ class TypeChecker(p2.TypeChecker):
 
 add = p2.Const("add")
 EqConst = p2.Const("Eq")
-add_zero_rule = p2.Const("add_zero_rule")
-add_succ_rule = p2.Const("add_succ_rule")
+add_zero = p2.Const("add_zero")
+add_succ = p2.Const("add_succ")
 
 
 def subst(expr: p2.Expr, var: str, replacement: p2.Expr) -> p2.Expr:
@@ -215,20 +215,20 @@ def register_declaration(tc: TypeChecker, name: str) -> None:
         tc.add("rfl_nat", rfl_nat_type())
     elif name == "add":
         tc.add("add", add_decl_case()[1])
-    elif name == "add_zero_rule":
-        tc.add("add_zero_rule", add_zero_rule_type())
+    elif name == "add_zero":
+        tc.add("add_zero", add_zero_type())
         tc.add_reducer("add", nat_add_reducer)
-    elif name == "add_succ_rule":
-        tc.add("add_succ_rule", add_succ_rule_type())
+    elif name == "add_succ":
+        tc.add("add_succ", add_succ_type())
         tc.add_reducer("add", nat_add_reducer)
     elif name == "congr_succ":
         tc.add("congr_succ", congr_succ_type())
-    elif name in {"add_zero", "add_succ", "rewrite_step"}:
+    elif name in {"add_zero_by_rfl", "add_succ_by_rfl", "rewrite_step"}:
         # Theorems do not add new computation behavior in this toy kernel.
-        if name == "add_zero":
-            tc.add(name, add_zero_case()[1])
-        elif name == "add_succ":
-            tc.add(name, add_succ_case()[1])
+        if name == "add_zero_by_rfl":
+            tc.add(name, add_zero_by_rfl_case()[1])
+        elif name == "add_succ_by_rfl":
+            tc.add(name, add_succ_by_rfl_case()[1])
         elif name == "rewrite_step":
             tc.add(name, rewrite_step_case()[1])
 
@@ -292,23 +292,23 @@ def add_decl_case() -> tuple[p2.Expr, p2.Expr]:
     return add, p2.arrow(p2.Nat, p2.arrow(p2.Nat, p2.Nat))
 
 
-def add_zero_rule_type() -> p2.Expr:
+def add_zero_type() -> p2.Expr:
     a = p2.Var("a")
     return p2.Pi("a", p2.Nat, Eq(p2.Nat, p2.apps(add, a, p2.zero), a))
 
 
-def add_zero_rule_case() -> tuple[p2.Expr, p2.Expr]:
-    return add_zero_rule, add_zero_rule_type()
+def add_zero_case() -> tuple[p2.Expr, p2.Expr]:
+    return add_zero, add_zero_type()
 
 
-def add_succ_rule_type() -> p2.Expr:
+def add_succ_type() -> p2.Expr:
     a = p2.Var("a")
     b = p2.Var("b")
     return p2.Pi("a", p2.Nat, p2.Pi("b", p2.Nat, Eq(p2.Nat, p2.apps(add, a, p2.apps(p2.succ, b)), p2.apps(p2.succ, p2.apps(add, a, b)))))
 
 
-def add_succ_rule_case() -> tuple[p2.Expr, p2.Expr]:
-    return add_succ_rule, add_succ_rule_type()
+def add_succ_case() -> tuple[p2.Expr, p2.Expr]:
+    return add_succ, add_succ_type()
 
 
 def congr_succ_type() -> p2.Expr:
@@ -328,14 +328,14 @@ def congr_succ_case() -> tuple[p2.Expr, p2.Expr]:
     return proof, congr_succ_type()
 
 
-def add_zero_case() -> tuple[p2.Expr, p2.Expr]:
+def add_zero_by_rfl_case() -> tuple[p2.Expr, p2.Expr]:
     a = p2.Var("a")
     proof = Lam("a", p2.Nat, Refl(p2.Nat, a))
     expected = p2.Pi("a", p2.Nat, Eq(p2.Nat, p2.apps(add, a, p2.zero), a))
     return proof, expected
 
 
-def add_succ_case() -> tuple[p2.Expr, p2.Expr]:
+def add_succ_by_rfl_case() -> tuple[p2.Expr, p2.Expr]:
     a = p2.Var("a")
     n = p2.Var("n")
     proof = Lam("a", p2.Nat, Lam("n", p2.Nat, Refl(p2.Nat, p2.apps(p2.succ, p2.apps(add, a, n)))))
@@ -358,8 +358,8 @@ REGISTER_BEFORE_CHECK = {
     "Eq",
     "rfl_nat",
     "add",
-    "add_zero_rule",
-    "add_succ_rule",
+    "add_zero",
+    "add_succ",
     "congr_succ",
 }
 
@@ -369,11 +369,11 @@ for _name in (
     "Eq",
     "rfl_nat",
     "add",
-    "add_zero_rule",
-    "add_succ_rule",
-    "congr_succ",
     "add_zero",
     "add_succ",
+    "congr_succ",
+    "add_zero_by_rfl",
+    "add_succ_by_rfl",
     "rewrite_step",
 ):
     register_declaration(DEFAULT_CHECKER, _name)
