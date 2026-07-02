@@ -136,6 +136,9 @@ class TypeChecker(p2.TypeChecker):
 
 
 add = p2.Const("add")
+EqConst = p2.Const("Eq")
+add_zero_rule = p2.Const("add_zero_rule")
+add_succ_rule = p2.Const("add_succ_rule")
 
 
 def subst(expr: p2.Expr, var: str, replacement: p2.Expr) -> p2.Expr:
@@ -203,12 +206,36 @@ def nat_add_reducer(tc: TypeChecker, expr: p2.Expr) -> p2.Expr | None:
     return None
 
 
+def register_declaration(tc: TypeChecker, name: str) -> None:
+    """Update the checker environment when script.lean reaches a declaration."""
+
+    if name == "Eq":
+        tc.add("Eq", eq_decl_case()[1])
+    elif name == "rfl_nat":
+        tc.add("rfl_nat", rfl_nat_type())
+    elif name == "add":
+        tc.add("add", add_decl_case()[1])
+    elif name == "add_zero_rule":
+        tc.add("add_zero_rule", add_zero_rule_type())
+        tc.add_reducer("add", nat_add_reducer)
+    elif name == "add_succ_rule":
+        tc.add("add_succ_rule", add_succ_rule_type())
+        tc.add_reducer("add", nat_add_reducer)
+    elif name == "congr_succ":
+        tc.add("congr_succ", congr_succ_type())
+    elif name in {"add_zero", "add_succ", "rewrite_step"}:
+        # Theorems do not add new computation behavior in this toy kernel.
+        tc.add(name, DECLARATIONS[name][1])
+
+
 def phase3_checker() -> TypeChecker:
     tc = TypeChecker()
     tc.add_recursive_type(p2.nat_type_spec())
-    tc.add("add", p2.arrow(p2.Nat, p2.arrow(p2.Nat, p2.Nat)))
-    tc.add_reducer("add", nat_add_reducer)
     return tc
+
+
+def fresh_checker() -> TypeChecker:
+    return phase3_checker()
 
 
 def pretty(expr: p2.Expr) -> str:
@@ -242,6 +269,60 @@ def atom(expr: p2.Expr) -> str:
     return f"({pretty(expr)})"
 
 
+def eq_decl_case() -> tuple[p2.Expr, p2.Expr]:
+    return EqConst, p2.arrow(p2.Type, p2.arrow(p2.Nat, p2.arrow(p2.Nat, p2.Prop)))
+
+
+def rfl_nat_type() -> p2.Expr:
+    x = p2.Var("x")
+    return p2.Pi("x", p2.Nat, Eq(p2.Nat, x, x))
+
+
+def rfl_nat_case() -> tuple[p2.Expr, p2.Expr]:
+    x = p2.Var("x")
+    return Lam("x", p2.Nat, Refl(p2.Nat, x)), rfl_nat_type()
+
+
+def add_decl_case() -> tuple[p2.Expr, p2.Expr]:
+    return add, p2.arrow(p2.Nat, p2.arrow(p2.Nat, p2.Nat))
+
+
+def add_zero_rule_type() -> p2.Expr:
+    a = p2.Var("a")
+    return p2.Pi("a", p2.Nat, Eq(p2.Nat, p2.apps(add, a, p2.zero), a))
+
+
+def add_zero_rule_case() -> tuple[p2.Expr, p2.Expr]:
+    return add_zero_rule, add_zero_rule_type()
+
+
+def add_succ_rule_type() -> p2.Expr:
+    a = p2.Var("a")
+    b = p2.Var("b")
+    return p2.Pi("a", p2.Nat, p2.Pi("b", p2.Nat, Eq(p2.Nat, p2.apps(add, a, p2.apps(p2.succ, b)), p2.apps(p2.succ, p2.apps(add, a, b)))))
+
+
+def add_succ_rule_case() -> tuple[p2.Expr, p2.Expr]:
+    return add_succ_rule, add_succ_rule_type()
+
+
+def congr_succ_type() -> p2.Expr:
+    x = p2.Var("x")
+    y = p2.Var("y")
+    premise = Eq(p2.Nat, x, y)
+    conclusion = Eq(p2.Nat, p2.apps(p2.succ, x), p2.apps(p2.succ, y))
+    return p2.Pi("x", p2.Nat, p2.Pi("y", p2.Nat, p2.arrow(premise, conclusion)))
+
+
+def congr_succ_case() -> tuple[p2.Expr, p2.Expr]:
+    x = p2.Var("x")
+    y = p2.Var("y")
+    h = p2.Var("h")
+    premise = Eq(p2.Nat, x, y)
+    proof = Lam("x", p2.Nat, Lam("y", p2.Nat, Lam("h", premise, CongSucc(h))))
+    return proof, congr_succ_type()
+
+
 def add_zero_case() -> tuple[p2.Expr, p2.Expr]:
     a = p2.Var("a")
     proof = Lam("a", p2.Nat, Refl(p2.Nat, a))
@@ -268,17 +349,38 @@ def rewrite_step_case() -> tuple[p2.Expr, p2.Expr]:
     return proof, expected
 
 
-DEFAULT_CHECKER = phase3_checker()
 DECLARATIONS = {
+    "Eq": eq_decl_case(),
+    "rfl_nat": rfl_nat_case(),
+    "add": add_decl_case(),
+    "add_zero_rule": add_zero_rule_case(),
+    "add_succ_rule": add_succ_rule_case(),
+    "congr_succ": congr_succ_case(),
     "add_zero": add_zero_case(),
     "add_succ": add_succ_case(),
     "rewrite_step": rewrite_step_case(),
 }
 
+REGISTER_BEFORE_CHECK = {
+    "Eq",
+    "rfl_nat",
+    "add",
+    "add_zero_rule",
+    "add_succ_rule",
+    "congr_succ",
+}
 
-def infer(expr: p2.Expr, ctx: dict[str, p2.Expr] | None = None) -> p2.Expr:
-    return DEFAULT_CHECKER.infer(expr, ctx)
+
+DEFAULT_CHECKER = phase3_checker()
+for _name in DECLARATIONS:
+    register_declaration(DEFAULT_CHECKER, _name)
 
 
-def check(expr: p2.Expr, expected: p2.Expr, ctx: dict[str, p2.Expr] | None = None) -> None:
-    DEFAULT_CHECKER.check(expr, expected, ctx)
+def infer(expr: p2.Expr, ctx: dict[str, p2.Expr] | None = None, tc: TypeChecker | None = None) -> p2.Expr:
+    tc = DEFAULT_CHECKER if tc is None else tc
+    return tc.infer(expr, ctx)
+
+
+def check(expr: p2.Expr, expected: p2.Expr, ctx: dict[str, p2.Expr] | None = None, tc: TypeChecker | None = None) -> None:
+    tc = DEFAULT_CHECKER if tc is None else tc
+    tc.check(expr, expected, ctx)

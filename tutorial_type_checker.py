@@ -90,14 +90,24 @@ def run_phase(phase_dir: Path) -> None:
     check = solution.check
     declarations = solution.DECLARATIONS
     pretty = solution.pretty
+    checker = solution.fresh_checker() if hasattr(solution, "fresh_checker") else None
+    register = getattr(solution, "register_declaration", None)
 
     print(phase_dir.relative_to(ROOT))
     for name in declaration_names(phase_dir):
         if name not in declarations:
             raise RunnerError(f"{phase_dir / 'script.lean'}: no DECLARATIONS case named {name!r}")
         expr, expected = declarations[name]
-        infer(expr)
-        check(expr, expected)
+        if checker is None:
+            infer(expr)
+            check(expr, expected)
+        else:
+            if register is not None and name in getattr(solution, "REGISTER_BEFORE_CHECK", set()):
+                register(checker, name)
+            infer(expr, tc=checker)
+            check(expr, expected, tc=checker)
+            if register is not None and name not in getattr(solution, "REGISTER_BEFORE_CHECK", set()):
+                register(checker, name)
         print(f"  {name} : {pretty(expected)}")
 
 

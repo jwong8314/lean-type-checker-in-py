@@ -1,6 +1,24 @@
 /-
-Phase 3 script: equality, computation, and rewrites.
+Phase 3 script: build equality, addition, computation, and rewrites piece by
+piece. Nothing here is a compiler default.
 -/
+
+constant Eq : Type -> Nat -> Nat -> Prop
+
+theorem rfl_nat : forall x : Nat, Eq Nat x x :=
+  fun x => rfl
+
+def add : Nat -> Nat -> Nat
+
+def add_zero_rule : forall a : Nat, add a zero = a
+
+def add_succ_rule : forall a b : Nat, add a (succ b) = succ (add a b)
+
+theorem congr_succ :
+    forall x y : Nat,
+      x = y ->
+      succ x = succ y :=
+  fun x y h => congr_succ h
 
 theorem add_zero : forall a : Nat, a + zero = a :=
   fun a => rfl
