@@ -11,6 +11,7 @@ rhythm:
    expected.
 3. Use definitional equality to compare types.
 4. Let `rfl` prove equalities whose two sides compute to the same expression.
+5. Use a small `Nat.ind` expression when computation alone is not enough.
 
 The demo target is:
 
@@ -18,21 +19,27 @@ The demo target is:
 forall a b : Nat, succ a + b = succ (a + b)
 ```
 
-The proof is:
+The proof is induction on `b`, matching the usual Lean shape:
 
 ```text
-fun a b => rfl
+fun a b =>
+  Nat.ind
+    (fun b => succ a + b = succ (a + b))
+    rfl
+    (fun n ih => congr_succ ih)
+    b
 ```
 
-That works because this miniature kernel gives `Nat.add` the Lean-style
-computation rule:
+This is needed because `Nat.add` computes by recursion on the second argument:
 
 ```text
-add zero     b --> b
-add (succ a) b --> succ (add a b)
+add a zero     --> a
+add a (succ b) --> succ (add a b)
 ```
 
-So the left side of the theorem reduces to the right side during type checking.
+So `succ a + b = succ (a + b)` is not definitionally true for a variable `b`.
+The base and step cases are definitionally simple, but the theorem itself needs
+the inductive hypothesis.
 
 ## Run It
 
@@ -47,15 +54,11 @@ Target theorem:
   forall (a : Nat), forall (b : Nat), (succ a) + b = succ (a + b)
 
 Proof term:
-  fun (a : Nat) => fun (b : Nat) => rfl@Nat (succ (a + b))
+  fun (a : Nat) => fun (b : Nat) => Nat.ind (fun (b : Nat) => (succ a) + b = succ (a + b)) (rfl@Nat (succ a)) (fun (n : Nat) => fun (ih : (succ a) + n = succ (a + n)) => congr_succ ih) b
 
 The checker accepts the proof with type:
-  forall (a : Nat), forall (b : Nat), succ (a + b) = succ (a + b)
+  forall (a : Nat), forall (b : Nat), (succ a) + b = succ (a + b)
 ```
-
-The final type is the inferred type of the proof term.  The checker accepts it
-against the target theorem because the target's left side is definitionally
-equal to the displayed, reduced left side.
 
 ## Where To Read
 
@@ -65,6 +68,5 @@ It is written top-to-bottom:
 1. Syntax.
 2. Capture-avoiding substitution.
 3. Type inference, weak-head reduction, and definitional equality.
-4. Natural numbers and addition.
+4. Natural numbers, addition, induction, and successor congruence.
 5. The theorem and proof.
-

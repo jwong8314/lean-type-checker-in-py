@@ -7,9 +7,9 @@ first proof:
 
     forall a b : Nat, succ a + b = succ (a + b)
 
-The proof is `rfl`, just as it is in Lean when addition reduces by recursion on
-its first argument.  Our checker therefore needs a little computation inside
-definitional equality, but it does not expose a user-facing evaluator.
+This is not a proof by `rfl`: Lean's natural-number addition computes by
+recursing on the second argument.  We therefore prove the theorem by induction
+on `b`, using `rfl` for the base case and congruence of `succ` for the step.
 
 The shape follows Lean's kernel type checker:
 
@@ -108,6 +108,35 @@ class Refl(Expr):
     value: Expr
 
 
+@dataclass(frozen=True)
+class CongSucc(Expr):
+    """If proof shows x = y, then CongSucc(proof) shows succ x = succ y."""
+
+    proof: Expr
+
+
+@dataclass(frozen=True)
+class NatInd(Expr):
+    """Natural-number induction.
+
+    NatInd(motive, zero_case, succ_case, target) means:
+
+        Nat.rec motive zero_case succ_case target
+
+    where:
+
+        motive    : Nat -> Sort u
+        zero_case : motive zero
+        succ_case : forall n, motive n -> motive (succ n)
+        target    : Nat
+    """
+
+    motive: Expr
+    zero_case: Expr
+    succ_case: Expr
+    target: Expr
+
+
 def apps(fn: Expr, *args: Expr) -> Expr:
     """Build nested applications: apps(f, a, b) means ((f a) b)."""
 
@@ -157,6 +186,10 @@ def free_vars(expr: Expr) -> set[str]:
             return free_vars(ty) | free_vars(lhs) | free_vars(rhs)
         case Refl(ty, value):
             return free_vars(ty) | free_vars(value)
+        case CongSucc(proof):
+            return free_vars(proof)
+        case NatInd(motive, zero_case, succ_case, target):
+            return free_vars(motive) | free_vars(zero_case) | free_vars(succ_case) | free_vars(target)
         case _:
             raise TypeError(f"unknown expression: {expr!r}")
 
@@ -194,6 +227,15 @@ def rename(expr: Expr, old: str, new: str) -> Expr:
             return Eq(rename(ty, old, new), rename(lhs, old, new), rename(rhs, old, new))
         case Refl(ty, value):
             return Refl(rename(ty, old, new), rename(value, old, new))
+        case CongSucc(proof):
+            return CongSucc(rename(proof, old, new))
+        case NatInd(motive, zero_case, succ_case, target):
+            return NatInd(
+                rename(motive, old, new),
+                rename(zero_case, old, new),
+                rename(succ_case, old, new),
+                rename(target, old, new),
+            )
         case _:
             raise TypeError(f"unknown expression: {expr!r}")
 
@@ -230,6 +272,15 @@ def subst(expr: Expr, var: str, replacement: Expr) -> Expr:
             return Eq(subst(ty, var, replacement), subst(lhs, var, replacement), subst(rhs, var, replacement))
         case Refl(ty, value):
             return Refl(subst(ty, var, replacement), subst(value, var, replacement))
+        case CongSucc(proof):
+            return CongSucc(subst(proof, var, replacement))
+        case NatInd(motive, zero_case, succ_case, target):
+            return NatInd(
+                subst(motive, var, replacement),
+                subst(zero_case, var, replacement),
+                subst(succ_case, var, replacement),
+                subst(target, var, replacement),
+            )
         case _:
             raise TypeError(f"unknown expression: {expr!r}")
 
@@ -277,7 +328,7 @@ class TypeChecker:
                 return subst(fn_ty.body, fn_ty.var, arg)
             case Lam(var, domain, body):
                 self.ensure_sort(self.infer(domain, ctx))
-                body_ty = self.infer(body, ctx | {var: domain})
+                body_ty = self.whnf(self.infer(body, ctx | {var: domain}))
                 return Pi(var, domain, body_ty)
             case Pi(var, domain, body):
                 domain_sort = self.ensure_sort(self.infer(domain, ctx))
@@ -298,6 +349,33 @@ class TypeChecker:
                 if not self.defeq(value_ty, ty, ctx):
                     raise TypeError(f"refl value has type {pretty(value_ty)}, expected {pretty(ty)}")
                 return Eq(ty, value, value)
+            case CongSucc(proof):
+                proof_ty = self.whnf(self.infer(proof, ctx))
+                if not isinstance(proof_ty, Eq):
+                    raise TypeError(f"congr_succ expected an equality proof, got {pretty(proof_ty)}")
+                if not self.defeq(proof_ty.ty, Nat, ctx):
+                    raise TypeError(f"congr_succ expected equality over Nat, got {pretty(proof_ty.ty)}")
+                return Eq(Nat, apps(succ, proof_ty.lhs), apps(succ, proof_ty.rhs))
+            case NatInd(motive, zero_case, succ_case, target):
+                motive_ty = self.ensure_pi(self.infer(motive, ctx))
+                if not self.defeq(motive_ty.domain, Nat, ctx):
+                    raise TypeError(f"Nat induction motive must take Nat, got {pretty(motive_ty.domain)}")
+                self.ensure_sort(motive_ty.body)
+
+                motive_at_zero = apps(motive, zero)
+                self.check(zero_case, motive_at_zero, ctx)
+
+                n = Var("n")
+                ih = Var("ih")
+                motive_at_n = apps(motive, n)
+                motive_at_succ_n = apps(motive, apps(succ, n))
+                succ_case_ty = Pi("n", Nat, Pi("ih", motive_at_n, motive_at_succ_n))
+                self.check(succ_case, succ_case_ty, ctx)
+
+                target_ty = self.infer(target, ctx)
+                if not self.defeq(target_ty, Nat, ctx):
+                    raise TypeError(f"Nat induction target has type {pretty(target_ty)}, expected Nat")
+                return apps(motive, target)
             case _:
                 raise TypeError(f"unknown expression: {expr!r}")
 
@@ -375,6 +453,15 @@ class TypeChecker:
                 return Eq(self.normalize(ty), self.normalize(lhs), self.normalize(rhs))
             case Refl(ty, value):
                 return Refl(self.normalize(ty), self.normalize(value))
+            case CongSucc(proof):
+                return CongSucc(self.normalize(proof))
+            case NatInd(motive, zero_case, succ_case, target):
+                return NatInd(
+                    self.normalize(motive),
+                    self.normalize(zero_case),
+                    self.normalize(succ_case),
+                    self.normalize(target),
+                )
             case _:
                 return expr
 
@@ -414,6 +501,15 @@ def alpha_equal(left: Expr, right: Expr, env: dict[str, str] | None = None) -> b
             return alpha_equal(t1, t2, env) and alpha_equal(l1, l2, env) and alpha_equal(r1, r2, env)
         case Refl(t1, v1), Refl(t2, v2):
             return alpha_equal(t1, t2, env) and alpha_equal(v1, v2, env)
+        case CongSucc(p1), CongSucc(p2):
+            return alpha_equal(p1, p2, env)
+        case NatInd(m1, z1, s1, t1), NatInd(m2, z2, s2, t2):
+            return (
+                alpha_equal(m1, m2, env)
+                and alpha_equal(z1, z2, env)
+                and alpha_equal(s1, s2, env)
+                and alpha_equal(t1, t2, env)
+            )
         case _:
             return False
 
@@ -447,24 +543,23 @@ add = Const("add")
 def nat_add_reducer(tc: TypeChecker, expr: Expr) -> Expr | None:
     """The two definitional equations for Nat.add.
 
-    add zero     b --> b
-    add (succ a) b --> succ (add a b)
+    add a zero     --> a
+    add a (succ b) --> succ (add a b)
 
-    This is the iota-style computation rule that makes the target theorem true
-    by reflexivity.  It is intentionally tiny: no evaluator, just the one
-    primitive reduction our checker needs when comparing types.
+    Lean's theorem now needs induction on the second argument.  The base and
+    step cases still close by definitional equality after these reductions.
     """
 
     head, args = spine(expr)
     if not (isinstance(head, Const) and head.name == "add" and len(args) == 2):
         return None
     first, second = args
-    first = tc.whnf(first)
-    if alpha_equal(first, zero):
-        return second
-    first_head, first_args = spine(first)
-    if isinstance(first_head, Const) and first_head.name == "succ" and len(first_args) == 1:
-        return apps(succ, apps(add, first_args[0], second))
+    second = tc.whnf(second)
+    if alpha_equal(second, zero):
+        return first
+    second_head, second_args = spine(second)
+    if isinstance(second_head, Const) and second_head.name == "succ" and len(second_args) == 1:
+        return apps(succ, apps(add, first, second_args[0]))
     return None
 
 
@@ -491,13 +586,42 @@ def theorem_type() -> Expr:
 
 
 def theorem_proof() -> Expr:
-    """fun a b => rfl
+    """fun a b => Nat.ind motive base step b
 
-    The body uses Refl at the right-hand side.  Its inferred type is
-    Eq Nat (succ (add a b)) (succ (add a b)), and the checker accepts it at the
-    desired type because the left side `add (succ a) b` unfolds to the same
-    expression.
+    This corresponds to the Lean proof sketch:
+
+        induction b with
+        | zero =>
+            rw [Nat.add_zero]
+            rw [Nat.add_zero]
+            rfl
+        | succ n ih =>
+            rw [Nat.add_succ]
+            rw [ih]
+            rw [Nat.add_succ]
+            rfl
+
+    The two rewrites by `Nat.add_zero` and `Nat.add_succ` are definitional
+    reductions in this checker.  The rewrite by `ih` is represented by
+    CongSucc(ih).
     """
+
+    a = Var("a")
+    n = Var("n")
+    ih = Var("ih")
+
+    def motive_at(x: Expr) -> Expr:
+        return Eq(Nat, apps(add, apps(succ, a), x), apps(succ, apps(add, a, x)))
+
+    motive = Lam("b", Nat, motive_at(Var("b")))
+    base = Refl(Nat, apps(succ, a))
+    step = Lam("n", Nat, Lam("ih", motive_at(n), CongSucc(ih)))
+    body = NatInd(motive, base, step, Var("b"))
+    return Lam("a", Nat, Lam("b", Nat, body))
+
+
+def rfl_only_proof() -> Expr:
+    """The tempting but invalid proof: fun a b => rfl."""
 
     a = Var("a")
     b = Var("b")
@@ -538,6 +662,13 @@ def pretty(expr: Expr) -> str:
             return f"{pretty(lhs)} = {pretty(rhs)}"
         case Refl(ty, value):
             return f"rfl@{pretty(ty)} {atom(value)}"
+        case CongSucc(proof):
+            return f"congr_succ {atom(proof)}"
+        case NatInd(motive, zero_case, succ_case, target):
+            return (
+                f"Nat.ind {atom(motive)} {atom(zero_case)} "
+                f"{atom(succ_case)} {atom(target)}"
+            )
         case _:
             return repr(expr)
 
@@ -553,6 +684,11 @@ def demo() -> None:
     target = theorem_type()
     proof = theorem_proof()
     inferred = tc.check(proof, target)
+    rfl_rejected = False
+    try:
+        tc.check(rfl_only_proof(), target)
+    except TypeError:
+        rfl_rejected = True
 
     print("Target theorem:")
     print(" ", pretty(target))
@@ -562,6 +698,9 @@ def demo() -> None:
     print()
     print("The checker accepts the proof with type:")
     print(" ", pretty(inferred))
+    print()
+    print("Bare rfl proof accepted?")
+    print(" ", "no, rejected as expected" if rfl_rejected else "yes, something is wrong")
 
 
 if __name__ == "__main__":
