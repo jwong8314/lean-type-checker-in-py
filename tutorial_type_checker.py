@@ -2,14 +2,20 @@
 
 This file is not a Lean implementation.  Lean's kernel has many more
 expression forms, universe features, safety checks, projections, inductive
-reducers, and caches.  The goal here is the small core that matters for a
-first proof:
+reducers, and caches.  This tutorial grows in four phases:
+
+1. Propositions: `True`, `False`, and simple proof checking.
+2. Objects: declarations such as `Nat`, `zero`, and `succ`.
+3. Computation and rewrites: equality, `rfl`, `Nat.add` reductions, and a
+   small successor-congruence rewrite.
+4. Induction: a tiny `Nat.ind` eliminator that proves:
 
     forall a b : Nat, succ a + b = succ (a + b)
 
-This is not a proof by `rfl`: Lean's natural-number addition computes by
-recursing on the second argument.  We therefore prove the theorem by induction
-on `b`, using `rfl` for the base case and congruence of `succ` for the step.
+The final theorem is not a proof by `rfl`: Lean's natural-number addition
+computes by recursing on the second argument.  We therefore prove it by
+induction on `b`, using `rfl` for the base case and a rewrite under `succ` for
+the step.
 
 The shape follows Lean's kernel type checker:
 
@@ -534,6 +540,9 @@ def rebuild(head: Expr, args: list[Expr]) -> Expr:
 
 Prop = Sort(0)
 Type = Sort(1)
+TrueProp = Const("True")
+true_intro = Const("true_intro")
+FalseProp = Const("False")
 Nat = Const("Nat")
 zero = Const("zero")
 succ = Const("succ")
@@ -565,9 +574,40 @@ def nat_add_reducer(tc: TypeChecker, expr: Expr) -> Expr | None:
 
 def base_checker() -> TypeChecker:
     tc = TypeChecker()
+    tc.add("True", Prop)
+    tc.add("true_intro", TrueProp)
+    tc.add("False", Prop)
     tc.add("Nat", Type)
     tc.add("zero", Nat)
     tc.add("succ", arrow(Nat, Nat))
+    tc.add("add", arrow(Nat, arrow(Nat, Nat)), reducer=nat_add_reducer)
+    return tc
+
+
+def phase1_checker() -> TypeChecker:
+    """Phase 1: a checker with only propositions and proofs-as-terms."""
+
+    tc = TypeChecker()
+    tc.add("True", Prop)
+    tc.add("true_intro", TrueProp)
+    tc.add("False", Prop)
+    return tc
+
+
+def phase2_checker() -> TypeChecker:
+    """Phase 2: add ordinary mathematical objects, here natural numbers."""
+
+    tc = phase1_checker()
+    tc.add("Nat", Type)
+    tc.add("zero", Nat)
+    tc.add("succ", arrow(Nat, Nat))
+    return tc
+
+
+def phase3_checker() -> TypeChecker:
+    """Phase 3: add definitional equations for Nat.add and equality proofs."""
+
+    tc = phase2_checker()
     tc.add("add", arrow(Nat, arrow(Nat, Nat)), reducer=nat_add_reducer)
     return tc
 
@@ -630,7 +670,103 @@ def rfl_only_proof() -> Expr:
 
 
 # ---------------------------------------------------------------------------
-# 6. Pretty printing and demo
+# 6. Phase demos
+# ---------------------------------------------------------------------------
+
+
+def phase1_demo() -> list[str]:
+    """Phase 1: propositions are types, proofs are terms."""
+
+    tc = phase1_checker()
+    tc.check(true_intro, TrueProp)
+    false_rejected = rejected(lambda: tc.check(true_intro, FalseProp))
+    return [
+        f"True : {pretty(tc.infer(TrueProp))}",
+        f"False : {pretty(tc.infer(FalseProp))}",
+        f"true_intro : {pretty(tc.infer(true_intro))}",
+        f"true_intro checked against False? {'no' if false_rejected else 'yes'}",
+    ]
+
+
+def phase2_demo() -> list[str]:
+    """Phase 2: add an object language with natural numbers."""
+
+    tc = phase2_checker()
+    one = apps(succ, zero)
+    two = apps(succ, one)
+    tc.check(zero, Nat)
+    tc.check(one, Nat)
+    tc.check(two, Nat)
+    return [
+        f"zero : {pretty(tc.infer(zero))}",
+        f"succ : {pretty(tc.infer(succ))}",
+        f"succ (succ zero) : {pretty(tc.infer(two))}",
+    ]
+
+
+def phase3_demo() -> list[str]:
+    """Phase 3: equality, computation, and a small rewrite."""
+
+    tc = phase3_checker()
+    a = Var("a")
+    n = Var("n")
+    ih = Var("ih")
+
+    add_zero_type = Pi("a", Nat, Eq(Nat, apps(add, a, zero), a))
+    add_zero_proof = Lam("a", Nat, Refl(Nat, a))
+    tc.check(add_zero_proof, add_zero_type)
+
+    add_succ_type = Pi("a", Nat, Pi("n", Nat, Eq(Nat, apps(add, a, apps(succ, n)), apps(succ, apps(add, a, n)))))
+    add_succ_proof = Lam("a", Nat, Lam("n", Nat, Refl(Nat, apps(succ, apps(add, a, n)))))
+    tc.check(add_succ_proof, add_succ_type)
+
+    rewrite_ctx = {
+        "a": Nat,
+        "n": Nat,
+        "ih": Eq(Nat, apps(add, apps(succ, a), n), apps(succ, apps(add, a, n))),
+    }
+    rewrite_goal = Eq(
+        Nat,
+        apps(add, apps(succ, a), apps(succ, n)),
+        apps(succ, apps(succ, apps(add, a, n))),
+    )
+    rewrite_proof = CongSucc(ih)
+    tc.check(rewrite_proof, rewrite_goal, rewrite_ctx)
+
+    return [
+        f"add_zero proof: {pretty(add_zero_proof)}",
+        f"add_succ proof: {pretty(add_succ_proof)}",
+        f"rewrite step from ih: {pretty(rewrite_proof)}",
+        f"rewrite goal: {pretty(rewrite_goal)}",
+    ]
+
+
+def phase4_demo() -> list[str]:
+    """Phase 4: induction proves the target theorem."""
+
+    tc = base_checker()
+    target = theorem_type()
+    proof = theorem_proof()
+    inferred = tc.check(proof, target)
+    rfl_rejected = rejected(lambda: tc.check(rfl_only_proof(), target))
+    return [
+        f"Target theorem: {pretty(target)}",
+        f"Proof term: {pretty(proof)}",
+        f"Accepted with type: {pretty(inferred)}",
+        f"Bare rfl proof accepted? {'no, rejected as expected' if rfl_rejected else 'yes, something is wrong'}",
+    ]
+
+
+def rejected(action: Callable[[], object]) -> bool:
+    try:
+        action()
+    except TypeError:
+        return True
+    return False
+
+
+# ---------------------------------------------------------------------------
+# 7. Pretty printing and command-line tutorial
 # ---------------------------------------------------------------------------
 
 
@@ -679,28 +815,18 @@ def atom(expr: Expr) -> str:
     return f"({pretty(expr)})"
 
 
-def demo() -> None:
-    tc = base_checker()
-    target = theorem_type()
-    proof = theorem_proof()
-    inferred = tc.check(proof, target)
-    rfl_rejected = False
-    try:
-        tc.check(rfl_only_proof(), target)
-    except TypeError:
-        rfl_rejected = True
+def print_phase(title: str, lines: list[str]) -> None:
+    print(title)
+    for line in lines:
+        print(" ", line)
+    print()
 
-    print("Target theorem:")
-    print(" ", pretty(target))
-    print()
-    print("Proof term:")
-    print(" ", pretty(proof))
-    print()
-    print("The checker accepts the proof with type:")
-    print(" ", pretty(inferred))
-    print()
-    print("Bare rfl proof accepted?")
-    print(" ", "no, rejected as expected" if rfl_rejected else "yes, something is wrong")
+
+def demo() -> None:
+    print_phase("Phase 1: True and False", phase1_demo())
+    print_phase("Phase 2: Natural-number objects", phase2_demo())
+    print_phase("Phase 3: Equality and rewrites", phase3_demo())
+    print_phase("Phase 4: Induction completes the proof", phase4_demo())
 
 
 if __name__ == "__main__":
