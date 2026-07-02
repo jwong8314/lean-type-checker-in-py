@@ -1,98 +1,72 @@
-# A Tiny Lean-Inspired Type Checker in Python
+# Lean-Style Type Checker in Python
 
-This repository is organized like a tiny tutorial Lean project, but the files
-are checked by our Python kernel.
-
-Each phase lives in its own subdirectory under [phases](phases).  The `.lean` files are Lean-shaped tutorial files with `#kernel` directives.  The Python runner reads those directives and dispatches them to the under-development kernel.
-
-## Layout
+This is now structured as a small workshop. Each phase is its own directory
+with:
 
 ```text
-lean_type_checker/
-  core.py        # expressions, recursive type declarations, conversion, checking
-  runner.py      # reads #kernel directives from the phase .lean files
-
-phases/
-  01_true_false/1_true_false.lean
-  02_recursive_nat/2_recursive_nat.lean
-  03_rewrites/3_rewrites.lean
-  04_induction/4_induction.lean
-
-tutorial_type_checker.py  # runs every phase
+README.md    # what to build and why
+solution.py  # one working implementation for that phase
 ```
+
+The idea is to implement step by step. Read a phase README, try writing the
+checker yourself, then compare against `solution.py`.
 
 ## Phases
 
-Phase 1 starts with propositions-as-types:
-
-```lean
-#kernel check True : Prop
-#kernel check true_intro : True
-#kernel reject true_intro : False
+```text
+phases/
+  01_true_false/
+    README.md
+    solution.py
+  02_recursive_nat/
+    README.md
+    solution.py
+  03_rewrites/
+    README.md
+    solution.py
+  04_induction/
+    README.md
+    solution.py
 ```
 
-Phase 2 introduces `Nat` as a recursive type declaration, not as a built-in:
+Phase 1 builds a tiny checker for `True`, `False`, and proof terms.
 
-```lean
-#kernel inductive Nat : Type where
-#kernel | zero : Nat
-#kernel | succ : Nat -> Nat
+Phase 2 adds `Nat` as a recursive type declaration, not as a built-in.
+
+Phase 3 adds equality, `rfl`, definitional computation for `add`, and a tiny
+rewrite principle.
+
+Phase 4 adds induction over recursive type declarations and proves:
+
+```text
+forall a b : Nat, succ a + b = succ (a + b)
 ```
 
-Phase 3 adds equality, `rfl`, computation rules for `add`, and a tiny rewrite principle:
-
-```lean
-#kernel check add_zero : forall a : Nat, a + zero = a
-#kernel check add_succ : forall a n : Nat, a + succ n = succ (a + n)
-```
-
-Phase 4 uses induction over the recursive `Nat` declaration to prove:
-
-```lean
-#kernel check succ_add : forall a b : Nat, succ a + b = succ (a + b)
-```
-
-The runner also checks that the tempting bare `rfl` proof is rejected, since `Nat.add` recurses on the second argument.
-
-## Run It
+## Run Everything
 
 ```bash
 python3 -B tutorial_type_checker.py
 ```
 
-Expected output:
+Or run one phase directly:
 
-```text
-phases/01_true_false/1_true_false.lean
-  using phase 1 kernel
-  True : Prop
-  False : Prop
-  true_intro : True
-  rejected true_intro : False
-
-phases/02_recursive_nat/2_recursive_nat.lean
-  using phase 2 kernel
-  registered recursive type Nat
-  registered constructor zero
-  registered constructor succ
-  Nat : Type
-  zero : Nat
-  succ : Nat -> Nat
-  succ zero : Nat
-  succ (succ zero) : Nat
-
-phases/03_rewrites/3_rewrites.lean
-  using phase 3 kernel
-  add_zero checked by rfl
-  add_succ checked by rfl
-  rewrite_step checked by congr_succ
-
-phases/04_induction/4_induction.lean
-  using phase 4 kernel
-  rejected by_rfl
-  succ_add : forall (a : Nat), forall (b : Nat), (succ a) + b = succ (a + b)
+```bash
+python3 -B phases/01_true_false/solution.py
+python3 -B phases/02_recursive_nat/solution.py
+python3 -B phases/03_rewrites/solution.py
+python3 -B phases/04_induction/solution.py
 ```
 
-## Important Limitation
+Expected final phase output:
 
-The `.lean` files are not parsed by Lean, and this project does not yet contain a full Lean parser.  For now, `#kernel` directives form a tiny tutorial command language.  That keeps the focus on kernel concepts: inference, weak-head reduction, definitional equality, recursive type declarations, rewrites, and induction.
+```text
+bare rfl rejected
+succ_add : forall (a : Nat), forall (b : Nat), (succ a) + b = succ (a + b)
+```
+
+## Note
+
+The implementations are intentionally small and pedagogical. They are not a
+full Lean parser or kernel; they isolate the kernel ideas needed for the final
+proof: inference, conversion, recursive type declarations, computation,
+rewriting, and induction.
