@@ -43,7 +43,7 @@ class Refl(p2.Expr):
 
 
 @dataclass(frozen=True)
-class Rw(p2.Expr):
+class SuccCongr(p2.Expr):
     proof: p2.Expr
 
 
@@ -80,13 +80,13 @@ class TypeChecker(p2.TypeChecker):
                 self.check(ty, p2.Type, ctx)
                 self.check(value, ty, ctx)
                 return Eq(ty, value, value)
-            case Rw(proof):
+            case SuccCongr(proof):
                 proof_ty = self.whnf(self.infer(proof, ctx))
                 if not isinstance(proof_ty, Eq):
-                    raise p2.TypeError("rw expected an equality proof")
+                    raise p2.TypeError("succ congruence expected an equality proof")
                 self.check(proof_ty.ty, p2.Type, ctx)
                 if not self.defeq(proof_ty.ty, p2.MyNat):
-                    raise p2.TypeError("rw only handles MyNat equalities in this tutorial")
+                    raise p2.TypeError("succ congruence only handles MyNat equalities in this tutorial")
                 return Eq(p2.MyNat, p2.apps(p2.succ, proof_ty.lhs), p2.apps(p2.succ, proof_ty.rhs))
             case _:
                 return super().infer(expr, ctx)
@@ -121,8 +121,8 @@ class TypeChecker(p2.TypeChecker):
                 return Eq(self.normalize(ty), self.normalize(lhs), self.normalize(rhs))
             case Refl(ty, value):
                 return Refl(self.normalize(ty), self.normalize(value))
-            case Rw(proof):
-                return Rw(self.normalize(proof))
+            case SuccCongr(proof):
+                return SuccCongr(self.normalize(proof))
             case _:
                 return expr
 
@@ -147,7 +147,7 @@ class TypeChecker(p2.TypeChecker):
             if tactic.__class__.__name__ == "RwNode":
                 if not tactic.args:
                     raise p2.TypeError("rw expects at least one rewrite rule")
-                return Rw(lower_expr(tactic.args[-1]))
+                return rewrite_goal(self, goal, lower_expr(tactic.args[-1]))
         return super().execute_tactics(goal, tactics, lower_expr)
 
 
@@ -175,8 +175,8 @@ def subst(expr: p2.Expr, var: str, replacement: p2.Expr) -> p2.Expr:
             return Eq(subst(ty, var, replacement), subst(lhs, var, replacement), subst(rhs, var, replacement))
         case Refl(ty, value):
             return Refl(subst(ty, var, replacement), subst(value, var, replacement))
-        case Rw(proof):
-            return Rw(subst(proof, var, replacement))
+        case SuccCongr(proof):
+            return SuccCongr(subst(proof, var, replacement))
         case _:
             raise p2.TypeError(f"cannot substitute in {expr!r}")
 
@@ -200,7 +200,7 @@ def alpha_equal(left: p2.Expr, right: p2.Expr, env: dict[str, str] | None = None
             return alpha_equal(t1, t2, env) and alpha_equal(l1, l2, env) and alpha_equal(r1, r2, env)
         case Refl(t1, v1), Refl(t2, v2):
             return alpha_equal(t1, t2, env) and alpha_equal(v1, v2, env)
-        case Rw(p1), Rw(p2_):
+        case SuccCongr(p1), SuccCongr(p2_):
             return alpha_equal(p1, p2_, env)
         case _:
             return False
@@ -220,6 +220,23 @@ def nat_add_reducer(tc: TypeChecker, expr: p2.Expr) -> p2.Expr | None:
     return None
 
 
+def rewrite_goal(tc: TypeChecker, goal: p2.Expr, proof: p2.Expr) -> p2.Expr:
+    """Elaborate `rw proof` for the tiny Chapter 3 rewrite language.
+
+    The tactic layer is where we inspect the current goal and turn rewrite
+    syntax into a regular proof object. The kernel then only sees
+    `SuccCongr(proof)`, not a primitive `rw`.
+    """
+
+    proof_ty = tc.whnf(tc.infer(proof))
+    if not isinstance(goal, Eq) or not isinstance(proof_ty, Eq):
+        raise p2.TypeError("rw expected an equality goal and equality proof")
+    expected = Eq(p2.MyNat, p2.apps(p2.succ, proof_ty.lhs), p2.apps(p2.succ, proof_ty.rhs))
+    if not tc.defeq(goal, expected):
+        raise p2.TypeError(f"rw produced {pretty(expected)}, but goal is {pretty(goal)}")
+    return SuccCongr(proof)
+
+
 def after_register_declaration(tc: TypeChecker, declaration) -> None:
     if declaration.name in {"add_zero", "add_succ"}:
         tc.add_reducer("add", nat_add_reducer)
@@ -231,8 +248,8 @@ def pretty(expr: p2.Expr) -> str:
             return f"{pretty(lhs)} = {pretty(rhs)}"
         case Refl(ty, value):
             return f"rfl@{pretty(ty)} {atom(value)}"
-        case Rw(proof):
-            return f"rw {atom(proof)}"
+        case SuccCongr(proof):
+            return f"succ_congr {atom(proof)}"
         case Lam(var, domain, body):
             return f"fun ({var} : {pretty(domain)}) => {pretty(body)}"
         case p2.Pi("_", domain, body):

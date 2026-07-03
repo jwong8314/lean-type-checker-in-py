@@ -480,9 +480,9 @@ def lower_proof(solution: ModuleType, checker, name: str, node: Any, expected):
     if isinstance(node, RflNode):
         return refl_for(solution, expected)
     if isinstance(node, RwNode):
-        return lower_rw(solution, node)
+        return lower_rw(solution, checker, node, expected)
     if isinstance(node, AppNode) and isinstance(node.fn, NameNode) and node.fn.value == "rw":
-        return lower_rw(solution, RwNode(node.args))
+        return lower_rw(solution, checker, RwNode(node.args), expected)
     return lower_expr(solution, node)
 
 
@@ -536,10 +536,14 @@ def lower_by_proof(solution: ModuleType, checker, node: ByNode, expected):
     return checker.execute_tactics(expected, node.tactics, lambda expr: lower_expr(solution, expr))
 
 
-def lower_rw(solution: ModuleType, node: RwNode):
+def lower_rw(solution: ModuleType, checker, node: RwNode, expected):
     if not node.args:
         raise ParseError("rw expects at least one rewrite rule")
-    return rw_ctor(solution)(lower_expr(solution, node.args[-1]))
+    proof = lower_expr(solution, node.args[-1])
+    rewrite_goal = solution_attr(solution, "rewrite_goal")
+    if rewrite_goal is not None and checker is not None:
+        return rewrite_goal(checker, expected, proof)
+    return rewrite_proof_ctor(solution)(proof)
 
 
 def unresolved_proof(solution: ModuleType):
@@ -642,8 +646,8 @@ def refl_ctor(solution: ModuleType):
     return solution.Refl if hasattr(solution, "Refl") else solution.p3.Refl
 
 
-def rw_ctor(solution: ModuleType):
-    return solution.Rw if hasattr(solution, "Rw") else solution.p3.Rw
+def rewrite_proof_ctor(solution: ModuleType):
+    return solution.SuccCongr if hasattr(solution, "SuccCongr") else solution.p3.SuccCongr
 
 
 def is_tree(node: Any, data: str) -> bool:

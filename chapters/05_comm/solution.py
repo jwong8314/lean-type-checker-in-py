@@ -63,13 +63,13 @@ class TypeChecker(p4.TypeChecker):
                     raise p2.TypeError(f"expected function type, got {pretty(fn_ty)}")
                 self.check(arg, fn_ty.domain, ctx)
                 return subst(fn_ty.body, fn_ty.var, arg)
-            case p3.Rw(proof):
+            case p3.SuccCongr(proof):
                 proof_ty = self.whnf(self.infer(proof, ctx))
                 if not isinstance(proof_ty, p3.Eq):
-                    raise p2.TypeError("rw expected an equality proof")
+                    raise p2.TypeError("succ congruence expected an equality proof")
                 self.check(proof_ty.ty, Type, ctx)
                 if not self.defeq(proof_ty.ty, MyNat):
-                    raise p2.TypeError("chapter 5 rw only handles MyNat equalities")
+                    raise p2.TypeError("succ congruence only handles MyNat equalities")
                 return p3.Eq(MyNat, p2.apps(succ, proof_ty.lhs), p2.apps(succ, proof_ty.rhs))
             case EqSymm(proof):
                 proof_ty = self.whnf(self.infer(proof, ctx))
@@ -141,7 +141,7 @@ def free_vars(expr: p2.Expr) -> set[str]:
             return free_vars(ty) | free_vars(lhs) | free_vars(rhs)
         case p3.Refl(ty, value):
             return free_vars(ty) | free_vars(value)
-        case p3.Rw(proof):
+        case p3.SuccCongr(proof):
             return free_vars(proof)
         case p4.Induction(_, motive, cases, target):
             result = free_vars(motive) | free_vars(target)
@@ -197,8 +197,8 @@ def subst(expr: p2.Expr, var: str, replacement: p2.Expr) -> p2.Expr:
             return p3.Eq(subst(ty, var, replacement), subst(lhs, var, replacement), subst(rhs, var, replacement))
         case p3.Refl(ty, value):
             return p3.Refl(subst(ty, var, replacement), subst(value, var, replacement))
-        case p3.Rw(proof):
-            return p3.Rw(subst(proof, var, replacement))
+        case p3.SuccCongr(proof):
+            return p3.SuccCongr(subst(proof, var, replacement))
         case p4.Induction(type_name, motive, cases, target):
             return p4.Induction(
                 type_name,
@@ -237,7 +237,7 @@ def succ_add_succ_case() -> tuple[p2.Expr, p2.Expr]:
     a = p2.Var("a")
     b = p2.Var("b")
     ih = p2.Var("ih")
-    proof = EqTrans(theorem_app(p2.Const("my_add_succ"), p2.apps(succ, a), b), p3.Rw(ih))
+    proof = EqTrans(theorem_app(p2.Const("my_add_succ"), p2.apps(succ, a), b), p3.SuccCongr(ih))
     return p3.Lam("a", MyNat, p3.Lam("b", MyNat, p3.Lam("ih", succ_add_succ_type().body.body.domain, proof))), succ_add_succ_type()
 
 
@@ -264,7 +264,7 @@ def succ_add_case() -> tuple[p2.Expr, p2.Expr]:
     motive = p3.Lam("b", MyNat, motive_at(p2.Var("b")))
     base = EqTrans(
         theorem_app(p2.Const("my_add_zero"), p2.apps(succ, a)),
-        EqSymm(p3.Rw(theorem_app(p2.Const("my_add_zero"), a))),
+        EqSymm(p3.SuccCongr(theorem_app(p2.Const("my_add_zero"), a))),
     )
     step = p3.Lam(
         "n",
@@ -274,7 +274,7 @@ def succ_add_case() -> tuple[p2.Expr, p2.Expr]:
             motive_at(n),
             EqTrans(
                 theorem_app(succ_add_succ, a, n, ih),
-                EqSymm(p3.Rw(theorem_app(p2.Const("my_add_succ"), a, n))),
+                EqSymm(p3.SuccCongr(theorem_app(p2.Const("my_add_succ"), a, n))),
             ),
         ),
     )
@@ -303,7 +303,7 @@ def zero_add_case() -> tuple[p2.Expr, p2.Expr]:
         p3.Lam(
             "ih",
             motive_at(n),
-            EqTrans(theorem_app(p2.Const("my_add_succ"), zero, n), p3.Rw(ih)),
+            EqTrans(theorem_app(p2.Const("my_add_succ"), zero, n), p3.SuccCongr(ih)),
         ),
     )
     proof = p3.Lam("a", MyNat, p4.Induction("MyNat", motive, (base, step), a))
@@ -328,7 +328,7 @@ def add_comm_case() -> tuple[p2.Expr, p2.Expr]:
     motive = p3.Lam("b", MyNat, motive_at(p2.Var("b")))
     base = EqTrans(theorem_app(p2.Const("my_add_zero"), a), EqSymm(theorem_app(zero_add, a)))
     step_left = theorem_app(p2.Const("my_add_succ"), a, n)
-    step_middle = p3.Rw(ih)
+    step_middle = p3.SuccCongr(ih)
     step_right = EqSymm(theorem_app(succ_add, n, a))
     step = p3.Lam("n", MyNat, p3.Lam("ih", motive_at(n), EqTrans(EqTrans(step_left, step_middle), step_right)))
     body = p4.Induction("MyNat", motive, (base, step), b)
@@ -371,7 +371,7 @@ def add_assoc_case() -> tuple[p2.Expr, p2.Expr]:
             "ih",
             motive_at(n),
             EqTrans(
-                EqTrans(theorem_app(p2.Const("my_add_succ"), p2.apps(add, a, b), n), p3.Rw(ih)),
+                EqTrans(theorem_app(p2.Const("my_add_succ"), p2.apps(add, a, b), n), p3.SuccCongr(ih)),
                 EqSymm(
                     EqTrans(
                         EqCongrAddLeft(a, theorem_app(p2.Const("my_add_succ"), b, n)),

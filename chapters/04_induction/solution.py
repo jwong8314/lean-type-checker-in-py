@@ -169,7 +169,7 @@ def theorem_proof() -> p2.Expr:
     motive = p3.Lam("b", p2.MyNat, motive_at(p2.Var("b")))
     base = EqTrans(
         p2.apps(p2.Const("add_zero"), p2.apps(p2.succ, a)),
-        EqSymm(p3.Rw(p2.apps(p2.Const("add_zero"), a))),
+        EqSymm(p3.SuccCongr(p2.apps(p2.Const("add_zero"), a))),
     )
     step = p3.Lam(
         "n",
@@ -180,9 +180,9 @@ def theorem_proof() -> p2.Expr:
             EqTrans(
                 EqTrans(
                     p2.apps(p2.Const("add_succ"), p2.apps(p2.succ, a), n),
-                    p3.Rw(ih),
+                    p3.SuccCongr(ih),
                 ),
-                EqSymm(p3.Rw(p2.apps(p2.Const("add_succ"), a, n))),
+                EqSymm(p3.SuccCongr(p2.apps(p2.Const("add_succ"), a, n))),
             ),
         ),
     )

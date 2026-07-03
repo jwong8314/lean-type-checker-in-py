@@ -30,9 +30,11 @@ equality. If the goal contains `a + zero`, the proof must explicitly use
 
 Tactics are not extra kernel rules. They are a small elaboration layer that
 massages a proof script into an ordinary proof object before the type checker
-sees it. In this chapter, `rfl` elaborates to a `Refl(...)` proof object, and
-`rw h` elaborates to an `Rw(h)` proof object. After that point, the checker is
-only checking expression trees, not tactic syntax.
+sees it. In this chapter, `rfl` elaborates to a `Refl(...)` proof object. The
+`rw h` tactic first inspects the current goal, checks that rewriting with `h`
+would produce that exact goal shape, and then elaborates to `SuccCongr(h)`, an
+ordinary congruence proof under `succ`. After that point, the checker is only
+checking expression trees, not tactic syntax.
 
 That mirrors the important Lean idea: tactics help build proof terms, but the
 kernel still only accepts or rejects the proof term that tactics produce.
