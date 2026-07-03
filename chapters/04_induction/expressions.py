@@ -2,23 +2,13 @@
 
 from __future__ import annotations
 
-import importlib.util
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-
-def load_chapter3():
-    path = Path(__file__).resolve().parents[1] / "03_rewrites/solution.py"
-    spec = importlib.util.spec_from_file_location("chapter3_solution", path)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
+from pylean.chapter_loader import load_solution_for_dir
 
 
-p3 = load_chapter3()
+p3 = load_solution_for_dir(Path(__file__).resolve().parents[1] / "03_rewrites")
 p2 = p3.p2
 
 

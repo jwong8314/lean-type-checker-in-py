@@ -2,35 +2,21 @@
 
 from __future__ import annotations
 
-import importlib.util
-import sys
-from pathlib import Path
 from typing import Callable
 
-
-def load_expressions():
-    path = Path(__file__).resolve().with_name("expressions.py")
-    spec = importlib.util.spec_from_file_location("chapter3_expressions", path)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
-
-
-exprs = load_expressions()
-
-p2 = exprs.p2
-Lam = exprs.Lam
-Eq = exprs.Eq
-Refl = exprs.Refl
-SuccCongr = exprs.SuccCongr
-add = exprs.add
-EqConst = exprs.EqConst
-subst = exprs.subst
-alpha_equal = exprs.alpha_equal
-pretty = exprs.pretty
-atom = exprs.atom
+from .expressions import (
+    Eq,
+    EqConst,
+    Lam,
+    Refl,
+    SuccCongr,
+    add,
+    alpha_equal,
+    atom,
+    p2,
+    pretty,
+    subst,
+)
 
 
 Reducer = Callable[["TypeChecker", p2.Expr], p2.Expr | None]

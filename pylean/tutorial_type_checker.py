@@ -16,11 +16,10 @@ and asks that chapter's kernel to check each parsed declaration.
 from __future__ import annotations
 
 import argparse
-import importlib.util
-import sys
 from pathlib import Path
 from types import ModuleType
 
+from pylean.chapter_loader import ChapterLoadError, load_solution_for_dir
 from pylean import lean_parser
 import solution_runner
 
@@ -40,15 +39,10 @@ class RunnerError(Exception):
 
 
 def load_solution(chapter_dir: Path) -> ModuleType:
-    path = chapter_dir / "solution.py"
-    module_name = f"{chapter_dir.name}_solution"
-    spec = importlib.util.spec_from_file_location(module_name, path)
-    if spec is None or spec.loader is None:
-        raise RunnerError(f"cannot load {path}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[module_name] = module
-    spec.loader.exec_module(module)
-    return module
+    try:
+        return load_solution_for_dir(chapter_dir)
+    except ChapterLoadError as exc:
+        raise RunnerError(str(exc)) from exc
 
 
 def run_chapter(chapter_dir: Path) -> None:

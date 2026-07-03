@@ -2,41 +2,26 @@
 
 from __future__ import annotations
 
-import importlib.util
-import sys
-from pathlib import Path
-
 from pylean.expressions import Type
 
-
-def load_expressions():
-    path = Path(__file__).resolve().with_name("expressions.py")
-    spec = importlib.util.spec_from_file_location("chapter5_expressions", path)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
-
-
-exprs = load_expressions()
-
-p4 = exprs.p4
-p3 = exprs.p3
-p2 = exprs.p2
-MyNat = exprs.MyNat
-zero = exprs.zero
-succ = exprs.succ
-add = exprs.add
-zero_add = exprs.zero_add
-succ_add = exprs.succ_add
-succ_add_succ = exprs.succ_add_succ
-add_assoc = exprs.add_assoc
-add_comm = exprs.add_comm
-add_right_comm = exprs.add_right_comm
-EqSymm = exprs.EqSymm
-EqTrans = exprs.EqTrans
-EqCongrAddLeft = exprs.EqCongrAddLeft
+from .expressions import (
+    EqCongrAddLeft,
+    EqSymm,
+    EqTrans,
+    MyNat,
+    add,
+    add_assoc,
+    add_comm,
+    add_right_comm,
+    p2,
+    p3,
+    p4,
+    succ,
+    succ_add,
+    succ_add_succ,
+    zero,
+    zero_add,
+)
 
 
 class TypeChecker(p4.TypeChecker):

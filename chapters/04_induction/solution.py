@@ -2,28 +2,7 @@
 
 from __future__ import annotations
 
-import importlib.util
-import sys
-from pathlib import Path
-
-
-def load_expressions():
-    path = Path(__file__).resolve().with_name("expressions.py")
-    spec = importlib.util.spec_from_file_location("chapter4_expressions", path)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
-
-
-exprs = load_expressions()
-
-p3 = exprs.p3
-p2 = exprs.p2
-Induction = exprs.Induction
-EqSymm = exprs.EqSymm
-EqTrans = exprs.EqTrans
+from .expressions import EqSymm, EqTrans, Induction, p2, p3
 
 
 class TypeChecker(p3.TypeChecker):

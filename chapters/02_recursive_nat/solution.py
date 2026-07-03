@@ -2,49 +2,34 @@
 
 from __future__ import annotations
 
-import importlib.util
-import sys
-from pathlib import Path
-
 from pylean.type_checker import TypeChecker as AbstractTypeChecker
 from pylean.type_checker import TypeCheckerError as TypeError
 
-
-def load_expressions():
-    path = Path(__file__).resolve().with_name("expressions.py")
-    spec = importlib.util.spec_from_file_location("chapter2_expressions", path)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
-
-
-exprs = load_expressions()
-
-Const = exprs.Const
-Expr = exprs.Expr
-Prop = exprs.Prop
-Sort = exprs.Sort
-Type = exprs.Type
-Var = exprs.Var
-App = exprs.App
-Pi = exprs.Pi
-Lam = exprs.Lam
-Eq = exprs.Eq
-Refl = exprs.Refl
-ConstructorSpec = exprs.ConstructorSpec
-RecursiveTypeSpec = exprs.RecursiveTypeSpec
-apps = exprs.apps
-arrow = exprs.arrow
-MyNat = exprs.MyNat
-zero = exprs.zero
-succ = exprs.succ
-EqConst = exprs.EqConst
-mynat_type_spec = exprs.mynat_type_spec
-pretty = exprs.pretty
-atom = exprs.atom
-spine = exprs.spine
+from .expressions import (
+    App,
+    Const,
+    ConstructorSpec,
+    Eq,
+    EqConst,
+    Expr,
+    Lam,
+    MyNat,
+    Pi,
+    Prop,
+    RecursiveTypeSpec,
+    Refl,
+    Sort,
+    Type,
+    Var,
+    apps,
+    arrow,
+    atom,
+    mynat_type_spec,
+    pretty,
+    spine,
+    succ,
+    zero,
+)
 
 
 def constructor_type(result_type: Expr, arg_types: tuple[Expr, ...]) -> Expr:
