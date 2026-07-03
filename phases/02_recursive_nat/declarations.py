@@ -6,14 +6,14 @@ import solution
 
 
 def declaration(name: str):
-    if name == "Nat":
-        return solution.Nat, solution.Type
+    if name == "MyNat":
+        return solution.MyNat, solution.Type
     if name == "zero":
-        return solution.zero, solution.Nat
+        return solution.zero, solution.MyNat
     if name == "succ":
-        return solution.succ, solution.arrow(solution.Nat, solution.Nat)
+        return solution.succ, solution.arrow(solution.MyNat, solution.MyNat)
     if name == "one":
-        return solution.one, solution.Nat
+        return solution.one, solution.MyNat
     if name == "two":
-        return solution.two, solution.Nat
+        return solution.two, solution.MyNat
     raise KeyError(name)

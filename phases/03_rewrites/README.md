@@ -20,7 +20,7 @@ add a zero     --> a
 add a (succ b) --> succ (add a b)
 ```
 
-So `add : Nat -> Nat -> Nat` is just the shape of the function. Its behavior is
+So `add : MyNat -> MyNat -> MyNat` is just the shape of the function. Its behavior is
 introduced by `add_zero` and `add_succ`: those are the only equations the
 checker uses to reduce an addition expression.
 

@@ -1,10 +1,10 @@
 /-
-Phase 2 script: Nat is declared as a recursive type, not a built-in.
+Phase 2 script: MyNat is declared as a recursive type, not a built-in.
 -/
 
-inductive Nat : Type where
-| zero : Nat
-| succ : Nat -> Nat
+inductive MyNat : Type where
+| zero : MyNat
+| succ : MyNat -> MyNat
 
-def one : Nat := succ zero
-def two : Nat := succ one
+def one : MyNat := succ zero
+def two : MyNat := succ one

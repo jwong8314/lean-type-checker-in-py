@@ -2,13 +2,13 @@
 
 Goal: add ordinary mathematical objects by declaring a recursive type.
 
-Do not treat `Nat` as a built-in. Add it to the environment with a recursive
+Do not treat `MyNat` as a built-in. Add it to the environment with a recursive
 type declaration:
 
 ```text
-inductive Nat : Type where
-| zero : Nat
-| succ : Nat -> Nat
+inductive MyNat : Type where
+| zero : MyNat
+| succ : MyNat -> MyNat
 ```
 
 New implementation pieces:

@@ -1,11 +1,11 @@
 # Phase 4: Induction
 
-Goal: use the recursive `Nat` declaration to derive an induction rule.
+Goal: use the recursive `MyNat` declaration to derive an induction rule.
 
 The theorem is:
 
 ```text
-forall a b : Nat, succ a + b = succ (a + b)
+forall a b : MyNat, succ a + b = succ (a + b)
 ```
 
 This is not true by bare `rfl`, because `add` computes by recursion on the

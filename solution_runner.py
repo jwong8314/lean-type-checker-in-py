@@ -41,20 +41,20 @@ def phase1_checker(solution: ModuleType):
 
 def phase2_checker(solution: ModuleType):
     tc = solution.TypeChecker()
-    tc.add_recursive_type(solution.nat_type_spec())
+    tc.add_recursive_type(solution.mynat_type_spec())
     return tc
 
 
 def phase3_checker(solution: ModuleType):
     tc = solution.TypeChecker()
-    tc.add_recursive_type(solution.p2.nat_type_spec())
+    tc.add_recursive_type(solution.p2.mynat_type_spec())
     return tc
 
 
 def phase4_checker(solution: ModuleType):
     tc = solution.TypeChecker()
-    tc.add_recursive_type(solution.p2.nat_type_spec())
-    tc.add("add", solution.p2.arrow(solution.p2.Nat, solution.p2.arrow(solution.p2.Nat, solution.p2.Nat)))
+    tc.add_recursive_type(solution.p2.mynat_type_spec())
+    tc.add("add", solution.p2.arrow(solution.p2.MyNat, solution.p2.arrow(solution.p2.MyNat, solution.p2.MyNat)))
     tc.add_reducer("add", solution.p3.nat_add_reducer)
     return tc
 

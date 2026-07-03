@@ -49,7 +49,7 @@ anything fails to type check, the runner crashes with an error.
 
 Phase 1 builds a tiny checker for `True`, `False`, and proof terms.
 
-Phase 2 adds `Nat` as a recursive type declaration, not as a built-in.
+Phase 2 adds `MyNat` as a recursive type declaration, not as a built-in.
 
 Phase 3 adds equality, `rfl`, definitional computation for `add`, and a tiny
 rewrite principle.
@@ -57,7 +57,7 @@ rewrite principle.
 Phase 4 adds induction over recursive type declarations and proves:
 
 ```text
-forall a b : Nat, succ a + b = succ (a + b)
+forall a b : MyNat, succ a + b = succ (a + b)
 ```
 
 Phase 5 accepts the raw `MyNatSuccAdd.lean` script and proves the

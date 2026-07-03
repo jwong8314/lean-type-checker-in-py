@@ -1,4 +1,4 @@
-"""Phase 4 solution: induction over the recursive Nat declaration."""
+"""Phase 4 solution: induction over the recursive MyNat declaration."""
 
 from __future__ import annotations
 
@@ -73,9 +73,9 @@ class TypeChecker(p3.TypeChecker):
 def induction_case_type(spec: p2.RecursiveTypeSpec, constructor: p2.ConstructorSpec, motive: p2.Expr) -> p2.Expr:
     """Derive one case type from a recursive constructor.
 
-    For `succ : Nat -> Nat`, this returns:
+    For `succ : MyNat -> MyNat`, this returns:
 
-        forall n : Nat, motive n -> motive (succ n)
+        forall n : MyNat, motive n -> motive (succ n)
     """
 
     type_const = p2.Const(spec.name)
@@ -99,7 +99,7 @@ def theorem_type() -> p2.Expr:
     b = p2.Var("b")
     lhs = p2.apps(p3.add, p2.apps(p2.succ, a), b)
     rhs = p2.apps(p2.succ, p2.apps(p3.add, a, b))
-    return p2.Pi("a", p2.Nat, p2.Pi("b", p2.Nat, p3.Eq(p2.Nat, lhs, rhs)))
+    return p2.Pi("a", p2.MyNat, p2.Pi("b", p2.MyNat, p3.Eq(p2.MyNat, lhs, rhs)))
 
 
 def theorem_proof() -> p2.Expr:
@@ -109,16 +109,16 @@ def theorem_proof() -> p2.Expr:
 
     def motive_at(x: p2.Expr) -> p2.Expr:
         return p3.Eq(
-            p2.Nat,
+            p2.MyNat,
             p2.apps(p3.add, p2.apps(p2.succ, a), x),
             p2.apps(p2.succ, p2.apps(p3.add, a, x)),
         )
 
-    motive = p3.Lam("b", p2.Nat, motive_at(p2.Var("b")))
-    base = p3.Refl(p2.Nat, p2.apps(p2.succ, a))
-    step = p3.Lam("n", p2.Nat, p3.Lam("ih", motive_at(n), p3.Rw(ih)))
-    body = Induction("Nat", motive, (base, step), p2.Var("b"))
-    return p3.Lam("a", p2.Nat, p3.Lam("b", p2.Nat, body))
+    motive = p3.Lam("b", p2.MyNat, motive_at(p2.Var("b")))
+    base = p3.Refl(p2.MyNat, p2.apps(p2.succ, a))
+    step = p3.Lam("n", p2.MyNat, p3.Lam("ih", motive_at(n), p3.Rw(ih)))
+    body = Induction("MyNat", motive, (base, step), p2.Var("b"))
+    return p3.Lam("a", p2.MyNat, p3.Lam("b", p2.MyNat, body))
 
 
 def pretty(expr: p2.Expr) -> str:

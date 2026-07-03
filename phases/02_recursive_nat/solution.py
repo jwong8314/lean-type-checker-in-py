@@ -1,4 +1,4 @@
-"""Phase 2 solution: declare Nat as a recursive type."""
+"""Phase 2 solution: declare MyNat as a recursive type."""
 
 from __future__ import annotations
 
@@ -116,18 +116,18 @@ class TypeChecker(AbstractTypeChecker):
         return pretty(expr)
 
 
-Nat = Const("Nat")
+MyNat = Const("MyNat")
 zero = Const("zero")
 succ = Const("succ")
 
 
-def nat_type_spec() -> RecursiveTypeSpec:
+def mynat_type_spec() -> RecursiveTypeSpec:
     return RecursiveTypeSpec(
-        "Nat",
+        "MyNat",
         Type,
         (
             ConstructorSpec("zero", ()),
-            ConstructorSpec("succ", (Nat,)),
+            ConstructorSpec("succ", (MyNat,)),
         ),
     )
 
