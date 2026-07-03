@@ -8,7 +8,6 @@ Each phase has:
 README.md    # what to implement
 solution.py  # the kernel implementation for that phase
 script.lean  # Lean-like declarations kept separate from the implementation
-declarations.py # temporary AST bridge from script names to Python terms
 ```
 
 The top-level [solution_runner.py](solution_runner.py) owns the default
@@ -71,7 +70,6 @@ MyNat, zero_add, succ_add_succ, add_comm, add_assoc, add_right_comm
 
 `script.lean` is intentionally tiny. It contains ordinary-looking `constant`,
 `inductive`, `def`, and `theorem` declarations, but this project still does not
-parse full Lean terms. For now, the runner extracts declaration names, and the
-actual ASTs are produced by each phase’s separate `declarations.py` bridge.
-That keeps scripts separate from the kernel implementation while avoiding a
-full Lean parser too early.
+parse full Lean. For now, [lean_parser.py](lean_parser.py) parses only the
+small subset used in these tutorial scripts. That keeps scripts separate from
+the kernel implementation while avoiding a full Lean parser too early.

@@ -8,10 +8,9 @@ Usage:
     python3 -B tutorial_type_checker.py 05_comm
 
 The scripts are intentionally tiny Lean-like files containing `constant`,
-`inductive`, `def`, and `theorem` declarations.  This runner does not parse full
-Lean terms yet.  It extracts declaration names from the script, imports the
-selected phase's `solution.py`, and asks that phase's kernel to check the AST
-registered for each declaration.
+`inductive`, `def`, and `theorem` declarations. This runner parses the small
+script subset used by the tutorial, imports the selected phase's `solution.py`,
+and asks that phase's kernel to check each parsed declaration.
 """
 
 from __future__ import annotations
@@ -22,6 +21,7 @@ import sys
 from pathlib import Path
 from types import ModuleType
 
+import lean_parser
 import solution_runner
 
 
@@ -51,81 +51,22 @@ def load_solution(phase_dir: Path) -> ModuleType:
     return module
 
 
-def load_declarations(phase_dir: Path, solution: ModuleType) -> ModuleType:
-    path = phase_dir / "declarations.py"
-    module_name = f"{phase_dir.name}_declarations"
-    spec = importlib.util.spec_from_file_location(module_name, path)
-    if spec is None or spec.loader is None:
-        raise RunnerError(f"cannot load {path}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[module_name] = module
-    sys.modules["solution"] = solution
-    spec.loader.exec_module(module)
-    return module
-
-
-def strip_block_comments(text: str) -> str:
-    while "/-" in text:
-        start = text.index("/-")
-        end = text.index("-/", start) + 2
-        text = text[:start] + text[end:]
-    return text
-
-
-def declaration_names(phase_dir: Path) -> list[str]:
-    path = phase_dir / "script.lean"
-    names: list[str] = []
-    for lineno, line in enumerate(strip_block_comments(path.read_text()).splitlines(), start=1):
-        stripped = line.strip()
-        if not stripped or stripped.startswith("--"):
-            continue
-        if stripped.startswith("constant "):
-            names.append(stripped.split()[1])
-        elif stripped.startswith("inductive "):
-            names.append(stripped.split()[1])
-        elif stripped.startswith("| ") and ":" in stripped and "=>" not in stripped:
-            names.append(stripped.split()[1])
-        elif stripped.startswith("| "):
-            continue
-        elif stripped.startswith("def ") or stripped.startswith("theorem "):
-            names.append(stripped.split()[1])
-        elif stripped.startswith(("fun ", "Nat.ind", "rfl", "rw ", "induction ", "(")):
-            continue
-        elif stripped.startswith(("deriving ", "namespace ", "end ", "instance ", "add :=", "|")):
-            continue
-        elif stripped in {"where"}:
-            continue
-        elif stripped.startswith(("forall ", "succ ", "(succ ")):
-            continue
-        else:
-            # Continuation lines in these tutorial scripts are proof/type text.
-            # Unknown top-level commands should be explicit failures.
-            if not line.startswith((" ", "\t")):
-                raise RunnerError(f"{path}:{lineno}: cannot understand declaration line: {stripped}")
-    return names
-
-
 def run_phase(phase_dir: Path) -> None:
     solution = load_solution(phase_dir)
-    declarations_module = load_declarations(phase_dir, solution)
-    declaration = declarations_module.declaration
+    declarations = lean_parser.parse_script(phase_dir.name, phase_dir, solution)
     pretty = solution.pretty
     checker = solution_runner.setting_default_types(phase_dir.name, solution)
     register_before = solution_runner.register_before_check(phase_dir.name)
 
     print(phase_dir.relative_to(ROOT))
-    for name in declaration_names(phase_dir):
-        try:
-            expr, expected = declaration(name)
-        except KeyError as exc:
-            raise RunnerError(f"{phase_dir / 'script.lean'}: no declaration case named {name!r}") from exc
-        if name in register_before:
-            solution_runner.register_declaration(phase_dir.name, solution, checker, name)
-        checker.infer(expr)
-        checker.check(expr, expected)
-        if name not in register_before:
-            solution_runner.register_declaration(phase_dir.name, solution, checker, name)
-        print(f"  {name} : {pretty(expected)}")
+    for declaration in declarations:
+        if declaration.name in register_before:
+            solution_runner.register_declaration(phase_dir.name, solution, checker, declaration.name)
+        checker.infer(declaration.expr)
+        checker.check(declaration.expr, declaration.expected)
+        if declaration.name not in register_before:
+            solution_runner.register_declaration(phase_dir.name, solution, checker, declaration.name)
+        print(f"  {declaration.name} : {pretty(declaration.expected)}")
 
 
 def select_phases(request: str) -> list[Path]:
