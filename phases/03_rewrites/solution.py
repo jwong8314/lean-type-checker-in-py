@@ -206,43 +206,6 @@ def nat_add_reducer(tc: TypeChecker, expr: p2.Expr) -> p2.Expr | None:
     return None
 
 
-def register_declaration(tc: TypeChecker, name: str) -> None:
-    """Update the checker environment when script.lean reaches a declaration."""
-
-    if name == "Eq":
-        tc.add("Eq", eq_decl_case()[1])
-    elif name == "rfl_nat":
-        tc.add("rfl_nat", rfl_nat_type())
-    elif name == "add":
-        tc.add("add", add_decl_case()[1])
-    elif name == "add_zero":
-        tc.add("add_zero", add_zero_type())
-        tc.add_reducer("add", nat_add_reducer)
-    elif name == "add_succ":
-        tc.add("add_succ", add_succ_type())
-        tc.add_reducer("add", nat_add_reducer)
-    elif name == "rw":
-        tc.add("rw", rw_type())
-    elif name in {"add_zero_by_rfl", "add_succ_by_rfl", "rewrite_step"}:
-        # Theorems do not add new computation behavior in this toy kernel.
-        if name == "add_zero_by_rfl":
-            tc.add(name, add_zero_by_rfl_case()[1])
-        elif name == "add_succ_by_rfl":
-            tc.add(name, add_succ_by_rfl_case()[1])
-        elif name == "rewrite_step":
-            tc.add(name, rewrite_step_case()[1])
-
-
-def phase3_checker() -> TypeChecker:
-    tc = TypeChecker()
-    tc.add_recursive_type(p2.nat_type_spec())
-    return tc
-
-
-def fresh_checker() -> TypeChecker:
-    return phase3_checker()
-
-
 def pretty(expr: p2.Expr) -> str:
     match expr:
         case Eq(_, lhs, rhs):
@@ -353,37 +316,3 @@ def rewrite_step_case() -> tuple[p2.Expr, p2.Expr]:
     expected = p2.Pi("a", p2.Nat, p2.Pi("n", p2.Nat, p2.arrow(premise, goal)))
     return proof, expected
 
-
-REGISTER_BEFORE_CHECK = {
-    "Eq",
-    "rfl_nat",
-    "add",
-    "add_zero",
-    "add_succ",
-    "rw",
-}
-
-
-DEFAULT_CHECKER = phase3_checker()
-for _name in (
-    "Eq",
-    "rfl_nat",
-    "add",
-    "add_zero",
-    "add_succ",
-    "rw",
-    "add_zero_by_rfl",
-    "add_succ_by_rfl",
-    "rewrite_step",
-):
-    register_declaration(DEFAULT_CHECKER, _name)
-
-
-def infer(expr: p2.Expr, ctx: dict[str, p2.Expr] | None = None, tc: TypeChecker | None = None) -> p2.Expr:
-    tc = DEFAULT_CHECKER if tc is None else tc
-    return tc.infer(expr, ctx)
-
-
-def check(expr: p2.Expr, expected: p2.Expr, ctx: dict[str, p2.Expr] | None = None, tc: TypeChecker | None = None) -> None:
-    tc = DEFAULT_CHECKER if tc is None else tc
-    tc.check(expr, expected, ctx)

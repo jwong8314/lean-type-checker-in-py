@@ -139,12 +139,6 @@ def nat_type_spec() -> RecursiveTypeSpec:
     )
 
 
-def phase2_checker() -> TypeChecker:
-    tc = TypeChecker()
-    tc.add_recursive_type(nat_type_spec())
-    return tc
-
-
 def pretty(expr: Expr) -> str:
     match expr:
         case Sort(0):
@@ -181,13 +175,3 @@ def spine(expr: Expr) -> tuple[Expr, list[Expr]]:
 
 one = apps(succ, zero)
 two = apps(succ, one)
-DEFAULT_CHECKER = phase2_checker()
-
-
-def infer(expr: Expr, ctx: dict[str, Expr] | None = None) -> Expr:
-    return DEFAULT_CHECKER.infer(expr, ctx)
-
-
-def check(expr: Expr, expected: Expr, ctx: dict[str, Expr] | None = None) -> None:
-    DEFAULT_CHECKER.check(expr, expected, ctx)
-

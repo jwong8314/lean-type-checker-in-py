@@ -11,6 +11,10 @@ script.lean  # Lean-like declarations kept separate from the implementation
 declarations.py # temporary AST bridge from script names to Python terms
 ```
 
+The top-level [solution_runner.py](solution_runner.py) owns the default
+environment setup for each phase. That keeps each `solution.py` focused on the
+kernel syntax and typing rules instead of also seeding known declarations.
+
 The top-level [expressions.py](expressions.py) defines the shared `Expr`, `Sort`,
 `Prop`, and `Type`. Every phase-specific expression node inherits from that
 same top-level `Expr`.
@@ -33,9 +37,9 @@ python3 -B tutorial_type_checker.py 04
 python3 -B tutorial_type_checker.py 05
 ```
 
-The runner imports `infer` and `check` from the selected phase’s `solution.py`,
-then type-checks each declaration in that phase’s separate `script.lean` file.
-If anything fails to type check, the runner crashes with an error.
+The runner builds the selected phase's checker with `solution_runner.py`, then
+type-checks each declaration in that phase's separate `script.lean` file. If
+anything fails to type check, the runner crashes with an error.
 
 ## Phases
 
@@ -52,10 +56,11 @@ Phase 4 adds induction over recursive type declarations and proves:
 forall a b : Nat, succ a + b = succ (a + b)
 ```
 
-Phase 5 uses `succ_add` to prove the commutativity layer:
+Phase 5 accepts the raw `MyNatSuccAdd.lean` script and proves the
+commutativity layer:
 
 ```text
-zero_add, succ_add_succ, add_assoc, add_comm
+MyNat, zero_add, succ_add_succ, add_comm, add_assoc, add_right_comm
 ```
 
 ## Current Limitation

@@ -125,41 +125,6 @@ def mynat_type_spec() -> p2.RecursiveTypeSpec:
     )
 
 
-def phase5_checker() -> TypeChecker:
-    return TypeChecker()
-
-
-def fresh_checker() -> TypeChecker:
-    return phase5_checker()
-
-
-def register_declaration(tc: TypeChecker, name: str) -> None:
-    if name == "MyNat":
-        tc.add_recursive_type(mynat_type_spec())
-    elif name == "add":
-        tc.add("add", add_type())
-        tc.add_reducer("add", p3.nat_add_reducer)
-    elif name == "my_add_zero":
-        tc.add("my_add_zero", my_add_zero_type())
-    elif name == "my_add_succ":
-        tc.add("my_add_succ", my_add_succ_type())
-    elif name == "succ_add":
-        tc.add("succ_add", succ_add_type())
-    elif name == "succ_add_succ":
-        tc.add("succ_add_succ", succ_add_succ_type())
-    elif name == "zero_add":
-        tc.add("zero_add", zero_add_type())
-    elif name == "add_comm":
-        tc.add("add_comm", add_comm_type())
-    elif name == "add_assoc":
-        tc.add("add_assoc", add_assoc_type())
-    elif name == "add_right_comm":
-        tc.add("add_right_comm", add_right_comm_type())
-
-
-REGISTER_BEFORE_CHECK = {"MyNat", "zero", "succ", "add"}
-
-
 def theorem_app(theorem: p2.Expr, *args: p2.Expr) -> p2.Expr:
     return p2.apps(theorem, *args)
 
@@ -457,28 +422,3 @@ def pretty(expr: p2.Expr) -> str:
         case _:
             return p4.pretty(expr)
 
-
-DEFAULT_CHECKER = phase5_checker()
-for _name in (
-    "MyNat",
-    "add",
-    "my_add_zero",
-    "my_add_succ",
-    "succ_add",
-    "succ_add_succ",
-    "zero_add",
-    "add_comm",
-    "add_assoc",
-    "add_right_comm",
-):
-    register_declaration(DEFAULT_CHECKER, _name)
-
-
-def infer(expr: p2.Expr, ctx: dict[str, p2.Expr] | None = None, tc: TypeChecker | None = None) -> p2.Expr:
-    tc = DEFAULT_CHECKER if tc is None else tc
-    return tc.infer(expr, ctx)
-
-
-def check(expr: p2.Expr, expected: p2.Expr, ctx: dict[str, p2.Expr] | None = None, tc: TypeChecker | None = None) -> None:
-    tc = DEFAULT_CHECKER if tc is None else tc
-    tc.check(expr, expected, ctx)

@@ -24,10 +24,10 @@ So `add : Nat -> Nat -> Nat` is just the shape of the function. Its behavior is
 introduced by `add_zero` and `add_succ`: those are the only equations the
 checker uses to reduce an addition expression.
 
-The runner processes [script.lean](script.lean) in declaration order. In
-`solution.py`, `register_declaration` updates the checker as each declaration
-is reached, so later theorems only type-check because earlier declarations have
-already been added.
+The runner processes [script.lean](script.lean) in declaration order.
+[solution_runner.py](../../solution_runner.py) updates the checker as each
+declaration is reached, so later theorems only type-check because earlier
+declarations have already been added.
 
 Try it:
 

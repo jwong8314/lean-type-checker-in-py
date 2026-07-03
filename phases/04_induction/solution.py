@@ -91,14 +91,6 @@ def induction_case_type(spec: p2.RecursiveTypeSpec, constructor: p2.ConstructorS
     return result
 
 
-def phase4_checker() -> TypeChecker:
-    tc = TypeChecker()
-    tc.add_recursive_type(p2.nat_type_spec())
-    tc.add("add", p2.arrow(p2.Nat, p2.arrow(p2.Nat, p2.Nat)))
-    tc.add_reducer("add", p3.nat_add_reducer)
-    return tc
-
-
 def theorem_type() -> p2.Expr:
     a = p2.Var("a")
     b = p2.Var("b")
@@ -134,13 +126,3 @@ def pretty(expr: p2.Expr) -> str:
         case _:
             return p3.pretty(expr)
 
-
-DEFAULT_CHECKER = phase4_checker()
-
-
-def infer(expr: p2.Expr, ctx: dict[str, p2.Expr] | None = None) -> p2.Expr:
-    return DEFAULT_CHECKER.infer(expr, ctx)
-
-
-def check(expr: p2.Expr, expected: p2.Expr, ctx: dict[str, p2.Expr] | None = None) -> None:
-    DEFAULT_CHECKER.check(expr, expected, ctx)

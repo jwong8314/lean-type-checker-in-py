@@ -22,6 +22,8 @@ import sys
 from pathlib import Path
 from types import ModuleType
 
+import solution_runner
+
 
 ROOT = Path(__file__).resolve().parent
 PHASE_DIRS = {
@@ -106,12 +108,10 @@ def declaration_names(phase_dir: Path) -> list[str]:
 def run_phase(phase_dir: Path) -> None:
     solution = load_solution(phase_dir)
     declarations_module = load_declarations(phase_dir, solution)
-    infer = solution.infer
-    check = solution.check
     declaration = declarations_module.declaration
     pretty = solution.pretty
-    checker = solution.fresh_checker() if hasattr(solution, "fresh_checker") else None
-    register = getattr(solution, "register_declaration", None)
+    checker = solution_runner.setting_default_types(phase_dir.name, solution)
+    register_before = solution_runner.register_before_check(phase_dir.name)
 
     print(phase_dir.relative_to(ROOT))
     for name in declaration_names(phase_dir):
@@ -119,16 +119,12 @@ def run_phase(phase_dir: Path) -> None:
             expr, expected = declaration(name)
         except KeyError as exc:
             raise RunnerError(f"{phase_dir / 'script.lean'}: no declaration case named {name!r}") from exc
-        if checker is None:
-            infer(expr)
-            check(expr, expected)
-        else:
-            if register is not None and name in getattr(solution, "REGISTER_BEFORE_CHECK", set()):
-                register(checker, name)
-            infer(expr, tc=checker)
-            check(expr, expected, tc=checker)
-            if register is not None and name not in getattr(solution, "REGISTER_BEFORE_CHECK", set()):
-                register(checker, name)
+        if name in register_before:
+            solution_runner.register_declaration(phase_dir.name, solution, checker, name)
+        checker.infer(expr)
+        checker.check(expr, expected)
+        if name not in register_before:
+            solution_runner.register_declaration(phase_dir.name, solution, checker, name)
         print(f"  {name} : {pretty(expected)}")
 
 
