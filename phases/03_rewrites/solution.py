@@ -85,11 +85,6 @@ class TypeChecker(p2.TypeChecker):
             case _:
                 return super().infer(expr, ctx)
 
-    def check(self, expr: p2.Expr, expected: p2.Expr, ctx: dict[str, p2.Expr] | None = None) -> None:
-        actual = self.infer(expr, ctx)
-        if not self.defeq(actual, expected):
-            raise p2.TypeError(f"expected {pretty(expected)}, got {pretty(actual)}")
-
     def whnf(self, expr: p2.Expr) -> p2.Expr:
         while True:
             match expr:
@@ -133,6 +128,9 @@ class TypeChecker(p2.TypeChecker):
         if isinstance(head, p2.Const) and head.name in self.reducers:
             return self.reducers[head.name](self, expr)
         return None
+
+    def pretty(self, expr: p2.Expr) -> str:
+        return pretty(expr)
 
 
 add = p2.Const("add")
@@ -315,4 +313,3 @@ def rewrite_step_case() -> tuple[p2.Expr, p2.Expr]:
     proof = Lam("a", p2.Nat, Lam("n", p2.Nat, Lam("ih", premise, Rw(ih))))
     expected = p2.Pi("a", p2.Nat, p2.Pi("n", p2.Nat, p2.arrow(premise, goal)))
     return proof, expected
-

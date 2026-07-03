@@ -113,6 +113,9 @@ class TypeChecker(p4.TypeChecker):
             case _:
                 return super().normalize(expr)
 
+    def pretty(self, expr: p2.Expr) -> str:
+        return pretty(expr)
+
 
 def mynat_type_spec() -> p2.RecursiveTypeSpec:
     return p2.RecursiveTypeSpec(
@@ -421,4 +424,3 @@ def pretty(expr: p2.Expr) -> str:
             return p4.pretty(expr)
         case _:
             return p4.pretty(expr)
-

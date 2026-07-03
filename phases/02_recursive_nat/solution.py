@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from expressions import Const, Expr, Prop, Sort, Type
+from type_checker import TypeChecker as AbstractTypeChecker
+from type_checker import TypeCheckerError as TypeError
 
 
 @dataclass(frozen=True)
@@ -36,10 +38,6 @@ class RecursiveTypeSpec:
     name: str
     sort: Sort
     constructors: tuple[ConstructorSpec, ...]
-
-
-class TypeError(Exception):
-    pass
 
 
 def apps(fn: Expr, *args: Expr) -> Expr:
@@ -76,20 +74,9 @@ def subst(expr: Expr, var: str, replacement: Expr) -> Expr:
             raise TypeError(f"cannot substitute in {expr!r}")
 
 
-class TypeChecker:
-    def __init__(self) -> None:
-        self.env: dict[str, Expr] = {}
-        self.recursive_types: dict[str, RecursiveTypeSpec] = {}
-
-    def add(self, name: str, ty: Expr) -> None:
-        self.env[name] = ty
-
-    def add_recursive_type(self, spec: RecursiveTypeSpec) -> None:
-        self.recursive_types[spec.name] = spec
-        result_type = Const(spec.name)
-        self.add(spec.name, spec.sort)
-        for constructor in spec.constructors:
-            self.add(constructor.name, constructor_type(result_type, constructor.arg_types))
+class TypeChecker(AbstractTypeChecker):
+    def constructor_type(self, result_type: Expr, arg_types: tuple[Expr, ...]) -> Expr:
+        return constructor_type(result_type, arg_types)
 
     def infer(self, expr: Expr, ctx: dict[str, Expr] | None = None) -> Expr:
         ctx = {} if ctx is None else ctx
@@ -117,10 +104,8 @@ class TypeChecker:
             case _:
                 raise TypeError(f"cannot infer {expr!r}")
 
-    def check(self, expr: Expr, expected: Expr, ctx: dict[str, Expr] | None = None) -> None:
-        actual = self.infer(expr, ctx)
-        if actual != expected:
-            raise TypeError(f"expected {pretty(expected)}, got {pretty(actual)}")
+    def pretty(self, expr: Expr) -> str:
+        return pretty(expr)
 
 
 Nat = Const("Nat")

@@ -15,6 +15,10 @@ The top-level [solution_runner.py](solution_runner.py) owns the default
 environment setup for each phase. That keeps each `solution.py` focused on the
 kernel syntax and typing rules instead of also seeding known declarations.
 
+The top-level [type_checker.py](type_checker.py) defines the shared abstract
+`TypeChecker`: it owns the environment, recursive declaration registration, and
+generic `check`. Each phase customizes `infer`.
+
 The top-level [expressions.py](expressions.py) defines the shared `Expr`, `Sort`,
 `Prop`, and `Type`. Every phase-specific expression node inherits from that
 same top-level `Expr`.

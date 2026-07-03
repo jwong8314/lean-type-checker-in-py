@@ -66,6 +66,9 @@ class TypeChecker(p3.TypeChecker):
             case _:
                 return super().normalize(expr)
 
+    def pretty(self, expr: p2.Expr) -> str:
+        return pretty(expr)
+
 
 def induction_case_type(spec: p2.RecursiveTypeSpec, constructor: p2.ConstructorSpec, motive: p2.Expr) -> p2.Expr:
     """Derive one case type from a recursive constructor.
@@ -125,4 +128,3 @@ def pretty(expr: p2.Expr) -> str:
             return f"induction[{type_name}] {p3.atom(motive)} {rendered_cases} {p3.atom(target)}"
         case _:
             return p3.pretty(expr)
-

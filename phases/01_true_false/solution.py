@@ -3,20 +3,12 @@
 from __future__ import annotations
 
 from expressions import Const, Expr, Prop, Sort, Type
+from type_checker import TypeChecker as AbstractTypeChecker
+from type_checker import TypeCheckerError as TypeError
 
 
-class TypeError(Exception):
-    pass
-
-
-class TypeChecker:
-    def __init__(self) -> None:
-        self.env: dict[str, Expr] = {}
-
-    def add(self, name: str, ty: Expr) -> None:
-        self.env[name] = ty
-
-    def infer(self, expr: Expr) -> Expr:
+class TypeChecker(AbstractTypeChecker):
+    def infer(self, expr: Expr, ctx: dict[str, Expr] | None = None) -> Expr:
         match expr:
             case Sort(level):
                 return Sort(level + 1)
@@ -27,10 +19,8 @@ class TypeChecker:
             case _:
                 raise TypeError(f"cannot infer {expr!r}")
 
-    def check(self, expr: Expr, expected: Expr) -> None:
-        actual = self.infer(expr)
-        if actual != expected:
-            raise TypeError(f"expected {pretty(expected)}, got {pretty(actual)}")
+    def pretty(self, expr: Expr) -> str:
+        return pretty(expr)
 
 
 TrueProp = Const("True")
