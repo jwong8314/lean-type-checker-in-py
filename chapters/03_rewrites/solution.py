@@ -147,8 +147,6 @@ class TypeChecker(p2.TypeChecker):
 
 add = p2.Const("add")
 EqConst = p2.Const("Eq")
-add_zero = p2.Const("add_zero")
-add_succ = p2.Const("add_succ")
 
 
 def subst(expr: p2.Expr, var: str, replacement: p2.Expr) -> p2.Expr:
@@ -250,83 +248,3 @@ def atom(expr: p2.Expr) -> str:
     if isinstance(expr, (p2.Sort, p2.Const, p2.Var)):
         return pretty(expr)
     return f"({pretty(expr)})"
-
-
-def eq_decl_case() -> tuple[p2.Expr, p2.Expr]:
-    return EqConst, p2.arrow(p2.Type, p2.arrow(p2.MyNat, p2.arrow(p2.MyNat, p2.Prop)))
-
-
-def rfl_nat_type() -> p2.Expr:
-    x = p2.Var("x")
-    return p2.Pi("x", p2.MyNat, Eq(p2.MyNat, x, x))
-
-
-def rfl_nat_case() -> tuple[p2.Expr, p2.Expr]:
-    x = p2.Var("x")
-    return Lam("x", p2.MyNat, Refl(p2.MyNat, x)), rfl_nat_type()
-
-
-def add_decl_case() -> tuple[p2.Expr, p2.Expr]:
-    return add, p2.arrow(p2.MyNat, p2.arrow(p2.MyNat, p2.MyNat))
-
-
-def add_zero_type() -> p2.Expr:
-    a = p2.Var("a")
-    return p2.Pi("a", p2.MyNat, Eq(p2.MyNat, p2.apps(add, a, p2.zero), a))
-
-
-def add_zero_case() -> tuple[p2.Expr, p2.Expr]:
-    return add_zero, add_zero_type()
-
-
-def add_succ_type() -> p2.Expr:
-    a = p2.Var("a")
-    b = p2.Var("b")
-    return p2.Pi("a", p2.MyNat, p2.Pi("b", p2.MyNat, Eq(p2.MyNat, p2.apps(add, a, p2.apps(p2.succ, b)), p2.apps(p2.succ, p2.apps(add, a, b)))))
-
-
-def add_succ_case() -> tuple[p2.Expr, p2.Expr]:
-    return add_succ, add_succ_type()
-
-
-def rw_type() -> p2.Expr:
-    x = p2.Var("x")
-    y = p2.Var("y")
-    premise = Eq(p2.MyNat, x, y)
-    conclusion = Eq(p2.MyNat, p2.apps(p2.succ, x), p2.apps(p2.succ, y))
-    return p2.Pi("x", p2.MyNat, p2.Pi("y", p2.MyNat, p2.arrow(premise, conclusion)))
-
-
-def rw_case() -> tuple[p2.Expr, p2.Expr]:
-    x = p2.Var("x")
-    y = p2.Var("y")
-    h = p2.Var("h")
-    premise = Eq(p2.MyNat, x, y)
-    proof = Lam("x", p2.MyNat, Lam("y", p2.MyNat, Lam("h", premise, Rw(h))))
-    return proof, rw_type()
-
-
-def add_zero_by_rfl_case() -> tuple[p2.Expr, p2.Expr]:
-    a = p2.Var("a")
-    proof = Lam("a", p2.MyNat, Refl(p2.MyNat, a))
-    expected = p2.Pi("a", p2.MyNat, Eq(p2.MyNat, p2.apps(add, a, p2.zero), a))
-    return proof, expected
-
-
-def add_succ_by_rfl_case() -> tuple[p2.Expr, p2.Expr]:
-    a = p2.Var("a")
-    n = p2.Var("n")
-    proof = Lam("a", p2.MyNat, Lam("n", p2.MyNat, Refl(p2.MyNat, p2.apps(p2.succ, p2.apps(add, a, n)))))
-    expected = p2.Pi("a", p2.MyNat, p2.Pi("n", p2.MyNat, Eq(p2.MyNat, p2.apps(add, a, p2.apps(p2.succ, n)), p2.apps(p2.succ, p2.apps(add, a, n)))))
-    return proof, expected
-
-
-def rewrite_step_case() -> tuple[p2.Expr, p2.Expr]:
-    a = p2.Var("a")
-    n = p2.Var("n")
-    ih = p2.Var("ih")
-    premise = Eq(p2.MyNat, p2.apps(add, p2.apps(p2.succ, a), n), p2.apps(p2.succ, p2.apps(add, a, n)))
-    goal = Eq(p2.MyNat, p2.apps(add, p2.apps(p2.succ, a), p2.apps(p2.succ, n)), p2.apps(p2.succ, p2.apps(p2.succ, p2.apps(add, a, n))))
-    proof = Lam("a", p2.MyNat, Lam("n", p2.MyNat, Lam("ih", premise, Rw(ih))))
-    expected = p2.Pi("a", p2.MyNat, p2.Pi("n", p2.MyNat, p2.arrow(premise, goal)))
-    return proof, expected

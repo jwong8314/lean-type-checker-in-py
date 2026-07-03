@@ -28,8 +28,6 @@ MyNat = p2.Const("MyNat")
 zero = p2.Const("zero")
 succ = p2.Const("succ")
 add = p2.Const("add")
-my_add_zero = p2.Const("my_add_zero")
-my_add_succ = p2.Const("my_add_succ")
 zero_add = p2.Const("zero_add")
 succ_add = p2.Const("succ_add")
 succ_add_succ = p2.Const("succ_add_succ")
@@ -121,17 +119,6 @@ class TypeChecker(p4.TypeChecker):
 
     def pretty(self, expr: p2.Expr) -> str:
         return pretty(expr)
-
-
-def mynat_type_spec() -> p2.RecursiveTypeSpec:
-    return p2.RecursiveTypeSpec(
-        "MyNat",
-        Type,
-        (
-            p2.ConstructorSpec("zero", ()),
-            p2.ConstructorSpec("succ", (MyNat,)),
-        ),
-    )
 
 
 def theorem_app(theorem: p2.Expr, *args: p2.Expr) -> p2.Expr:
@@ -229,55 +216,9 @@ def subst(expr: p2.Expr, var: str, replacement: p2.Expr) -> p2.Expr:
             raise p2.TypeError(f"cannot substitute in {expr!r}")
 
 
-def mynat_case() -> tuple[p2.Expr, p2.Expr]:
-    return MyNat, Type
-
-
-def zero_case() -> tuple[p2.Expr, p2.Expr]:
-    return zero, MyNat
-
-
-def succ_case() -> tuple[p2.Expr, p2.Expr]:
-    return succ, p2.arrow(MyNat, MyNat)
-
-
-def add_type() -> p2.Expr:
-    return p2.arrow(MyNat, p2.arrow(MyNat, MyNat))
-
-
-def add_case() -> tuple[p2.Expr, p2.Expr]:
-    return add, add_type()
-
-
 def after_register_declaration(tc: TypeChecker, declaration) -> None:
     if declaration.name == "add":
         tc.add_reducer("add", p3.nat_add_reducer)
-
-
-def my_add_zero_type() -> p2.Expr:
-    a = p2.Var("a")
-    return p2.Pi("a", MyNat, p3.Eq(MyNat, p2.apps(add, a, zero), a))
-
-
-def my_add_zero_case() -> tuple[p2.Expr, p2.Expr]:
-    a = p2.Var("a")
-    return p3.Lam("a", MyNat, p3.Refl(MyNat, a)), my_add_zero_type()
-
-
-def my_add_succ_type() -> p2.Expr:
-    a = p2.Var("a")
-    b = p2.Var("b")
-    lhs = p2.apps(add, a, p2.apps(succ, b))
-    rhs = p2.apps(succ, p2.apps(add, a, b))
-    return p2.Pi("a", MyNat, p2.Pi("b", MyNat, p3.Eq(MyNat, lhs, rhs)))
-
-
-def my_add_succ_case() -> tuple[p2.Expr, p2.Expr]:
-    a = p2.Var("a")
-    b = p2.Var("b")
-    value = p2.apps(succ, p2.apps(add, a, b))
-    proof = p3.Lam("a", MyNat, p3.Lam("b", MyNat, p3.Refl(MyNat, value)))
-    return proof, my_add_succ_type()
 
 
 def succ_add_type() -> p2.Expr:
@@ -305,24 +246,6 @@ def succ_add_case() -> tuple[p2.Expr, p2.Expr]:
     step = p3.Lam("n", MyNat, p3.Lam("ih", motive_at(n), theorem_app(succ_add_succ, a, n, ih)))
     body = p4.Induction("MyNat", motive, (base, step), p2.Var("b"))
     return p3.Lam("a", MyNat, p3.Lam("b", MyNat, body)), succ_add_type()
-
-
-def succ_add_succ_type() -> p2.Expr:
-    a = p2.Var("a")
-    b = p2.Var("b")
-    ih = p3.Eq(MyNat, p2.apps(add, p2.apps(succ, a), b), p2.apps(succ, p2.apps(add, a, b)))
-    lhs = p2.apps(add, p2.apps(succ, a), p2.apps(succ, b))
-    rhs = p2.apps(succ, p2.apps(succ, p2.apps(add, a, b)))
-    return p2.Pi("a", MyNat, p2.Pi("b", MyNat, p2.Pi("ih", ih, p3.Eq(MyNat, lhs, rhs))))
-
-
-def succ_add_succ_case() -> tuple[p2.Expr, p2.Expr]:
-    a = p2.Var("a")
-    b = p2.Var("b")
-    ih = p2.Var("ih")
-    ih_type = p3.Eq(MyNat, p2.apps(add, p2.apps(succ, a), b), p2.apps(succ, p2.apps(add, a, b)))
-    proof = p3.Lam("a", MyNat, p3.Lam("b", MyNat, p3.Lam("ih", ih_type, p3.Rw(ih))))
-    return proof, succ_add_succ_type()
 
 
 def zero_add_type() -> p2.Expr:

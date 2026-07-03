@@ -6,7 +6,6 @@ declarations against our Python kernel.
 This chapter proves the same shape as `MyNatSuccAdd.lean`:
 
 ```text
-MyNat          : Type
 my_add_zero    : forall a : MyNat, a + zero = a
 my_add_succ    : forall a b : MyNat, a + succ b = succ (a + b)
 succ_add       : forall a b : MyNat, succ a + b = succ (a + b)
@@ -25,8 +24,15 @@ New implementation pieces:
 2. `EqTrans(left, right)` chains two equality proofs.
 3. `EqCongrAddLeft(a, proof)` is the small congruence step needed by
    `add_right_comm`.
-4. The checker declares a recursive type named `MyNat`, rather than reusing
-   the earlier tutorial's `Nat` name.
+4. Chapter imports now provide the previous `MyNat`, `add`, and induction
+   declarations instead of redeclaring them here.
+
+Remaining proof-elaboration work:
+
+1. Interpret `induction ... with` directly from the parsed tactic tree.
+2. Interpret multi-step `rw [...]` as equality transitivity/congruence proof
+   terms instead of using theorem-specific fallback builders.
+3. Interpret `rw [← h]` by producing an equality-symmetry proof.
 
 The key `add_comm` proof follows the Lean proof:
 
