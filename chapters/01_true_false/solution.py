@@ -36,9 +36,6 @@ class TypeChecker(AbstractTypeChecker):
         if not self.defeq(actual, expected):
             raise TypeError(f"expected {self.pretty(expected)}, got {self.pretty(actual)}")
 
-    def defeq(self, left: Expr, right: Expr) -> bool:
-        return left == right
-
     def unfold_defs(self, expr: Expr) -> Expr:
         match expr:
             case Const(name) if name in self.definitions:
