@@ -213,21 +213,3 @@ def spine(expr: Expr) -> tuple[Expr, list[Expr]]:
         expr = expr.fn
     args.reverse()
     return expr, args
-
-
-one = apps(succ, zero)
-two = apps(succ, one)
-
-
-def eq_decl_case() -> tuple[Expr, Expr]:
-    return EqConst, arrow(Type, arrow(MyNat, arrow(MyNat, Prop)))
-
-
-def rfl_nat_type() -> Expr:
-    x = Var("x")
-    return Pi("x", MyNat, Eq(MyNat, x, x))
-
-
-def rfl_nat_case() -> tuple[Expr, Expr]:
-    x = Var("x")
-    return Lam("x", MyNat, Refl(MyNat, x)), rfl_nat_type()

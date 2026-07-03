@@ -89,9 +89,16 @@ def register_declaration(phase_name: str, solution: ModuleType, tc, name: str) -
 
 def register_phase2(solution: ModuleType, tc, name: str) -> None:
     if name == "Eq":
-        tc.add("Eq", solution.eq_decl_case()[1])
+        tc.add(
+            "Eq",
+            solution.arrow(
+                solution.Type,
+                solution.arrow(solution.MyNat, solution.arrow(solution.MyNat, solution.Prop)),
+            ),
+        )
     elif name == "rfl_nat":
-        tc.add("rfl_nat", solution.rfl_nat_type())
+        x = solution.Var("x")
+        tc.add("rfl_nat", solution.Pi("x", solution.MyNat, solution.Eq(solution.MyNat, x, x)))
 
 
 def register_phase3(solution: ModuleType, tc, name: str) -> None:
