@@ -10,9 +10,9 @@ solution.py  # the kernel implementation for that phase
 script.lean  # Lean-like declarations kept separate from the implementation
 ```
 
-The top-level [solution_runner.py](solution_runner.py) owns the default
-environment setup for each phase. That keeps each `solution.py` focused on the
-kernel syntax and typing rules instead of also seeding known declarations.
+The top-level [solution_runner.py](solution_runner.py) owns the generic
+declaration-checking loop. It registers parsed `script.lean` declarations as
+they are checked instead of carrying a separate table of theorem names.
 
 The top-level [type_checker.py](type_checker.py) defines the shared abstract
 `TypeChecker`: it owns the environment and generic `check`. Each phase

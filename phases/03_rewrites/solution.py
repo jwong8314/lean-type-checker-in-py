@@ -204,6 +204,11 @@ def nat_add_reducer(tc: TypeChecker, expr: p2.Expr) -> p2.Expr | None:
     return None
 
 
+def after_register_declaration(tc: TypeChecker, declaration) -> None:
+    if declaration.name in {"add_zero", "add_succ"}:
+        tc.add_reducer("add", nat_add_reducer)
+
+
 def pretty(expr: p2.Expr) -> str:
     match expr:
         case Eq(_, lhs, rhs):

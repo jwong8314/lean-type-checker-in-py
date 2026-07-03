@@ -121,6 +121,11 @@ def theorem_proof() -> p2.Expr:
     return p3.Lam("a", p2.MyNat, p3.Lam("b", p2.MyNat, body))
 
 
+def after_register_declaration(tc: TypeChecker, declaration) -> None:
+    if declaration.name in {"add_zero", "add_succ"}:
+        tc.add_reducer("add", p3.nat_add_reducer)
+
+
 def pretty(expr: p2.Expr) -> str:
     match expr:
         case Induction(type_name, motive, cases, target):

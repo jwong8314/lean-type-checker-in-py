@@ -1,146 +1,63 @@
-"""Build phase checkers and register script declarations.
+"""Build checkers and register parsed script declarations.
 
-The phase `solution.py` files define the kernel pieces for that phase.  This
-runner module owns the tutorial-time environment setup: which constants are
-available before a declaration is checked, and which declarations get added
-afterwards.
+The runner should not know the names of tutorial theorems.  It gets declaration
+metadata from `lean_parser.py`, registers opaque constants before checking them,
+and registers checked declarations afterwards.  Phase solutions may still expose
+small hooks for kernel features that the script language cannot express yet,
+such as installing a Python reducer.
 """
 
 from __future__ import annotations
 
+from pathlib import Path
 from types import ModuleType
-
-from expressions import Prop
-
-
-def setting_default_types(phase_name: str, solution: ModuleType):
-    if phase_name == "01_true_false":
-        return phase1_checker(solution)
-    if phase_name == "02_recursive_nat":
-        return phase2_checker(solution)
-    if phase_name == "03_rewrites":
-        return phase3_checker(solution)
-    if phase_name == "04_induction":
-        return phase4_checker(solution)
-    if phase_name == "05_comm":
-        return phase5_checker(solution)
-    raise ValueError(f"unknown phase {phase_name}")
+from typing import Iterable
 
 
-def phase1_checker(solution: ModuleType):
-    tc = solution.TypeChecker()
-    default_types = {
-        "True": Prop,
-        "False": Prop,
-        "true_intro": solution.TrueProp,
-    }
-    for name, ty in default_types.items():
-        tc.add(name, ty)
-    return tc
+def setting_default_types(phase_dir: Path, solution: ModuleType, declarations: Iterable[object]):
+    checker = solution.TypeChecker()
+    if needs_previous_phase_context(declarations):
+        seed_previous_phase_scripts(phase_dir, solution, checker)
+    return checker
 
 
-def phase2_checker(solution: ModuleType):
-    tc = solution.TypeChecker()
-    tc.add_recursive_type(solution.mynat_type_spec())
-    return tc
+def needs_previous_phase_context(declarations: Iterable[object]) -> bool:
+    return not any(getattr(declaration, "kind", None) == "inductive" for declaration in declarations)
 
 
-def phase3_checker(solution: ModuleType):
-    tc = solution.TypeChecker()
-    tc.add_recursive_type(solution.p2.mynat_type_spec())
-    return tc
+def seed_previous_phase_scripts(phase_dir: Path, solution: ModuleType, checker) -> None:
+    import lean_parser
+
+    current_number = phase_number(phase_dir)
+    for prior_dir in sorted(phase_dir.parent.iterdir()):
+        prior_number = phase_number(prior_dir)
+        if prior_number is None or prior_number < 2 or prior_number >= current_number:
+            continue
+        for declaration in lean_parser.parse_script(prior_dir, solution):
+            register_declaration(solution, checker, declaration)
 
 
-def phase4_checker(solution: ModuleType):
-    tc = solution.TypeChecker()
-    tc.add_recursive_type(solution.p2.mynat_type_spec())
-    tc.add("add", solution.p2.arrow(solution.p2.MyNat, solution.p2.arrow(solution.p2.MyNat, solution.p2.MyNat)))
-    tc.add_reducer("add", solution.p3.nat_add_reducer)
-    return tc
+def phase_number(phase_dir: Path) -> int | None:
+    try:
+        return int(phase_dir.name.split("_", 1)[0])
+    except ValueError:
+        return None
 
 
-def phase5_checker(solution: ModuleType):
-    return solution.TypeChecker()
+def should_register_before_check(declaration: object) -> bool:
+    if getattr(declaration, "recursive_spec", None) is not None:
+        return True
+    return bool(getattr(declaration, "opaque", False))
 
 
-def register_before_check(phase_name: str) -> set[str]:
-    if phase_name == "02_recursive_nat":
-        return {"Eq"}
-    if phase_name == "03_rewrites":
-        return {"add", "add_zero", "add_succ", "rw"}
-    if phase_name == "05_comm":
-        return {"MyNat", "add"}
-    return set()
+def register_declaration(solution: ModuleType, checker, declaration: object) -> None:
+    recursive_spec = getattr(declaration, "recursive_spec", None)
+    if recursive_spec is not None and hasattr(checker, "add_recursive_type"):
+        if declaration.name not in checker.env:
+            checker.add_recursive_type(recursive_spec)
+    elif declaration.name not in checker.env:
+        checker.add(declaration.name, declaration.expected)
 
-
-def register_declaration(phase_name: str, solution: ModuleType, tc, name: str) -> None:
-    if phase_name == "01_true_false":
-        return
-    if phase_name == "02_recursive_nat":
-        register_phase2(solution, tc, name)
-    if phase_name == "03_rewrites":
-        register_phase3(solution, tc, name)
-    elif phase_name == "04_induction":
-        if name == "succ_add":
-            tc.add("succ_add", solution.theorem_type())
-    elif phase_name == "05_comm":
-        register_phase5(solution, tc, name)
-
-
-def register_phase2(solution: ModuleType, tc, name: str) -> None:
-    if name in {"one", "two"}:
-        tc.add(name, solution.MyNat)
-    elif name == "Eq":
-        tc.add(
-            "Eq",
-            solution.arrow(
-                solution.Type,
-                solution.arrow(solution.MyNat, solution.arrow(solution.MyNat, solution.Prop)),
-            ),
-        )
-    elif name == "rfl_nat":
-        x = solution.Var("x")
-        tc.add("rfl_nat", solution.Pi("x", solution.MyNat, solution.Eq(solution.MyNat, x, x)))
-
-
-def register_phase3(solution: ModuleType, tc, name: str) -> None:
-    if name == "add":
-        tc.add("add", solution.add_decl_case()[1])
-    elif name == "add_zero":
-        tc.add("add_zero", solution.add_zero_type())
-        tc.add_reducer("add", solution.nat_add_reducer)
-    elif name == "add_succ":
-        tc.add("add_succ", solution.add_succ_type())
-        tc.add_reducer("add", solution.nat_add_reducer)
-    elif name == "rw":
-        tc.add("rw", solution.rw_type())
-    elif name == "add_zero_by_rfl":
-        tc.add(name, solution.add_zero_by_rfl_case()[1])
-    elif name == "add_succ_by_rfl":
-        tc.add(name, solution.add_succ_by_rfl_case()[1])
-    elif name == "rewrite_step":
-        tc.add(name, solution.rewrite_step_case()[1])
-
-
-def register_phase5(solution: ModuleType, tc, name: str) -> None:
-    if name == "MyNat":
-        tc.add_recursive_type(solution.mynat_type_spec())
-    elif name == "add":
-        tc.add("add", solution.add_type())
-        tc.add_reducer("add", solution.p3.nat_add_reducer)
-    elif name == "my_add_zero":
-        tc.add("my_add_zero", solution.my_add_zero_type())
-    elif name == "my_add_succ":
-        tc.add("my_add_succ", solution.my_add_succ_type())
-    elif name == "succ_add":
-        tc.add("succ_add", solution.succ_add_type())
-    elif name == "succ_add_succ":
-        tc.add("succ_add_succ", solution.succ_add_succ_type())
-    elif name == "zero_add":
-        tc.add("zero_add", solution.zero_add_type())
-    elif name == "add_comm":
-        tc.add("add_comm", solution.add_comm_type())
-    elif name == "add_assoc":
-        tc.add("add_assoc", solution.add_assoc_type())
-    elif name == "add_right_comm":
-        tc.add("add_right_comm", solution.add_right_comm_type())
+    after_register = getattr(solution, "after_register_declaration", None)
+    if after_register is not None:
+        after_register(checker, declaration)

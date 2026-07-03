@@ -55,17 +55,16 @@ def run_phase(phase_dir: Path) -> None:
     solution = load_solution(phase_dir)
     declarations = lean_parser.parse_script(phase_dir, solution)
     pretty = solution.pretty
-    checker = solution_runner.setting_default_types(phase_dir.name, solution)
-    register_before = solution_runner.register_before_check(phase_dir.name)
+    checker = solution_runner.setting_default_types(phase_dir, solution, declarations)
 
     print(phase_dir.relative_to(ROOT))
     for declaration in declarations:
-        if declaration.name in register_before:
-            solution_runner.register_declaration(phase_dir.name, solution, checker, declaration.name)
+        if solution_runner.should_register_before_check(declaration):
+            solution_runner.register_declaration(solution, checker, declaration)
         checker.infer(declaration.expr)
         checker.check(declaration.expr, declaration.expected)
-        if declaration.name not in register_before:
-            solution_runner.register_declaration(phase_dir.name, solution, checker, declaration.name)
+        if not solution_runner.should_register_before_check(declaration):
+            solution_runner.register_declaration(solution, checker, declaration)
         print(f"  {declaration.name} : {pretty(declaration.expected)}")
 
 

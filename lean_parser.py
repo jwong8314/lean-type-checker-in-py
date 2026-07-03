@@ -119,6 +119,9 @@ class ParsedDeclaration:
     name: str
     expr: object
     expected: object
+    kind: str
+    opaque: bool = False
+    recursive_spec: object | None = None
 
 
 class ParseError(Exception):
@@ -228,7 +231,9 @@ class DeclarationNode:
 def parse_script(phase_dir: Path, solution: ModuleType) -> list[ParsedDeclaration]:
     tree = PARSER.parse((phase_dir / "script.lean").read_text())
     declarations = [build_declaration_node(child) for child in tree.children]
-    return [lower_declaration(solution, declaration) for declaration in declarations if declaration is not None]
+    declarations = [declaration for declaration in declarations if declaration is not None]
+    recursive_specs = lower_recursive_specs(solution, declarations)
+    return [lower_declaration(solution, declaration, recursive_specs.get(declaration.name)) for declaration in declarations]
 
 
 def build_declaration_node(tree: Tree | Token) -> DeclarationNode | None:
@@ -331,18 +336,68 @@ def build_node(node: Tree | Token):
     raise ParseError(f"unsupported AST node: {node.data}")
 
 
-def lower_declaration(solution: ModuleType, declaration: DeclarationNode) -> ParsedDeclaration:
+def lower_recursive_specs(solution: ModuleType, declarations: list[DeclarationNode]) -> dict[str, object]:
+    specs: dict[str, object] = {}
+    for index, declaration in enumerate(declarations):
+        if declaration.kind != "inductive":
+            continue
+        constructors: list[DeclarationNode] = []
+        for candidate in declarations[index + 1 :]:
+            if candidate.kind == "constructor":
+                constructors.append(candidate)
+                continue
+            break
+        specs[declaration.name] = lower_recursive_spec(solution, declaration, constructors)
+    return specs
+
+
+def lower_recursive_spec(solution: ModuleType, inductive: DeclarationNode, constructors: list[DeclarationNode]):
+    recursive_type_spec = solution_attr(solution, "RecursiveTypeSpec")
+    constructor_spec = solution_attr(solution, "ConstructorSpec")
+    if recursive_type_spec is None or constructor_spec is None:
+        return None
+
+    lowered_constructors = []
+    for constructor in constructors:
+        lowered_type = lower_type(solution, constructor.ty)
+        lowered_constructors.append(constructor_spec(constructor.name, constructor_arg_types(solution, lowered_type)))
+    return recursive_type_spec(inductive.name, lower_type(solution, inductive.ty), tuple(lowered_constructors))
+
+
+def constructor_arg_types(solution: ModuleType, ty: Any) -> tuple[Any, ...]:
+    args: list[Any] = []
+    while isinstance(ty, pi_ctor(solution)):
+        args.append(ty.domain)
+        ty = ty.body
+    return tuple(args)
+
+
+def solution_attr(solution: ModuleType, name: str):
+    if hasattr(solution, name):
+        return getattr(solution, name)
+    if hasattr(solution, "p2") and hasattr(solution.p2, name):
+        return getattr(solution.p2, name)
+    return None
+
+
+def lower_declaration(solution: ModuleType, declaration: DeclarationNode, recursive_spec: object | None = None) -> ParsedDeclaration:
     if declaration.kind in {"constant", "inductive", "constructor"}:
         return ParsedDeclaration(
             declaration.name,
             const_for_name(solution, declaration.name),
             lower_type(solution, declaration.ty),
+            declaration.kind,
+            opaque=True,
+            recursive_spec=recursive_spec,
         )
     if declaration.kind == "def":
+        opaque = declaration.proof is None
         return ParsedDeclaration(
             declaration.name,
-            lower_expr(solution, declaration.proof) if declaration.proof is not None else const_for_name(solution, declaration.name),
+            const_for_name(solution, declaration.name) if opaque else lower_expr(solution, declaration.proof),
             lower_type(solution, declaration.ty),
+            declaration.kind,
+            opaque=opaque,
         )
     if declaration.kind == "theorem":
         expected = lower_type(solution, declaration.ty)
@@ -354,6 +409,7 @@ def lower_declaration(solution: ModuleType, declaration: DeclarationNode) -> Par
             declaration.name,
             lower_proof(solution, declaration.name, declaration.proof, expected),
             expected,
+            declaration.kind,
         )
     raise ParseError(f"unsupported declaration kind: {declaration.kind}")
 

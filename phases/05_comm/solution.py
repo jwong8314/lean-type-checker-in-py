@@ -243,6 +243,11 @@ def add_case() -> tuple[p2.Expr, p2.Expr]:
     return add, add_type()
 
 
+def after_register_declaration(tc: TypeChecker, declaration) -> None:
+    if declaration.name == "add":
+        tc.add_reducer("add", p3.nat_add_reducer)
+
+
 def my_add_zero_type() -> p2.Expr:
     a = p2.Var("a")
     return p2.Pi("a", MyNat, p3.Eq(MyNat, p2.apps(add, a, zero), a))
