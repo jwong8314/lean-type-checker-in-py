@@ -2,6 +2,9 @@
 
 Goal: build the smallest useful checker.
 
+If you are implementing this chapter yourself, start from
+[template.py](template.py). The completed reference is [solution.py](solution.py).
+
 In this chapter, propositions are just types and proofs are terms:
 
 ```text
