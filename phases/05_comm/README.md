@@ -10,7 +10,9 @@ MyNat          : Type
 my_add_zero    : forall a : MyNat, a + zero = a
 my_add_succ    : forall a b : MyNat, a + succ b = succ (a + b)
 succ_add       : forall a b : MyNat, succ a + b = succ (a + b)
-succ_add_succ  : forall a b : MyNat, succ a + succ b = succ (succ (a + b))
+succ_add_succ  : forall a b : MyNat,
+                 succ a + b = succ (a + b) ->
+                 succ a + succ b = succ (succ (a + b))
 zero_add       : forall a : MyNat, zero + a = a
 add_comm       : forall a b : MyNat, a + b = b + a
 add_assoc      : forall a b c : MyNat, (a + b) + c = a + (b + c)

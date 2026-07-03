@@ -19,16 +19,19 @@ theorem my_add_zero (a : MyNat) : a + zero = a := by
 theorem my_add_succ (a b : MyNat) : a + succ b = succ (a + b) := by
   rfl
 
+theorem succ_add_succ
+    (a b : MyNat)
+    (ih : succ a + b = succ (a + b)) :
+    succ a + succ b = succ (succ (a + b)) := by
+  rw [my_add_succ]
+  rw [ih]
+
 theorem succ_add (a b : MyNat) : succ a + b = succ (a + b) := by
   induction b with
   | zero =>
       rw [my_add_zero, my_add_zero]
   | succ n ih =>
-      rw [my_add_succ, ih, my_add_succ]
-
-theorem succ_add_succ (a b : MyNat) : succ a + succ b = succ (succ (a + b)) := by
-  rw [my_add_succ]
-  rw [succ_add]
+      exact succ_add_succ a n ih
 
 theorem zero_add (a : MyNat) : zero + a = a := by
   induction a with

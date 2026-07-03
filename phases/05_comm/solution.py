@@ -291,7 +291,7 @@ def succ_add_case() -> tuple[p2.Expr, p2.Expr]:
 
     motive = p3.Lam("b", MyNat, motive_at(p2.Var("b")))
     base = p3.Refl(MyNat, p2.apps(succ, a))
-    step = p3.Lam("n", MyNat, p3.Lam("ih", motive_at(n), p3.Rw(ih)))
+    step = p3.Lam("n", MyNat, p3.Lam("ih", motive_at(n), theorem_app(succ_add_succ, a, n, ih)))
     body = p4.Induction("MyNat", motive, (base, step), p2.Var("b"))
     return p3.Lam("a", MyNat, p3.Lam("b", MyNat, body)), succ_add_type()
 
@@ -299,15 +299,18 @@ def succ_add_case() -> tuple[p2.Expr, p2.Expr]:
 def succ_add_succ_type() -> p2.Expr:
     a = p2.Var("a")
     b = p2.Var("b")
+    ih = p3.Eq(MyNat, p2.apps(add, p2.apps(succ, a), b), p2.apps(succ, p2.apps(add, a, b)))
     lhs = p2.apps(add, p2.apps(succ, a), p2.apps(succ, b))
     rhs = p2.apps(succ, p2.apps(succ, p2.apps(add, a, b)))
-    return p2.Pi("a", MyNat, p2.Pi("b", MyNat, p3.Eq(MyNat, lhs, rhs)))
+    return p2.Pi("a", MyNat, p2.Pi("b", MyNat, p2.Pi("ih", ih, p3.Eq(MyNat, lhs, rhs))))
 
 
 def succ_add_succ_case() -> tuple[p2.Expr, p2.Expr]:
     a = p2.Var("a")
     b = p2.Var("b")
-    proof = p3.Lam("a", MyNat, p3.Lam("b", MyNat, p3.Rw(theorem_app(succ_add, a, b))))
+    ih = p2.Var("ih")
+    ih_type = p3.Eq(MyNat, p2.apps(add, p2.apps(succ, a), b), p2.apps(succ, p2.apps(add, a, b)))
+    proof = p3.Lam("a", MyNat, p3.Lam("b", MyNat, p3.Lam("ih", ih_type, p3.Rw(ih))))
     return proof, succ_add_succ_type()
 
 
