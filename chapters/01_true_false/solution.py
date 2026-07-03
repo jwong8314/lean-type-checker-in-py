@@ -11,8 +11,13 @@ from .expressions import Const, Expr, FalseProp, Prop, Sort, TrueProp, Type, tru
 class TypeChecker(AbstractTypeChecker):
     def __init__(self) -> None:
         super().__init__()
+        self.definitions: dict[str, Expr] = {}
         self.add("True", Prop)
         self.add("True.intro", Const("True"))
+
+    def add_definition(self, name: str, ty: Expr, value: Expr) -> None:
+        self.add(name, ty)
+        self.definitions[name] = value
 
     def infer(self, expr: Expr, ctx: dict[str, Expr] | None = None) -> Expr:
         match expr:
@@ -25,10 +30,21 @@ class TypeChecker(AbstractTypeChecker):
             case _:
                 raise TypeError(f"cannot infer {expr!r}")
 
+    def check(self, expr: Expr, expected: Expr, ctx: dict[str, Expr] | None = None) -> None:
+        actual = self.unfold_defs(self.infer(expr, ctx))
+        expected = self.unfold_defs(expected)
+        if not self.defeq(actual, expected):
+            raise TypeError(f"expected {self.pretty(expected)}, got {self.pretty(actual)}")
+
     def defeq(self, left: Expr, right: Expr) -> bool:
-        if left == right:
-            return True
-        return {left, right} == {Const("True"), Const("TrueProp")}
+        return left == right
+
+    def unfold_defs(self, expr: Expr) -> Expr:
+        match expr:
+            case Const(name) if name in self.definitions:
+                return self.unfold_defs(self.definitions[name])
+            case _:
+                return expr
 
     def pretty(self, expr: Expr) -> str:
         match expr:

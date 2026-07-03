@@ -74,9 +74,22 @@ actual:   Const("True")
 expected: Const("TrueProp")
 ```
 
-In this chapter, `TrueProp` was defined as `True`, so the checker treats
-`Const("True")` and `Const("TrueProp")` as definitionally equal. That is why the
-theorem is accepted.
+In this chapter, `TrueProp` was defined as `True`, so the checker records a
+transparent definition:
+
+```text
+TrueProp := True
+```
+
+Before the final equality comparison, it unfolds `Const("TrueProp")` to
+`Const("True")`. Then `defeq` itself is just exact structural equality:
+
+```text
+defeq(Const("True"), Const("True")) = true
+defeq(Const("True"), Const("TrueProp")) = false
+```
+
+That is why the theorem is accepted without adding a special equality shortcut.
 
 ## 2. Expression Trees
 
@@ -106,7 +119,7 @@ expected type:
 expr     = Const("True.intro")
 infer    = Const("True")
 expected = Const("TrueProp")
-result   = accepted, because TrueProp is definitionally equal to True
+result   = accepted, because TrueProp unfolds to True before exact comparison
 ```
 
 A bad declaration is one where the proof term cannot have the expected type:
@@ -211,7 +224,7 @@ we are checking that:
 True.intro is a proof of TrueProp
 ```
 
-and that succeeds because `TrueProp` is just the name introduced by:
+and that succeeds because `TrueProp` is a transparent definition introduced by:
 
 ```lean
 def TrueProp : Prop := True
@@ -318,20 +331,25 @@ The final shape is:
 ```text
 check(expr, expected):
   actual = infer(expr)
-  accept only if actual is definitionally equal to expected
+  unfold transparent definitions in actual and expected
+  accept only if the unfolded expressions are exactly equal
 ```
 
-Most of Chapter 1 uses exact equality. The one tutorial-specific exception is:
+`defeq` itself should stay boring:
 
 ```text
-Const("True") == Const("TrueProp")
+defeq(left, right):
+  return left == right
 ```
 
-because `script.lean` defined:
+The definition table does the Lean-style transparency work instead:
 
 ```lean
 def TrueProp : Prop := True
 ```
+
+so `check` compares `Const("True")` with `Const("True")`, not with
+`Const("TrueProp")`.
 
 That is enough to validate:
 

@@ -49,6 +49,9 @@ def register_declaration(solution: ModuleType, checker, declaration: object) -> 
     if recursive_spec is not None and hasattr(checker, "add_recursive_type"):
         if declaration.name not in checker.env:
             checker.add_recursive_type(recursive_spec)
+    elif declaration.kind == "def" and not declaration.opaque and hasattr(checker, "add_definition"):
+        if declaration.name not in checker.env:
+            checker.add_definition(declaration.name, declaration.expected, declaration.expr)
     elif declaration.name not in checker.env:
         checker.add(declaration.name, declaration.expected)
 
