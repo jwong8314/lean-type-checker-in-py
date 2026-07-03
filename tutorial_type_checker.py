@@ -5,6 +5,7 @@ Usage:
     python3 -B tutorial_type_checker.py all
     python3 -B tutorial_type_checker.py 01
     python3 -B tutorial_type_checker.py 03_rewrites
+    python3 -B tutorial_type_checker.py 05_comm
 
 The scripts are intentionally tiny Lean-like files containing `constant`,
 `inductive`, `def`, and `theorem` declarations.  This runner does not parse full
@@ -28,6 +29,7 @@ PHASE_DIRS = {
     "02": ROOT / "phases/02_recursive_nat",
     "03": ROOT / "phases/03_rewrites",
     "04": ROOT / "phases/04_induction",
+    "05": ROOT / "phases/05_comm",
 }
 
 

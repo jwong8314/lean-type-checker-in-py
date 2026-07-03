@@ -30,6 +30,7 @@ python3 -B tutorial_type_checker.py 01
 python3 -B tutorial_type_checker.py 02
 python3 -B tutorial_type_checker.py 03
 python3 -B tutorial_type_checker.py 04
+python3 -B tutorial_type_checker.py 05
 ```
 
 The runner imports `infer` and `check` from the selected phase’s `solution.py`,
@@ -49,6 +50,12 @@ Phase 4 adds induction over recursive type declarations and proves:
 
 ```text
 forall a b : Nat, succ a + b = succ (a + b)
+```
+
+Phase 5 uses `succ_add` to prove the commutativity layer:
+
+```text
+zero_add, succ_add_succ, add_assoc, add_comm
 ```
 
 ## Current Limitation
