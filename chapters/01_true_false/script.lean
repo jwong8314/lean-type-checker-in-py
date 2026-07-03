@@ -1,9 +1,5 @@
-/-
-Chapter 1 script: propositions are types, proofs are terms.
--/
+def TrueProp : Prop := True
 
-constant True : Prop
-constant False : Prop
-constant true_intro : True
+theorem true_intro : TrueProp := True.intro
 
-theorem true_is_true : True := true_intro
+theorem true_is_true : TrueProp := true_intro

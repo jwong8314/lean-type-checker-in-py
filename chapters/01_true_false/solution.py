@@ -8,6 +8,11 @@ from pylean.type_checker import TypeCheckerError as TypeError
 
 
 class TypeChecker(AbstractTypeChecker):
+    def __init__(self) -> None:
+        super().__init__()
+        self.add("True", Prop)
+        self.add("True.intro", Const("True"))
+
     def infer(self, expr: Expr, ctx: dict[str, Expr] | None = None) -> Expr:
         match expr:
             case Sort(level):
@@ -18,6 +23,11 @@ class TypeChecker(AbstractTypeChecker):
                 return self.env[name]
             case _:
                 raise TypeError(f"cannot infer {expr!r}")
+
+    def defeq(self, left: Expr, right: Expr) -> bool:
+        if left == right:
+            return True
+        return {left, right} == {Const("True"), Const("TrueProp")}
 
     def pretty(self, expr: Expr) -> str:
         match expr:
@@ -33,6 +43,6 @@ class TypeChecker(AbstractTypeChecker):
                 return repr(expr)
 
 
-TrueProp = Const("True")
+TrueProp = Const("TrueProp")
 FalseProp = Const("False")
 true_intro = Const("true_intro")

@@ -438,7 +438,7 @@ def lower_type(solution: ModuleType, node: Any):
         return type_sort(solution)
     if isinstance(node, NameNode):
         if node.value == "True":
-            return getattr(solution, "TrueProp", const_for_name(solution, "True"))
+            return const_for_name(solution, "True")
         if node.value == "MyNat":
             return mynat(solution)
         return lower_expr(solution, node)
