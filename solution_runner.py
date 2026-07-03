@@ -11,18 +11,12 @@ from __future__ import annotations
 
 from pathlib import Path
 from types import ModuleType
-from typing import Iterable
 
 
-def setting_default_types(chapter_dir: Path, solution: ModuleType, declarations: Iterable[object]):
+def setting_default_types(chapter_dir: Path, solution: ModuleType):
     checker = solution.TypeChecker()
-    if needs_previous_chapter_context(declarations):
-        seed_previous_chapter_scripts(chapter_dir, solution, checker)
+    seed_previous_chapter_scripts(chapter_dir, solution, checker)
     return checker
-
-
-def needs_previous_chapter_context(declarations: Iterable[object]) -> bool:
-    return not any(getattr(declaration, "kind", None) == "inductive" for declaration in declarations)
 
 
 def seed_previous_chapter_scripts(chapter_dir: Path, solution: ModuleType, checker) -> None:
@@ -31,7 +25,7 @@ def seed_previous_chapter_scripts(chapter_dir: Path, solution: ModuleType, check
     current_number = chapter_number(chapter_dir)
     for prior_dir in sorted(chapter_dir.parent.iterdir()):
         prior_number = chapter_number(prior_dir)
-        if prior_number is None or prior_number < 2 or prior_number >= current_number:
+        if prior_number is None or current_number is None or prior_number >= current_number:
             continue
         for declaration in lean_parser.parse_script(prior_dir, solution):
             register_declaration(solution, checker, declaration)

@@ -54,7 +54,7 @@ def load_solution(chapter_dir: Path) -> ModuleType:
 def run_chapter(chapter_dir: Path) -> None:
     solution = load_solution(chapter_dir)
     declarations = lean_parser.parse_script(chapter_dir, solution)
-    checker = solution_runner.setting_default_types(chapter_dir, solution, declarations)
+    checker = solution_runner.setting_default_types(chapter_dir, solution)
 
     print(chapter_dir.relative_to(ROOT))
     for declaration in declarations:

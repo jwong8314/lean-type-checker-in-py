@@ -438,7 +438,7 @@ def lower_type(solution: ModuleType, node: Any):
         return type_sort(solution)
     if isinstance(node, NameNode):
         if node.value == "True":
-            return solution.TrueProp
+            return getattr(solution, "TrueProp", const_for_name(solution, "True"))
         if node.value == "MyNat":
             return mynat(solution)
         return lower_expr(solution, node)
@@ -474,7 +474,7 @@ def lower_proof(solution: ModuleType, checker, name: str, node: Any, expected):
     if isinstance(node, LambdaNode):
         return lower_lambda(solution, checker, node, expected)
     if isinstance(node, NameNode) and node.value == "true_intro":
-        return solution.true_intro
+        return getattr(solution, "true_intro", const_for_name(solution, "true_intro"))
     if isinstance(node, NameNode) and node.value == "rfl":
         return refl_for(solution, expected)
     if isinstance(node, RflNode):

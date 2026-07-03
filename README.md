@@ -20,7 +20,9 @@ chapters/           # tutorial chapters with script.lean + solution.py
 
 [solution_runner.py](solution_runner.py) owns the generic declaration-checking
 loop. It registers parsed `script.lean` declarations as they are checked instead
-of carrying a separate table of theorem names.
+of carrying a separate table of theorem names. Before checking a chapter, it
+imports every earlier chapter by parsing and registering those earlier
+`script.lean` declarations.
 
 [pylean/type_checker.py](pylean/type_checker.py) defines the shared abstract
 `TypeChecker`: it owns the environment and generic `check`. Each chapter

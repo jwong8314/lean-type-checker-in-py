@@ -14,7 +14,7 @@ def print_script_ast(script_path: Path) -> None:
     chapter_dir = script_path.resolve().parent
     solution = load_solution(chapter_dir)
     declarations = lean_parser.parse_script(chapter_dir, solution)
-    checker = solution_runner.setting_default_types(chapter_dir, solution, declarations)
+    checker = solution_runner.setting_default_types(chapter_dir, solution)
 
     for declaration in declarations:
         if solution_runner.should_register_before_check(declaration):
