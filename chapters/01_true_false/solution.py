@@ -20,7 +20,17 @@ class TypeChecker(AbstractTypeChecker):
                 raise TypeError(f"cannot infer {expr!r}")
 
     def pretty(self, expr: Expr) -> str:
-        return pretty(expr)
+        match expr:
+            case Sort(0):
+                return "Prop"
+            case Sort(1):
+                return "Type"
+            case Sort(level):
+                return f"Type {level - 1}"
+            case Const(name):
+                return name
+            case _:
+                return repr(expr)
 
 
 TrueProp = Const("True")
