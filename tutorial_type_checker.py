@@ -53,7 +53,7 @@ def load_solution(phase_dir: Path) -> ModuleType:
 
 def run_phase(phase_dir: Path) -> None:
     solution = load_solution(phase_dir)
-    declarations = lean_parser.parse_script(phase_dir.name, phase_dir, solution)
+    declarations = lean_parser.parse_script(phase_dir, solution)
     pretty = solution.pretty
     checker = solution_runner.setting_default_types(phase_dir.name, solution)
     register_before = solution_runner.register_before_check(phase_dir.name)

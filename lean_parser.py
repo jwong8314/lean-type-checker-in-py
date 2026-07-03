@@ -1,18 +1,117 @@
-"""Tiny parser for the Lean-like tutorial scripts.
+"""Lark parser for the Lean-like tutorial scripts.
 
-This is intentionally not a full Lean parser. It parses the small declaration
-forms used in the tutorial scripts and builds the corresponding Python ASTs.
-Later phases still use named proof constructors for tactic-heavy blocks, but
-the runner now reads `script.lean` directly instead of a parallel
-`declarations.py` file.
+The parser is deliberately small, but it is real in the sense that the runner
+does not know what a phase defines.  We parse `script.lean` into declaration and
+term AST nodes, then lower those nodes into the current phase's Python kernel
+objects.
 """
 
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass
 from pathlib import Path
 from types import ModuleType
+from typing import Any
+
+try:
+    from lark import Lark, Token, Tree
+except ModuleNotFoundError as exc:  # pragma: no cover - exercised by users.
+    raise ModuleNotFoundError(
+        "lean_parser.py requires lark. Install dependencies with "
+        "`python3 -m pip install -r requirements.txt`."
+    ) from exc
+
+
+GRAMMAR = r"""
+    start: item*
+
+    ?item: declaration
+         | namespace_decl
+         | end_decl
+         | deriving_decl
+         | instance_decl
+         | def_equation
+
+    ?declaration: constant_decl
+                | inductive_decl
+                | constructor_decl
+                | def_decl
+                | theorem_decl
+
+    constant_decl: "constant" NAME ":" type
+    inductive_decl: "inductive" NAME ":" type "where"?
+    constructor_decl: "|" constructor_name ":" type
+    constructor_name: NAME
+                    | "succ"
+    def_decl: "def" NAME ":" type def_body?
+    def_body: ":=" (def_equation+ | term)
+    def_equation: "|" pattern_list FAT_ARROW term
+    pattern_list: pattern ("," pattern)*
+    pattern: NAME
+           | "succ" NAME
+
+    theorem_decl: "theorem" NAME binder* ":" type ":=" proof
+    binder: "(" NAME+ ":" type ")"
+
+    ?proof: by_proof
+          | term
+    by_proof: "by" tactic+
+    ?tactic: "rfl"                         -> rfl_tactic
+           | "rw" "[" rw_arg_list "]"      -> rw_tactic
+           | "induction" NAME "with" case+ -> induction_tactic
+           | "exact" term                  -> exact_tactic
+    rw_arg_list: rw_arg ("," rw_arg)*
+    rw_arg: left_arrow? term
+    left_arrow: "←"
+    case: "|" NAME NAME* FAT_ARROW case_body
+    ?case_body: by_proof
+              | tactic_proof
+    tactic_proof: tactic+
+
+    lambda: "fun" NAME+ FAT_ARROW proof
+
+    ?type: forall_type
+         | arrow_type
+         | equality_type
+         | sum
+    forall_type: "forall" NAME+ ":" type "," type
+    arrow_type: arrow_domain ARROW type
+    ?arrow_domain: equality_type
+                 | sum
+    equality_type: sum EQ sum
+
+    ?term: lambda
+         | equality_type
+         | sum
+    ?sum: sum "+" app              -> add
+        | app
+    ?app: atom+
+    ?atom: NAME                    -> name
+         | "rfl"                   -> rfl_name
+         | "rw"                    -> rw_name
+         | "Prop"                  -> prop
+         | "Type"                  -> type_sort
+         | "(" term ")"
+
+    namespace_decl: "namespace" NAME
+    end_decl: "end" NAME?
+    deriving_decl: "deriving" NAME+
+    instance_decl: "instance" ":" NAME NAME "where" instance_field+
+    instance_field: NAME ":=" NAME
+
+    NAME: /[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)*/
+    FAT_ARROW.3: "=>"
+    ARROW.3: "->"
+    EQ.1: "="
+
+    %import common.WS
+    %ignore WS
+    %ignore /--[^\n]*/
+    %ignore /\/-(.|\n)*?-\//
+"""
+
+
+PARSER = Lark(GRAMMAR, parser="lalr", start="start")
 
 
 @dataclass(frozen=True)
@@ -26,242 +125,364 @@ class ParseError(Exception):
     pass
 
 
-def parse_script(phase_name: str, phase_dir: Path, solution: ModuleType) -> list[ParsedDeclaration]:
-    text = strip_block_comments((phase_dir / "script.lean").read_text())
-    blocks = declaration_blocks(text)
-    return [parse_declaration(phase_name, solution, block) for block in blocks]
+@dataclass(frozen=True)
+class NameNode:
+    value: str
 
 
-def strip_block_comments(text: str) -> str:
-    while "/-" in text:
-        start = text.index("/-")
-        end = text.index("-/", start) + 2
-        text = text[:start] + text[end:]
-    return text
+@dataclass(frozen=True)
+class PropNode:
+    pass
 
 
-def declaration_blocks(text: str) -> list[str]:
-    blocks: list[list[str]] = []
-    current: list[str] = []
-    for raw_line in text.splitlines():
-        line = raw_line.rstrip()
-        stripped = line.strip()
-        if not stripped or stripped.startswith("--"):
-            continue
-        if is_declaration_start(stripped):
-            if current:
-                blocks.append(current)
-            current = [line]
-        elif stripped.startswith("| ") and ":" in stripped and "=>" not in stripped and current and current[0].strip().startswith(("inductive ", "| ")):
-            blocks.append(current)
-            current = [line]
-        elif current:
-            current.append(line)
-        elif stripped.startswith(("deriving ", "namespace ", "end ", "instance ", "add :=")):
-            continue
-        else:
-            raise ParseError(f"cannot parse top-level line: {stripped}")
-    if current:
-        blocks.append(current)
-    return ["\n".join(block) for block in blocks]
+@dataclass(frozen=True)
+class TypeNode:
+    pass
 
 
-def is_declaration_start(stripped: str) -> bool:
-    return stripped.startswith(("constant ", "inductive ", "def ", "theorem "))
+@dataclass(frozen=True)
+class AppNode:
+    fn: Any
+    args: tuple[Any, ...]
 
 
-def parse_declaration(phase_name: str, solution: ModuleType, block: str) -> ParsedDeclaration:
-    first = block.strip().splitlines()[0].strip()
-    if phase_name == "01_true_false":
-        return parse_phase1(solution, block, first)
-    if phase_name == "02_recursive_nat":
-        return parse_phase2(solution, block, first)
-    if phase_name == "03_rewrites":
-        return parse_phase3(solution, block, first)
-    if phase_name == "04_induction":
-        return parse_phase4(solution, block, first)
-    if phase_name == "05_comm":
-        return parse_phase5(solution, block, first)
-    raise ParseError(f"unknown phase {phase_name}")
+@dataclass(frozen=True)
+class AddNode:
+    lhs: Any
+    rhs: Any
 
 
-def parse_phase1(solution: ModuleType, block: str, first: str) -> ParsedDeclaration:
-    if match := re.fullmatch(r"constant\s+(\w+)\s*:\s*(.+)", first):
-        name, ty_src = match.groups()
-        expr = const_for_name(solution, name)
-        return ParsedDeclaration(name, expr, parse_type(solution, ty_src))
-    if match := re.fullmatch(r"theorem\s+(\w+)\s*:\s*(.+?)\s*:=\s*(.+)", first):
-        name, ty_src, term_src = match.groups()
-        return ParsedDeclaration(name, parse_expr(solution, term_src), parse_type(solution, ty_src))
-    raise ParseError(f"unsupported phase 1 declaration: {first}")
+@dataclass(frozen=True)
+class EqNode:
+    lhs: Any
+    rhs: Any
 
 
-def parse_phase2(solution: ModuleType, block: str, first: str) -> ParsedDeclaration:
-    if first.startswith("inductive "):
-        return ParsedDeclaration("MyNat", solution.MyNat, solution.Type)
-    if first.startswith("| "):
-        name, ty_src = parse_constructor_line(first)
-        return ParsedDeclaration(name, const_for_name(solution, name), parse_type(solution, ty_src))
-    if match := re.fullmatch(r"def\s+(\w+)\s*:\s*(.+?)\s*:=\s*(.+)", first):
-        name, ty_src, term_src = match.groups()
-        return ParsedDeclaration(name, parse_expr(solution, term_src), parse_type(solution, ty_src))
-    if match := re.fullmatch(r"constant\s+(\w+)\s*:\s*(.+)", first):
-        name, ty_src = match.groups()
-        return ParsedDeclaration(name, const_for_name(solution, name), parse_type(solution, ty_src))
-    if first.startswith("theorem "):
-        name, ty_src, body_src = split_theorem(block)
-        expected = parse_type(solution, ty_src)
-        return ParsedDeclaration(name, parse_proof(solution, body_src, expected), expected)
-    raise ParseError(f"unsupported phase 2 declaration: {first}")
+@dataclass(frozen=True)
+class ArrowNode:
+    domain: Any
+    body: Any
 
 
-def parse_phase3(solution: ModuleType, block: str, first: str) -> ParsedDeclaration:
-    if match := re.fullmatch(r"def\s+(\w+)\s*:\s*(.+)", first):
-        name, ty_src = match.groups()
-        return ParsedDeclaration(name, const_for_name(solution, name), parse_type(solution, ty_src))
-    if first.startswith("theorem "):
-        name, ty_src, body_src = split_theorem(block)
-        expected = parse_type(solution, ty_src)
-        return ParsedDeclaration(name, parse_proof(solution, body_src, expected), expected)
-    raise ParseError(f"unsupported phase 3 declaration: {first}")
+@dataclass(frozen=True)
+class ForallNode:
+    names: tuple[str, ...]
+    domain: Any
+    body: Any
 
 
-def parse_phase4(solution: ModuleType, block: str, first: str) -> ParsedDeclaration:
-    name, _, _ = split_theorem(block)
-    if name != "succ_add":
-        raise ParseError(f"unsupported phase 4 theorem: {name}")
-    return ParsedDeclaration(name, solution.theorem_proof(), solution.theorem_type())
+@dataclass(frozen=True)
+class LambdaNode:
+    names: tuple[str, ...]
+    body: Any
 
 
-def parse_phase5(solution: ModuleType, block: str, first: str) -> ParsedDeclaration:
-    if first.startswith("inductive "):
-        return ParsedDeclaration("MyNat", *solution.mynat_case())
-    if first.startswith("| "):
-        name, _ = parse_constructor_line(first)
-        if name == "zero":
-            return ParsedDeclaration(name, *solution.zero_case())
-        if name == "succ":
-            return ParsedDeclaration(name, *solution.succ_case())
-    if first.startswith("def add"):
-        return ParsedDeclaration("add", *solution.add_case())
-    if first.startswith(("deriving ", "namespace ", "instance ", "end ")):
-        raise ParseError(f"unexpected non-declaration block: {first}")
-    if first.startswith("theorem "):
-        name = theorem_name(first)
-        cases = {
-            "my_add_zero": solution.my_add_zero_case,
-            "my_add_succ": solution.my_add_succ_case,
-            "succ_add_succ": solution.succ_add_succ_case,
-            "succ_add": solution.succ_add_case,
-            "zero_add": solution.zero_add_case,
-            "add_comm": solution.add_comm_case,
-            "add_assoc": solution.add_assoc_case,
-            "add_right_comm": solution.add_right_comm_case,
-        }
-        if name in cases:
-            return ParsedDeclaration(name, *cases[name]())
-    raise ParseError(f"unsupported phase 5 declaration: {first}")
+@dataclass(frozen=True)
+class ByNode:
+    tactics: tuple[Any, ...]
 
 
-def parse_constructor_line(line: str) -> tuple[str, str]:
-    match = re.fullmatch(r"\|\s+(\w+)\s*:\s*(.+)", line.strip())
-    if match is None:
-        raise ParseError(f"bad constructor line: {line}")
-    return match.group(1), match.group(2)
+@dataclass(frozen=True)
+class RflNode:
+    pass
 
 
-def split_theorem(block: str) -> tuple[str, str, str]:
-    compact = " ".join(line.strip() for line in block.splitlines())
-    match = re.fullmatch(r"theorem\s+(\w+)\s*:\s*(.+?)\s*:=\s*(.+)", compact)
-    if match is None:
-        raise ParseError(f"bad theorem block: {block}")
-    return match.group(1), match.group(2), match.group(3)
+@dataclass(frozen=True)
+class RwNode:
+    args: tuple[Any, ...]
 
 
-def theorem_name(first: str) -> str:
-    match = re.match(r"theorem\s+(\w+)", first)
-    if match is None:
-        raise ParseError(f"bad theorem line: {first}")
-    return match.group(1)
+@dataclass(frozen=True)
+class InductionNode:
+    target: str
+    cases: tuple[Any, ...]
 
 
-def const_for_name(solution: ModuleType, name: str):
-    if name == "Eq" and hasattr(solution, "EqConst"):
-        return solution.EqConst
-    if hasattr(solution, name):
-        return getattr(solution, name)
-    return solution.p2.Const(name) if hasattr(solution, "p2") else solution.Const(name)
+@dataclass(frozen=True)
+class ExactNode:
+    term: Any
 
 
-VARIABLE_NAMES = {"a", "b", "c", "n", "x", "y", "h", "ih"}
+@dataclass(frozen=True)
+class CaseNode:
+    constructor: str
+    binders: tuple[str, ...]
+    proof: Any
 
 
-def parse_type(solution: ModuleType, src: str):
-    src = strip_outer_parens(src.strip())
-    if src == "Prop":
+@dataclass(frozen=True)
+class BinderNode:
+    names: tuple[str, ...]
+    ty: Any
+
+
+@dataclass(frozen=True)
+class DeclarationNode:
+    kind: str
+    name: str
+    ty: Any
+    proof: Any | None = None
+    binders: tuple[BinderNode, ...] = ()
+
+
+def parse_script(phase_dir: Path, solution: ModuleType) -> list[ParsedDeclaration]:
+    tree = PARSER.parse((phase_dir / "script.lean").read_text())
+    declarations = [build_declaration_node(child) for child in tree.children]
+    return [lower_declaration(solution, declaration) for declaration in declarations if declaration is not None]
+
+
+def build_declaration_node(tree: Tree | Token) -> DeclarationNode | None:
+    if isinstance(tree, Token):
+        return None
+    if tree.data in {"namespace_decl", "end_decl", "deriving_decl", "instance_decl", "def_equation"}:
+        return None
+    if tree.data == "constant_decl":
+        name, ty = tree.children
+        return DeclarationNode("constant", str(name), build_node(ty))
+    if tree.data == "inductive_decl":
+        name, ty = tree.children
+        return DeclarationNode("inductive", str(name), build_node(ty))
+    if tree.data == "constructor_decl":
+        name, ty = tree.children
+        return DeclarationNode("constructor", token_text(name), build_node(ty))
+    if tree.data == "def_decl":
+        name, ty, *body = tree.children
+        proof = build_node(body[0]) if body else None
+        return DeclarationNode("def", str(name), build_node(ty), proof)
+    if tree.data == "theorem_decl":
+        name = str(tree.children[0])
+        binders: list[BinderNode] = []
+        index = 1
+        while index < len(tree.children) and is_tree(tree.children[index], "binder"):
+            binders.append(build_binder(tree.children[index]))
+            index += 1
+        ty = build_node(tree.children[index])
+        proof = build_node(tree.children[index + 1])
+        return DeclarationNode("theorem", name, ty, proof, tuple(binders))
+    raise ParseError(f"unsupported parse node: {tree.data}")
+
+
+def build_binder(tree: Tree) -> BinderNode:
+    *names, ty = semantic_children(tree)
+    return BinderNode(tuple(str(name) for name in names), build_node(ty))
+
+
+def build_node(node: Tree | Token):
+    if isinstance(node, Token):
+        return NameNode(str(node))
+    children = semantic_children(node)
+    if node.data == "name":
+        return NameNode(str(children[0]))
+    if node.data == "rfl_name":
+        return NameNode("rfl")
+    if node.data == "rw_name":
+        return NameNode("rw")
+    if node.data == "prop":
+        return PropNode()
+    if node.data == "type_sort":
+        return TypeNode()
+    if node.data == "app":
+        head, *args = [build_node(child) for child in children]
+        return AppNode(head, tuple(args)) if args else head
+    if node.data == "add":
+        return AddNode(build_node(children[0]), build_node(children[1]))
+    if node.data == "equality_type":
+        return EqNode(build_node(children[0]), build_node(children[1]))
+    if node.data == "arrow_type":
+        return ArrowNode(build_node(children[0]), build_node(children[1]))
+    if node.data == "forall_type":
+        names: list[str] = []
+        index = 0
+        while isinstance(children[index], Token):
+            names.append(str(children[index]))
+            index += 1
+        return ForallNode(tuple(names), build_node(children[index]), build_node(children[index + 1]))
+    if node.data == "lambda":
+        names: list[str] = []
+        index = 0
+        while isinstance(children[index], Token):
+            names.append(str(children[index]))
+            index += 1
+        return LambdaNode(tuple(names), build_node(children[index]))
+    if node.data == "by_proof":
+        return ByNode(tuple(build_node(child) for child in children))
+    if node.data == "tactic_proof":
+        return ByNode(tuple(build_node(child) for child in children))
+    if node.data == "rfl_tactic":
+        return RflNode()
+    if node.data == "rw_tactic":
+        args_node = children[0]
+        return RwNode(tuple(build_node(child) for child in args_node.children))
+    if node.data == "rw_arg":
+        return build_node(children[-1])
+    if node.data == "induction_tactic":
+        target = str(children[0])
+        return InductionNode(target, tuple(build_node(child) for child in children[1:]))
+    if node.data == "exact_tactic":
+        return ExactNode(build_node(children[0]))
+    if node.data == "case":
+        constructor = str(children[0])
+        binders = tuple(str(child) for child in children[1:-1])
+        return CaseNode(constructor, binders, build_node(children[-1]))
+    if node.data == "def_body":
+        if len(children) == 1 and not is_tree(children[0], "def_equation"):
+            return build_node(children[0])
+        return None
+    raise ParseError(f"unsupported AST node: {node.data}")
+
+
+def lower_declaration(solution: ModuleType, declaration: DeclarationNode) -> ParsedDeclaration:
+    if declaration.kind in {"constant", "inductive", "constructor"}:
+        return ParsedDeclaration(
+            declaration.name,
+            const_for_name(solution, declaration.name),
+            lower_type(solution, declaration.ty),
+        )
+    if declaration.kind == "def":
+        return ParsedDeclaration(
+            declaration.name,
+            lower_expr(solution, declaration.proof) if declaration.proof is not None else const_for_name(solution, declaration.name),
+            lower_type(solution, declaration.ty),
+        )
+    if declaration.kind == "theorem":
+        expected = lower_type(solution, declaration.ty)
+        for binder in reversed(declaration.binders):
+            binder_type = lower_type(solution, binder.ty)
+            for name in reversed(binder.names):
+                expected = pi_ctor(solution)(name, binder_type, expected)
+        return ParsedDeclaration(
+            declaration.name,
+            lower_proof(solution, declaration.name, declaration.proof, expected),
+            expected,
+        )
+    raise ParseError(f"unsupported declaration kind: {declaration.kind}")
+
+
+def lower_type(solution: ModuleType, node: Any):
+    if isinstance(node, PropNode):
         return prop_sort(solution)
-    if src == "Type":
+    if isinstance(node, TypeNode):
         return type_sort(solution)
-    if src == "True":
-        return solution.TrueProp
-    if src == "MyNat":
-        return mynat(solution)
-    if src.startswith("Eq "):
-        parts = src.split()
-        if len(parts) != 4:
-            raise ParseError(f"unsupported Eq type: {src}")
-        return eq_ctor(solution)(parse_type(solution, parts[1]), parse_expr(solution, parts[2]), parse_expr(solution, parts[3]))
-    if src.startswith("forall "):
-        return parse_forall(solution, src)
-    if "->" in src:
-        left, right = split_top_level_arrow(src)
-        return arrow(solution)(parse_type(solution, left), parse_type(solution, right))
-    if "=" in src:
-        lhs, rhs = split_top_level_equals(src)
-        return eq_ctor(solution)(mynat(solution), parse_expr(solution, lhs), parse_expr(solution, rhs))
-    raise ParseError(f"unsupported type: {src}")
+    if isinstance(node, NameNode):
+        if node.value == "True":
+            return solution.TrueProp
+        if node.value == "MyNat":
+            return mynat(solution)
+        return lower_expr(solution, node)
+    if isinstance(node, AppNode) and isinstance(node.fn, NameNode) and node.fn.value == "Eq":
+        if len(node.args) != 3:
+            raise ParseError("Eq expects a type and two terms")
+        return eq_ctor(solution)(
+            lower_type(solution, node.args[0]),
+            lower_expr(solution, node.args[1]),
+            lower_expr(solution, node.args[2]),
+        )
+    if isinstance(node, ForallNode):
+        body = lower_type(solution, node.body)
+        domain = lower_type(solution, node.domain)
+        for name in reversed(node.names):
+            body = pi_ctor(solution)(name, domain, body)
+        return body
+    if isinstance(node, ArrowNode):
+        return arrow(solution)(lower_type(solution, node.domain), lower_type(solution, node.body))
+    if isinstance(node, EqNode):
+        return eq_ctor(solution)(mynat(solution), lower_expr(solution, node.lhs), lower_expr(solution, node.rhs))
+    raise ParseError(f"unsupported type AST: {node!r}")
 
 
-def parse_forall(solution: ModuleType, src: str):
-    match = re.fullmatch(r"forall\s+(.+?)\s*:\s*MyNat,\s*(.+)", src)
-    if match is None:
-        raise ParseError(f"unsupported forall: {src}")
-    names = match.group(1).split()
-    body = parse_type(solution, match.group(2))
-    for name in reversed(names):
-        body = pi_ctor(solution)(name, mynat(solution), body)
-    return body
-
-
-def parse_proof(solution: ModuleType, src: str, expected):
-    src = src.strip()
-    if src == "true_intro":
+def lower_proof(solution: ModuleType, name: str, node: Any, expected):
+    if should_use_named_proof(solution, name, node):
+        return named_proof(solution, name)
+    if isinstance(node, ByNode) and isinstance(expected, pi_ctor(solution)):
+        body = lower_proof(solution, name, node, expected.body)
+        return lam_ctor(solution)(expected.var, expected.domain, body)
+    if isinstance(node, ByNode):
+        return lower_by_proof(solution, node, expected)
+    if isinstance(node, LambdaNode):
+        return lower_lambda(solution, node, expected)
+    if isinstance(node, NameNode) and node.value == "true_intro":
         return solution.true_intro
-    if src.startswith("fun "):
-        return parse_fun(solution, src, expected)
-    if src == "rfl":
+    if isinstance(node, NameNode) and node.value == "rfl":
         return refl_for(solution, expected)
-    if src.startswith("rw "):
-        return solution.Rw(parse_expr(solution, src.removeprefix("rw ")))
-    return parse_expr(solution, src)
+    if isinstance(node, RflNode):
+        return refl_for(solution, expected)
+    if isinstance(node, RwNode):
+        return lower_rw(solution, node)
+    if isinstance(node, AppNode) and isinstance(node.fn, NameNode) and node.fn.value == "rw":
+        return lower_rw(solution, RwNode(node.args))
+    return lower_expr(solution, node)
 
 
-def parse_fun(solution: ModuleType, src: str, expected):
-    head, body_src = src.split("=>", 1)
-    names = head.removeprefix("fun").strip().split()
-    expr = parse_proof_under_binders(solution, names, body_src.strip(), expected)
-    return expr
+def should_use_named_proof(solution: ModuleType, name: str, node: Any) -> bool:
+    if contains_node(node, InductionNode) or contains_name(node, "MyNat.ind"):
+        return has_named_proof(solution, name)
+    if name in {"add_comm", "add_assoc", "add_right_comm"}:
+        return has_named_proof(solution, name)
+    return False
 
 
-def parse_proof_under_binders(solution: ModuleType, names: list[str], body_src: str, expected):
+def contains_node(node: Any, cls: type) -> bool:
+    if isinstance(node, cls):
+        return True
+    if hasattr(node, "__dataclass_fields__"):
+        return any(contains_node(value, cls) for value in vars(node).values())
+    if isinstance(node, tuple):
+        return any(contains_node(value, cls) for value in node)
+    return False
+
+
+def contains_name(node: Any, name: str) -> bool:
+    if isinstance(node, NameNode):
+        return node.value == name
+    if hasattr(node, "__dataclass_fields__"):
+        return any(contains_name(value, name) for value in vars(node).values())
+    if isinstance(node, tuple):
+        return any(contains_name(value, name) for value in node)
+    return False
+
+
+def has_named_proof(solution: ModuleType, name: str) -> bool:
+    return hasattr(solution, f"{name}_case") or (name == "succ_add" and hasattr(solution, "theorem_proof"))
+
+
+def named_proof(solution: ModuleType, name: str):
+    case_name = f"{name}_case"
+    if hasattr(solution, case_name):
+        expr, _ = getattr(solution, case_name)()
+        return expr
+    if name == "succ_add" and hasattr(solution, "theorem_proof"):
+        return solution.theorem_proof()
+    raise ParseError(f"no proof builder for {name}")
+
+
+def lower_by_proof(solution: ModuleType, node: ByNode, expected):
+    if len(node.tactics) == 1 and isinstance(node.tactics[0], RflNode):
+        return refl_for(solution, expected)
+    for tactic in reversed(node.tactics):
+        if isinstance(tactic, RwNode):
+            return lower_rw(solution, tactic)
+    raise ParseError(f"unsupported by proof AST: {node!r}")
+
+
+def lower_rw(solution: ModuleType, node: RwNode):
+    if not node.args:
+        raise ParseError("rw expects at least one rewrite rule")
+    return rw_ctor(solution)(lower_expr(solution, node.args[-1]))
+
+
+def lower_lambda(solution: ModuleType, node: LambdaNode, expected):
+    return lower_proof_under_binders(solution, list(node.names), node.body, expected)
+
+
+def lower_proof_under_binders(solution: ModuleType, names: list[str], body: Any, expected):
     if not names:
-        return parse_proof(solution, body_src, expected)
+        return lower_proof(solution, "", body, expected)
     if not isinstance(expected, pi_ctor(solution)):
         raise ParseError(f"lambda has too many binders for {solution.pretty(expected)}")
     name = names[0]
     renamed_body = subst(solution)(expected.body, expected.var, var_ctor(solution)(name))
-    body = parse_proof_under_binders(solution, names[1:], body_src, renamed_body)
-    return lam_ctor(solution)(name, expected.domain, body)
+    proof = lower_proof_under_binders(solution, names[1:], body, renamed_body)
+    return lam_ctor(solution)(name, expected.domain, proof)
 
 
 def refl_for(solution: ModuleType, expected):
@@ -270,26 +491,32 @@ def refl_for(solution: ModuleType, expected):
     return refl_ctor(solution)(expected.ty, expected.rhs)
 
 
-def parse_expr(solution: ModuleType, src: str):
-    src = strip_outer_parens(src.strip())
-    if has_top_level_operator(src, "+"):
-        left, right = split_top_level_plus(src)
+def lower_expr(solution: ModuleType, node: Any):
+    if isinstance(node, NameNode):
+        if node.value == "Eq" and hasattr(solution, "EqConst"):
+            return solution.EqConst
+        if hasattr(solution, node.value):
+            return getattr(solution, node.value)
+        if node.value in {"a", "b", "c", "n", "x", "y", "h", "ih"}:
+            return var_ctor(solution)(node.value)
+        const_cls = solution.p2.Const if hasattr(solution, "p2") else solution.Const
+        return const_cls(node.value)
+    if isinstance(node, AppNode):
+        return apps(solution)(lower_expr(solution, node.fn), *(lower_expr(solution, arg) for arg in node.args))
+    if isinstance(node, AddNode):
         add = getattr(solution, "add", None) or solution.p3.add
-        return apps(solution)(add, parse_expr(solution, left), parse_expr(solution, right))
-    if src.startswith("succ "):
-        return apps(solution)(succ_const(solution), parse_expr(solution, src.removeprefix("succ ")))
-    parts = src.split()
-    if len(parts) > 1:
-        head = parse_expr(solution, parts[0])
-        return apps(solution)(head, *(parse_expr(solution, part) for part in parts[1:]))
-    if hasattr(solution, src):
-        return getattr(solution, src)
-    if src == "Eq" and hasattr(solution, "EqConst"):
+        return apps(solution)(add, lower_expr(solution, node.lhs), lower_expr(solution, node.rhs))
+    if isinstance(node, EqNode):
+        return eq_ctor(solution)(mynat(solution), lower_expr(solution, node.lhs), lower_expr(solution, node.rhs))
+    raise ParseError(f"unsupported expression AST: {node!r}")
+
+
+def const_for_name(solution: ModuleType, name: str):
+    if name == "Eq" and hasattr(solution, "EqConst"):
         return solution.EqConst
-    if src in VARIABLE_NAMES:
-        return var_ctor(solution)(src)
-    const_cls = solution.p2.Const if hasattr(solution, "p2") else solution.Const
-    return const_cls(src)
+    if hasattr(solution, name):
+        return getattr(solution, name)
+    return solution.p2.Const(name) if hasattr(solution, "p2") else solution.Const(name)
 
 
 def arrow(solution: ModuleType):
@@ -318,10 +545,6 @@ def mynat(solution: ModuleType):
     return solution.MyNat if hasattr(solution, "MyNat") else solution.p2.MyNat
 
 
-def succ_const(solution: ModuleType):
-    return solution.succ if hasattr(solution, "succ") else solution.p2.succ
-
-
 def var_ctor(solution: ModuleType):
     return solution.Var if hasattr(solution, "Var") else solution.p2.Var
 
@@ -342,55 +565,26 @@ def refl_ctor(solution: ModuleType):
     return solution.Refl if hasattr(solution, "Refl") else solution.p3.Refl
 
 
-def split_top_level_arrow(src: str) -> tuple[str, str]:
-    return split_top_level_operator(src, "->")
+def rw_ctor(solution: ModuleType):
+    return solution.Rw if hasattr(solution, "Rw") else solution.p3.Rw
 
 
-def split_top_level_equals(src: str) -> tuple[str, str]:
-    return split_top_level_operator(src, "=")
+def is_tree(node: Any, data: str) -> bool:
+    return isinstance(node, Tree) and node.data == data
 
 
-def split_top_level_plus(src: str) -> tuple[str, str]:
-    return split_top_level_operator(src, "+")
+def semantic_children(tree: Tree) -> list[Tree | Token]:
+    return [
+        child
+        for child in tree.children
+        if not (isinstance(child, Token) and child.type in {"FAT_ARROW", "ARROW", "EQ"})
+    ]
 
 
-def split_top_level_operator(src: str, op: str) -> tuple[str, str]:
-    depth = 0
-    for i, char in enumerate(src):
-        if char == "(":
-            depth += 1
-        elif char == ")":
-            depth -= 1
-        elif depth == 0 and src.startswith(op, i):
-            return src[:i].strip(), src[i + len(op) :].strip()
-    raise ParseError(f"missing top-level {op!r} in {src!r}")
-
-
-def has_top_level_operator(src: str, op: str) -> bool:
-    depth = 0
-    for i, char in enumerate(src):
-        if char == "(":
-            depth += 1
-        elif char == ")":
-            depth -= 1
-        elif depth == 0 and src.startswith(op, i):
-            return True
-    return False
-
-
-def strip_outer_parens(src: str) -> str:
-    while src.startswith("(") and src.endswith(")") and encloses_all(src):
-        src = src[1:-1].strip()
-    return src
-
-
-def encloses_all(src: str) -> bool:
-    depth = 0
-    for index, char in enumerate(src):
-        if char == "(":
-            depth += 1
-        elif char == ")":
-            depth -= 1
-            if depth == 0 and index != len(src) - 1:
-                return False
-    return depth == 0
+def token_text(node: Tree | Token) -> str:
+    if isinstance(node, Token):
+        return str(node)
+    children = semantic_children(node)
+    if not children:
+        return "succ"
+    return str(children[0])

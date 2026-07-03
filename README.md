@@ -24,6 +24,12 @@ same top-level `Expr`.
 
 ## Run
 
+Install the parser dependency:
+
+```bash
+python3 -m pip install -r requirements.txt
+```
+
 Run every phase:
 
 ```bash
