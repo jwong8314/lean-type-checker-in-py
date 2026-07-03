@@ -81,11 +81,15 @@ def declaration_names(phase_dir: Path) -> list[str]:
             names.append(stripped.split()[1])
         elif stripped.startswith("inductive "):
             names.append(stripped.split()[1])
-        elif stripped.startswith("| "):
+        elif stripped.startswith("| ") and ":" in stripped and "=>" not in stripped:
             names.append(stripped.split()[1])
+        elif stripped.startswith("| "):
+            continue
         elif stripped.startswith("def ") or stripped.startswith("theorem "):
             names.append(stripped.split()[1])
-        elif stripped.startswith(("fun ", "Nat.ind", "rfl", "(")):
+        elif stripped.startswith(("fun ", "Nat.ind", "rfl", "rw ", "induction ", "(")):
+            continue
+        elif stripped.startswith(("deriving ", "namespace ", "end ", "instance ", "add :=", "|")):
             continue
         elif stripped in {"where"}:
             continue

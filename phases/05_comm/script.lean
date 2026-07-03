@@ -1,32 +1,57 @@
-/-
-Phase 5 script: reuse Phase 4's succ_add theorem to build the usual
-commutativity layer for our recursive Nat.
--/
+inductive MyNat : Type where
+  | zero : MyNat
+  | succ : MyNat -> MyNat
+deriving Repr
 
-theorem zero_add : forall a : Nat, zero + a = a :=
-  fun a =>
-    Nat.ind
-      (fun a => zero + a = a)
+namespace MyNat
+
+def add : MyNat -> MyNat -> MyNat
+  | a, zero => a
+  | a, succ b => succ (add a b)
+
+-- This instance lets Lean interpret `a + b` as `MyNat.add a b`.
+instance : Add MyNat where
+  add := add
+
+theorem my_add_zero (a : MyNat) : a + zero = a := by
+  rfl
+
+theorem my_add_succ (a b : MyNat) : a + succ b = succ (a + b) := by
+  rfl
+
+theorem succ_add (a b : MyNat) : succ a + b = succ (a + b) := by
+  induction b with
+  | zero =>
+      rw [my_add_zero, my_add_zero]
+  | succ n ih =>
+      rw [my_add_succ, ih, my_add_succ]
+
+theorem succ_add_succ (a b : MyNat) : succ a + succ b = succ (succ (a + b)) := by
+  rw [my_add_succ]
+  rw [succ_add]
+
+theorem zero_add (a : MyNat) : zero + a = a := by
+  induction a with
+  | zero =>
       rfl
-      (fun n ih => rw ih)
-      a
+  | succ n ih =>
+      rw [my_add_succ, ih]
 
-theorem succ_add_succ : forall a b : Nat, succ a + succ b = succ (succ (a + b)) :=
-  fun a b =>
-    rw (succ_add a b)
+theorem add_comm (a b : MyNat) : a + b = b + a := by
+  induction b with
+  | zero =>
+      rw [my_add_zero, zero_add]
+  | succ n ih =>
+      rw [my_add_succ, succ_add, ih]
 
-theorem add_assoc : forall a b c : Nat, (a + b) + c = a + (b + c) :=
-  fun a b c =>
-    Nat.ind
-      (fun c => (a + b) + c = a + (b + c))
-      rfl
-      (fun n ih => rw ih)
-      c
+theorem add_assoc (a b c : MyNat) : a + b + c = a + (b + c) := by
+  induction c with
+  | zero =>
+      rw [my_add_zero, my_add_zero]
+  | succ n ih =>
+      rw [my_add_succ, my_add_succ, ih, my_add_succ]
 
-theorem add_comm : forall a b : Nat, a + b = b + a :=
-  fun a b =>
-    Nat.ind
-      (fun b => a + b = b + a)
-      (symm (zero_add a))
-      (fun n ih => trans (rw ih) (symm (succ_add n a)))
-      b
+theorem add_right_comm (a b c : MyNat) : a + b + c = a + c + b := by
+  rw [add_assoc, add_comm b c, ← add_assoc]
+
+end MyNat
