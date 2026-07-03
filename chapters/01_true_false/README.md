@@ -178,6 +178,8 @@ not responsible for tokenizing or parsing the original source text.
 
 The same example also shows why Chapter 1 needs `Sort`.
 
+Think of `Sort` as a type system over types themselves.
+
 Lean has a hierarchy of universes. This tutorial starts with only the first two:
 
 ```text
