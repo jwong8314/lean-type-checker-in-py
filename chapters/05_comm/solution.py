@@ -1,4 +1,4 @@
-"""Phase 5 solution: check the raw MyNat commutativity script."""
+"""Chapter 5 solution: check the raw MyNat commutativity script."""
 
 from __future__ import annotations
 
@@ -7,12 +7,12 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-from expressions import Type
+from pylean.expressions import Type
 
 
-def load_phase4():
+def load_chapter4():
     path = Path(__file__).resolve().parents[1] / "04_induction/solution.py"
-    spec = importlib.util.spec_from_file_location("phase4_solution", path)
+    spec = importlib.util.spec_from_file_location("chapter4_solution", path)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
@@ -20,7 +20,7 @@ def load_phase4():
     return module
 
 
-p4 = load_phase4()
+p4 = load_chapter4()
 p3 = p4.p3
 p2 = p4.p2
 
@@ -71,7 +71,7 @@ class TypeChecker(p4.TypeChecker):
                     raise p2.TypeError("rw expected an equality proof")
                 self.check(proof_ty.ty, Type, ctx)
                 if not self.defeq(proof_ty.ty, MyNat):
-                    raise p2.TypeError("phase 5 rw only handles MyNat equalities")
+                    raise p2.TypeError("chapter 5 rw only handles MyNat equalities")
                 return p3.Eq(MyNat, p2.apps(succ, proof_ty.lhs), p2.apps(succ, proof_ty.rhs))
             case EqSymm(proof):
                 proof_ty = self.whnf(self.infer(proof, ctx))
@@ -179,7 +179,7 @@ def fresh_name(base: str, blocked: set[str]) -> str:
 
 
 def subst(expr: p2.Expr, var: str, replacement: p2.Expr) -> p2.Expr:
-    """Capture-avoiding substitution for the syntax used in this phase."""
+    """Capture-avoiding substitution for the syntax used in this chapter."""
 
     match expr:
         case p2.Sort() | p2.Const():

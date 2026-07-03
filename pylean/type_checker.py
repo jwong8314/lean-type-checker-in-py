@@ -1,11 +1,11 @@
-"""Shared abstract type checker used by every tutorial phase."""
+"""Shared abstract type checker used by every tutorial chapter."""
 
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Sequence
 
-from expressions import Expr
+from pylean.expressions import Expr
 
 
 class TypeCheckerError(Exception):
@@ -17,9 +17,9 @@ class TypeCheckerError(Exception):
 class TypeChecker(ABC):
     """Shared shell for every tutorial type checker.
 
-    Phase solutions inherit this class and customize `infer`. The base class
+    Chapter solutions inherit this class and customize `infer`. The base class
     only knows about global constants, generic checking, and definitional
-    equality; later phases add richer syntax and behavior.
+    equality; later chapters add richer syntax and behavior.
     """
 
     def __init__(self) -> None:
@@ -36,7 +36,7 @@ class TypeChecker(ABC):
     def infer(self, expr: Expr, ctx: dict[str, Expr] | None = None) -> Expr:
         """Infer the type of an expression.
 
-        Each phase implements this because each phase introduces new expression
+        Each chapter implements this because each chapter introduces new expression
         forms. The optional `ctx` stores local variables introduced by binders.
         """
 
@@ -68,8 +68,8 @@ class TypeChecker(ABC):
         """Elaborate a small tactic script into a proof term.
 
         Tactics are not kernel primitives: this helper belongs to the
-        tutorial runner/elaboration layer. Phase checkers override it as they
+        tutorial runner/elaboration layer. Chapter checkers override it as they
         learn the proof-term constructors that tactics should produce.
         """
 
-        raise TypeCheckerError("this phase does not support tactic execution")
+        raise TypeCheckerError("this chapter does not support tactic execution")

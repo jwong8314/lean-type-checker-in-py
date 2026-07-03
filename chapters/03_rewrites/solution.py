@@ -1,4 +1,4 @@
-"""Phase 3 solution: equality, rfl, computation, and a tiny rewrite."""
+"""Chapter 3 solution: equality, rfl, computation, and a tiny rewrite."""
 
 from __future__ import annotations
 
@@ -9,9 +9,9 @@ from pathlib import Path
 from typing import Callable
 
 
-def load_phase2():
+def load_chapter2():
     path = Path(__file__).resolve().parents[1] / "02_recursive_nat/solution.py"
-    spec = importlib.util.spec_from_file_location("phase2_solution", path)
+    spec = importlib.util.spec_from_file_location("chapter2_solution", path)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
@@ -19,7 +19,7 @@ def load_phase2():
     return module
 
 
-p2 = load_phase2()
+p2 = load_chapter2()
 
 
 @dataclass(frozen=True)

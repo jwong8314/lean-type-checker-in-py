@@ -1,8 +1,8 @@
-# Phase 3: Equality and Rewrites
+# Chapter 3: Equality and Rewrites
 
 Goal: build computation and rewriting one declaration at a time.
 
-Nothing in this phase should feel like a hidden compiler default. Phase 2
+Nothing in this chapter should feel like a hidden compiler default. Chapter 2
 introduced equality and `rfl`; this script introduces each new computation and
 rewrite ingredient before using it:
 
@@ -31,5 +31,5 @@ declarations have already been added.
 Try it:
 
 ```bash
-python3 -B tutorial_type_checker.py 03
+python3 -B -m pylean.tutorial_type_checker 03
 ```

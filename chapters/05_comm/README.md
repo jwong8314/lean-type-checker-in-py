@@ -1,9 +1,9 @@
-# Phase 5: Commutativity
+# Chapter 5: Commutativity
 
 Goal: accept the raw Lean script from `MyNatSuccAdd.lean` and check the same
 declarations against our Python kernel.
 
-This phase proves the same shape as `MyNatSuccAdd.lean`:
+This chapter proves the same shape as `MyNatSuccAdd.lean`:
 
 ```text
 MyNat          : Type
@@ -38,5 +38,5 @@ step: trans (rw ih) (symm (succ_add n a))
 Try it:
 
 ```bash
-python3 -B tutorial_type_checker.py 05
+python3 -B -m pylean.tutorial_type_checker 05
 ```

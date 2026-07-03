@@ -1,5 +1,5 @@
 /-
-Phase 4 script: induction over MyNat proves succ_add.
+Chapter 4 script: induction over MyNat proves succ_add.
 -/
 
 theorem succ_add : forall a b : MyNat, succ a + b = succ (a + b) :=

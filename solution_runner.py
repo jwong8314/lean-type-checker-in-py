@@ -1,10 +1,10 @@
 """Build checkers and register parsed script declarations.
 
 The runner should not know the names of tutorial theorems.  It gets declaration
-metadata from `lean_parser.py`, registers opaque constants before checking them,
-and registers checked declarations afterwards.  Phase solutions may still expose
-small hooks for kernel features that the script language cannot express yet,
-such as installing a Python reducer.
+metadata from `pylean.lean_parser`, registers opaque constants before checking
+them, and registers checked declarations afterwards. Chapter solutions may
+still expose small hooks for kernel features that the script language cannot
+express yet, such as installing a Python reducer.
 """
 
 from __future__ import annotations
@@ -14,32 +14,32 @@ from types import ModuleType
 from typing import Iterable
 
 
-def setting_default_types(phase_dir: Path, solution: ModuleType, declarations: Iterable[object]):
+def setting_default_types(chapter_dir: Path, solution: ModuleType, declarations: Iterable[object]):
     checker = solution.TypeChecker()
-    if needs_previous_phase_context(declarations):
-        seed_previous_phase_scripts(phase_dir, solution, checker)
+    if needs_previous_chapter_context(declarations):
+        seed_previous_chapter_scripts(chapter_dir, solution, checker)
     return checker
 
 
-def needs_previous_phase_context(declarations: Iterable[object]) -> bool:
+def needs_previous_chapter_context(declarations: Iterable[object]) -> bool:
     return not any(getattr(declaration, "kind", None) == "inductive" for declaration in declarations)
 
 
-def seed_previous_phase_scripts(phase_dir: Path, solution: ModuleType, checker) -> None:
-    import lean_parser
+def seed_previous_chapter_scripts(chapter_dir: Path, solution: ModuleType, checker) -> None:
+    from pylean import lean_parser
 
-    current_number = phase_number(phase_dir)
-    for prior_dir in sorted(phase_dir.parent.iterdir()):
-        prior_number = phase_number(prior_dir)
+    current_number = chapter_number(chapter_dir)
+    for prior_dir in sorted(chapter_dir.parent.iterdir()):
+        prior_number = chapter_number(prior_dir)
         if prior_number is None or prior_number < 2 or prior_number >= current_number:
             continue
         for declaration in lean_parser.parse_script(prior_dir, solution):
             register_declaration(solution, checker, declaration)
 
 
-def phase_number(phase_dir: Path) -> int | None:
+def chapter_number(chapter_dir: Path) -> int | None:
     try:
-        return int(phase_dir.name.split("_", 1)[0])
+        return int(chapter_dir.name.split("_", 1)[0])
     except ValueError:
         return None
 

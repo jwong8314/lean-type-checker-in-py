@@ -1,5 +1,5 @@
 /-
-Phase 1 script: propositions are types, proofs are terms.
+Chapter 1 script: propositions are types, proofs are terms.
 -/
 
 constant True : Prop

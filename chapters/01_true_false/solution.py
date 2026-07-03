@@ -1,10 +1,10 @@
-"""Phase 1 solution: propositions as types."""
+"""Chapter 1 solution: propositions as types."""
 
 from __future__ import annotations
 
-from expressions import Const, Expr, Prop, Sort, Type
-from type_checker import TypeChecker as AbstractTypeChecker
-from type_checker import TypeCheckerError as TypeError
+from pylean.expressions import Const, Expr, Prop, Sort, Type
+from pylean.type_checker import TypeChecker as AbstractTypeChecker
+from pylean.type_checker import TypeCheckerError as TypeError
 
 
 class TypeChecker(AbstractTypeChecker):

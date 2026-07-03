@@ -1,8 +1,8 @@
 """Lark parser for the Lean-like tutorial scripts.
 
 The parser is deliberately small, but it is real in the sense that the runner
-does not know what a phase defines.  We parse `script.lean` into declaration and
-term AST nodes, then lower those nodes into the current phase's Python kernel
+does not know what a chapter defines. We parse `script.lean` into declaration and
+term AST nodes, then lower those nodes into the current chapter's Python kernel
 objects.
 """
 

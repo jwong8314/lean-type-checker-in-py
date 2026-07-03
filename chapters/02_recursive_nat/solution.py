@@ -1,12 +1,12 @@
-"""Phase 2 solution: declare MyNat as a recursive type."""
+"""Chapter 2 solution: declare MyNat as a recursive type."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 
-from expressions import Const, Expr, Prop, Sort, Type
-from type_checker import TypeChecker as AbstractTypeChecker
-from type_checker import TypeCheckerError as TypeError
+from pylean.expressions import Const, Expr, Prop, Sort, Type
+from pylean.type_checker import TypeChecker as AbstractTypeChecker
+from pylean.type_checker import TypeCheckerError as TypeError
 
 
 @dataclass(frozen=True)

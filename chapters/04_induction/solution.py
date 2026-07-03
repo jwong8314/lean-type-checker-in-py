@@ -1,4 +1,4 @@
-"""Phase 4 solution: induction over the recursive MyNat declaration."""
+"""Chapter 4 solution: induction over the recursive MyNat declaration."""
 
 from __future__ import annotations
 
@@ -8,9 +8,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-def load_phase3():
+def load_chapter3():
     path = Path(__file__).resolve().parents[1] / "03_rewrites/solution.py"
-    spec = importlib.util.spec_from_file_location("phase3_solution", path)
+    spec = importlib.util.spec_from_file_location("chapter3_solution", path)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
@@ -18,7 +18,7 @@ def load_phase3():
     return module
 
 
-p3 = load_phase3()
+p3 = load_chapter3()
 p2 = p3.p2
 
 

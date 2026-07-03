@@ -1,4 +1,4 @@
-# Phase 2: Recursive Natural Numbers
+# Chapter 2: Recursive Natural Numbers
 
 Goal: add ordinary mathematical objects by declaring a recursive type.
 
@@ -21,5 +21,5 @@ New implementation pieces:
 Try it:
 
 ```bash
-python3 -B tutorial_type_checker.py 02
+python3 -B -m pylean.tutorial_type_checker 02
 ```

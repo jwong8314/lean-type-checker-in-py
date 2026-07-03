@@ -1,5 +1,5 @@
 /-
-Phase 2 script: MyNat is declared as a recursive type, not a built-in.
+Chapter 2 script: MyNat is declared as a recursive type, not a built-in.
 -/
 
 inductive MyNat : Type where

@@ -1,6 +1,6 @@
 /-
-Phase 3 script: build addition, computation, and rewrites piece by piece.
-Equality and rfl were introduced in Phase 2.
+Chapter 3 script: build addition, computation, and rewrites piece by piece.
+Equality and rfl were introduced in Chapter 2.
 -/
 
 /-

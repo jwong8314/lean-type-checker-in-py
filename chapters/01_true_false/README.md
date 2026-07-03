@@ -1,8 +1,8 @@
-# Phase 1: True and False
+# Chapter 1: True and False
 
 Goal: build the smallest useful checker.
 
-In this phase, propositions are just types and proofs are terms:
+In this chapter, propositions are just types and proofs are terms:
 
 ```text
 Prop : Type
@@ -22,7 +22,7 @@ The checks live in [script.lean](script.lean). Run them through the top-level
 runner:
 
 ```bash
-python3 -B tutorial_type_checker.py 01
+python3 -B -m pylean.tutorial_type_checker 01
 ```
 
 Expected result:

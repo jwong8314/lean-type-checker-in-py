@@ -1,4 +1,4 @@
-"""Shared expression nodes used by every tutorial phase."""
+"""Shared expression nodes used by every tutorial chapter."""
 
 from __future__ import annotations
 
