@@ -23,6 +23,15 @@ So `add : MyNat -> MyNat -> MyNat` is just the shape of the function. Its behavi
 introduced by `add_zero` and `add_succ`: those are the only equations the
 checker uses to reduce an addition expression.
 
+Tactics are not extra kernel rules. They are a small elaboration layer that
+massages a proof script into an ordinary proof object before the type checker
+sees it. In this chapter, `rfl` elaborates to a `Refl(...)` proof object, and
+`rw h` elaborates to an `Rw(h)` proof object. After that point, the checker is
+only checking expression trees, not tactic syntax.
+
+That mirrors the important Lean idea: tactics help build proof terms, but the
+kernel still only accepts or rejects the proof term that tactics produce.
+
 The runner processes [script.lean](script.lean) in declaration order.
 [solution_runner.py](../../solution_runner.py) updates the checker as each
 declaration is reached, so later theorems only type-check because earlier
