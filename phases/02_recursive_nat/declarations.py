@@ -16,4 +16,8 @@ def declaration(name: str):
         return solution.one, solution.MyNat
     if name == "two":
         return solution.two, solution.MyNat
+    if name == "Eq":
+        return solution.eq_decl_case()
+    if name == "rfl_nat":
+        return solution.rfl_nat_case()
     raise KeyError(name)

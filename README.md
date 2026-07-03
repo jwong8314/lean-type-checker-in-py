@@ -49,10 +49,10 @@ anything fails to type check, the runner crashes with an error.
 
 Phase 1 builds a tiny checker for `True`, `False`, and proof terms.
 
-Phase 2 adds `MyNat` as a recursive type declaration, not as a built-in.
+Phase 2 adds `MyNat` as a recursive type declaration, not as a built-in, and
+introduces `rfl` for reflexive equality proofs.
 
-Phase 3 adds equality, `rfl`, definitional computation for `add`, and a tiny
-rewrite principle.
+Phase 3 adds definitional computation for `add` and a tiny rewrite principle.
 
 Phase 4 adds induction over recursive type declarations and proves:
 

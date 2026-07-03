@@ -28,6 +28,26 @@ class Pi(Expr):
 
 
 @dataclass(frozen=True)
+class Lam(Expr):
+    var: str
+    domain: Expr
+    body: Expr
+
+
+@dataclass(frozen=True)
+class Eq(Expr):
+    ty: Expr
+    lhs: Expr
+    rhs: Expr
+
+
+@dataclass(frozen=True)
+class Refl(Expr):
+    ty: Expr
+    value: Expr
+
+
+@dataclass(frozen=True)
 class ConstructorSpec:
     name: str
     arg_types: tuple[Expr, ...]
@@ -70,6 +90,15 @@ def subst(expr: Expr, var: str, replacement: Expr) -> Expr:
             if bound == var:
                 return Pi(bound, domain, body)
             return Pi(bound, domain, subst(body, var, replacement))
+        case Lam(bound, domain, body):
+            domain = subst(domain, var, replacement)
+            if bound == var:
+                return Lam(bound, domain, body)
+            return Lam(bound, domain, subst(body, var, replacement))
+        case Eq(ty, lhs, rhs):
+            return Eq(subst(ty, var, replacement), subst(lhs, var, replacement), subst(rhs, var, replacement))
+        case Refl(ty, value):
+            return Refl(subst(ty, var, replacement), subst(value, var, replacement))
         case _:
             raise TypeError(f"cannot substitute in {expr!r}")
 
@@ -109,6 +138,19 @@ class TypeChecker(AbstractTypeChecker):
                 self.check(domain, Type, ctx)
                 self.check(body, Type, ctx | {var: domain})
                 return Type
+            case Lam(var, domain, body):
+                if not isinstance(self.infer(domain, ctx), Sort):
+                    raise TypeError(f"lambda domain is not a sort: {pretty(domain)}")
+                return Pi(var, domain, self.infer(body, ctx | {var: domain}))
+            case Eq(ty, lhs, rhs):
+                self.check(ty, Type, ctx)
+                self.check(lhs, ty, ctx)
+                self.check(rhs, ty, ctx)
+                return Prop
+            case Refl(ty, value):
+                self.check(ty, Type, ctx)
+                self.check(value, ty, ctx)
+                return Eq(ty, value, value)
             case _:
                 raise TypeError(f"cannot infer {expr!r}")
 
@@ -119,6 +161,7 @@ class TypeChecker(AbstractTypeChecker):
 MyNat = Const("MyNat")
 zero = Const("zero")
 succ = Const("succ")
+EqConst = Const("Eq")
 
 
 def mynat_type_spec() -> RecursiveTypeSpec:
@@ -147,6 +190,12 @@ def pretty(expr: Expr) -> str:
             return f"{atom(domain)} -> {pretty(body)}"
         case Pi(var, domain, body):
             return f"forall ({var} : {pretty(domain)}), {pretty(body)}"
+        case Lam(var, domain, body):
+            return f"fun ({var} : {pretty(domain)}) => {pretty(body)}"
+        case Eq(_, lhs, rhs):
+            return f"{pretty(lhs)} = {pretty(rhs)}"
+        case Refl(ty, value):
+            return f"rfl@{pretty(ty)} {atom(value)}"
         case _:
             return repr(expr)
 
@@ -168,3 +217,17 @@ def spine(expr: Expr) -> tuple[Expr, list[Expr]]:
 
 one = apps(succ, zero)
 two = apps(succ, one)
+
+
+def eq_decl_case() -> tuple[Expr, Expr]:
+    return EqConst, arrow(Type, arrow(MyNat, arrow(MyNat, Prop)))
+
+
+def rfl_nat_type() -> Expr:
+    x = Var("x")
+    return Pi("x", MyNat, Eq(MyNat, x, x))
+
+
+def rfl_nat_case() -> tuple[Expr, Expr]:
+    x = Var("x")
+    return Lam("x", MyNat, Refl(MyNat, x)), rfl_nat_type()

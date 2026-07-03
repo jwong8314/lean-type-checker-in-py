@@ -64,8 +64,10 @@ def phase5_checker(solution: ModuleType):
 
 
 def register_before_check(phase_name: str) -> set[str]:
+    if phase_name == "02_recursive_nat":
+        return {"Eq"}
     if phase_name == "03_rewrites":
-        return {"Eq", "rfl_nat", "add", "add_zero", "add_succ", "rw"}
+        return {"add", "add_zero", "add_succ", "rw"}
     if phase_name == "05_comm":
         return {"MyNat", "add"}
     return set()
@@ -75,7 +77,7 @@ def register_declaration(phase_name: str, solution: ModuleType, tc, name: str) -
     if phase_name == "01_true_false":
         return
     if phase_name == "02_recursive_nat":
-        return
+        register_phase2(solution, tc, name)
     if phase_name == "03_rewrites":
         register_phase3(solution, tc, name)
     elif phase_name == "04_induction":
@@ -83,6 +85,13 @@ def register_declaration(phase_name: str, solution: ModuleType, tc, name: str) -
             tc.add("succ_add", solution.theorem_type())
     elif phase_name == "05_comm":
         register_phase5(solution, tc, name)
+
+
+def register_phase2(solution: ModuleType, tc, name: str) -> None:
+    if name == "Eq":
+        tc.add("Eq", solution.eq_decl_case()[1])
+    elif name == "rfl_nat":
+        tc.add("rfl_nat", solution.rfl_nat_type())
 
 
 def register_phase3(solution: ModuleType, tc, name: str) -> None:

@@ -1,17 +1,16 @@
 # Phase 3: Equality and Rewrites
 
-Goal: build equality, computation, and rewriting one declaration at a time.
+Goal: build computation and rewriting one declaration at a time.
 
-Nothing in this phase should feel like a hidden compiler default. The script
-introduces each ingredient before using it:
+Nothing in this phase should feel like a hidden compiler default. Phase 2
+introduced equality and `rfl`; this script introduces each new computation and
+rewrite ingredient before using it:
 
-1. `Eq`, the equality proposition former.
-2. `rfl_nat`, reflexivity for natural-number equality.
-3. `add`, a natural-number function.
-4. `add_zero a : a + zero = a`, the first computation rule.
-5. `add_succ a b : a + succ b = succ (a + b)`, the second computation rule.
-6. `rw`, a tiny rewrite tactic/principle under `succ`.
-7. Theorems that use those pieces.
+1. `add`, a `MyNat` function.
+2. `add_zero a : a + zero = a`, the first computation rule.
+3. `add_succ a b : a + succ b = succ (a + b)`, the second computation rule.
+4. `rw`, a tiny rewrite tactic/principle under `succ`.
+5. Theorems that use those pieces.
 
 The computation rules are:
 

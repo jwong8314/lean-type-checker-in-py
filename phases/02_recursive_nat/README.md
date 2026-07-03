@@ -16,6 +16,7 @@ New implementation pieces:
 1. `Var`, `App`, and `Pi` expressions.
 2. Function application checking.
 3. A `RecursiveTypeSpec` that registers a type and derives constructor types.
+4. `Eq` and `Refl`, so `rfl` can prove `x = x`.
 
 Try it:
 

@@ -1,12 +1,7 @@
 /-
-Phase 3 script: build equality, addition, computation, and rewrites piece by
-piece. Nothing here is a compiler default.
+Phase 3 script: build addition, computation, and rewrites piece by piece.
+Equality and rfl were introduced in Phase 2.
 -/
-
-constant Eq : Type -> MyNat -> MyNat -> Prop
-
-theorem rfl_nat : forall x : MyNat, Eq MyNat x x :=
-  fun x => rfl
 
 /-
 At this point `add` is only given its type.  That is sensible because the next
