@@ -36,17 +36,3 @@ class TypeChecker(AbstractTypeChecker):
 TrueProp = Const("True")
 FalseProp = Const("False")
 true_intro = Const("true_intro")
-
-
-def pretty(expr: Expr) -> str:
-    match expr:
-        case Sort(0):
-            return "Prop"
-        case Sort(1):
-            return "Type"
-        case Sort(level):
-            return f"Type {level - 1}"
-        case Const(name):
-            return name
-        case _:
-            return repr(expr)

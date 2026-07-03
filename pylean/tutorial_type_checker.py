@@ -54,7 +54,6 @@ def load_solution(chapter_dir: Path) -> ModuleType:
 def run_chapter(chapter_dir: Path) -> None:
     solution = load_solution(chapter_dir)
     declarations = lean_parser.parse_script(chapter_dir, solution)
-    pretty = solution.pretty
     checker = solution_runner.setting_default_types(chapter_dir, solution, declarations)
 
     print(chapter_dir.relative_to(ROOT))
@@ -66,7 +65,7 @@ def run_chapter(chapter_dir: Path) -> None:
         checker.check(declaration.expr, declaration.expected)
         if not solution_runner.should_register_before_check(declaration):
             solution_runner.register_declaration(solution, checker, declaration)
-        print(f"  {declaration.name} : {pretty(declaration.expected)}")
+        print(f"  {declaration.name} : {checker.pretty(declaration.expected)}")
 
 
 def select_chapters(request: str) -> list[Path]:
