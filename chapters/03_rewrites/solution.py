@@ -61,6 +61,12 @@ class TypeChecker(p2.TypeChecker):
     def infer(self, expr: p2.Expr, ctx: dict[str, p2.Expr] | None = None) -> p2.Expr:
         ctx = {} if ctx is None else ctx
         match expr:
+            case p2.App(fn, arg):
+                fn_ty = self.infer(fn, ctx)
+                if not isinstance(fn_ty, p2.Pi):
+                    raise p2.TypeError(f"expected function type, got {pretty(fn_ty)}")
+                self.check(arg, fn_ty.domain, ctx)
+                return subst(fn_ty.body, fn_ty.var, arg)
             case Lam(var, domain, body):
                 if not isinstance(self.infer(domain, ctx), p2.Sort):
                     raise p2.TypeError(f"lambda domain is not a sort: {pretty(domain)}")
@@ -121,7 +127,7 @@ class TypeChecker(p2.TypeChecker):
                 return expr
 
     def defeq(self, left: p2.Expr, right: p2.Expr) -> bool:
-        return alpha_equal(self.normalize(left), self.normalize(right))
+        return left == right
 
     def try_reduce(self, expr: p2.Expr) -> p2.Expr | None:
         head, _ = p2.spine(expr)

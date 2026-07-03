@@ -1,8 +1,8 @@
-theorem my_add_zero (a : MyNat) : a + zero = a := by
-  rfl
+theorem my_add_zero : forall a : MyNat, a + zero = a :=
+  add_zero
 
-theorem my_add_succ (a b : MyNat) : a + succ b = succ (a + b) := by
-  rfl
+theorem my_add_succ : forall a b : MyNat, a + succ b = succ (a + b) :=
+  add_succ
 
 theorem succ_add_succ
     (a b : MyNat)

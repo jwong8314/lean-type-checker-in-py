@@ -487,6 +487,8 @@ def lower_proof(solution: ModuleType, checker, name: str, node: Any, expected):
 
 
 def should_use_named_proof(solution: ModuleType, name: str, node: Any) -> bool:
+    if has_named_proof(solution, name):
+        return True
     if contains_node(node, InductionNode) or contains_name(node, "MyNat.ind"):
         return has_named_proof(solution, name)
     if name in {"add_comm", "add_assoc", "add_right_comm"}:

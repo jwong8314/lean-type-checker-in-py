@@ -221,6 +221,26 @@ def after_register_declaration(tc: TypeChecker, declaration) -> None:
         tc.add_reducer("add", p3.nat_add_reducer)
 
 
+def succ_add_succ_type() -> p2.Expr:
+    a = p2.Var("a")
+    b = p2.Var("b")
+    ih_ty = p3.Eq(MyNat, p2.apps(add, p2.apps(succ, a), b), p2.apps(succ, p2.apps(add, a, b)))
+    goal = p3.Eq(
+        MyNat,
+        p2.apps(add, p2.apps(succ, a), p2.apps(succ, b)),
+        p2.apps(succ, p2.apps(succ, p2.apps(add, a, b))),
+    )
+    return p2.Pi("a", MyNat, p2.Pi("b", MyNat, p2.Pi("ih", ih_ty, goal)))
+
+
+def succ_add_succ_case() -> tuple[p2.Expr, p2.Expr]:
+    a = p2.Var("a")
+    b = p2.Var("b")
+    ih = p2.Var("ih")
+    proof = EqTrans(theorem_app(p2.Const("my_add_succ"), p2.apps(succ, a), b), p3.Rw(ih))
+    return p3.Lam("a", MyNat, p3.Lam("b", MyNat, p3.Lam("ih", succ_add_succ_type().body.body.domain, proof))), succ_add_succ_type()
+
+
 def succ_add_type() -> p2.Expr:
     a = p2.Var("a")
     b = p2.Var("b")
@@ -242,8 +262,22 @@ def succ_add_case() -> tuple[p2.Expr, p2.Expr]:
         )
 
     motive = p3.Lam("b", MyNat, motive_at(p2.Var("b")))
-    base = p3.Refl(MyNat, p2.apps(succ, a))
-    step = p3.Lam("n", MyNat, p3.Lam("ih", motive_at(n), theorem_app(succ_add_succ, a, n, ih)))
+    base = EqTrans(
+        theorem_app(p2.Const("my_add_zero"), p2.apps(succ, a)),
+        EqSymm(p3.Rw(theorem_app(p2.Const("my_add_zero"), a))),
+    )
+    step = p3.Lam(
+        "n",
+        MyNat,
+        p3.Lam(
+            "ih",
+            motive_at(n),
+            EqTrans(
+                theorem_app(succ_add_succ, a, n, ih),
+                EqSymm(p3.Rw(theorem_app(p2.Const("my_add_succ"), a, n))),
+            ),
+        ),
+    )
     body = p4.Induction("MyNat", motive, (base, step), p2.Var("b"))
     return p3.Lam("a", MyNat, p3.Lam("b", MyNat, body)), succ_add_type()
 
@@ -262,8 +296,16 @@ def zero_add_case() -> tuple[p2.Expr, p2.Expr]:
         return p3.Eq(MyNat, p2.apps(add, zero, x), x)
 
     motive = p3.Lam("a", MyNat, motive_at(p2.Var("a")))
-    base = p3.Refl(MyNat, zero)
-    step = p3.Lam("n", MyNat, p3.Lam("ih", motive_at(n), p3.Rw(ih)))
+    base = theorem_app(p2.Const("my_add_zero"), zero)
+    step = p3.Lam(
+        "n",
+        MyNat,
+        p3.Lam(
+            "ih",
+            motive_at(n),
+            EqTrans(theorem_app(p2.Const("my_add_succ"), zero, n), p3.Rw(ih)),
+        ),
+    )
     proof = p3.Lam("a", MyNat, p4.Induction("MyNat", motive, (base, step), a))
     return proof, zero_add_type()
 
@@ -284,10 +326,11 @@ def add_comm_case() -> tuple[p2.Expr, p2.Expr]:
         return p3.Eq(MyNat, p2.apps(add, a, x), p2.apps(add, x, a))
 
     motive = p3.Lam("b", MyNat, motive_at(p2.Var("b")))
-    base = EqSymm(theorem_app(zero_add, a))
-    step_left = p3.Rw(ih)
+    base = EqTrans(theorem_app(p2.Const("my_add_zero"), a), EqSymm(theorem_app(zero_add, a)))
+    step_left = theorem_app(p2.Const("my_add_succ"), a, n)
+    step_middle = p3.Rw(ih)
     step_right = EqSymm(theorem_app(succ_add, n, a))
-    step = p3.Lam("n", MyNat, p3.Lam("ih", motive_at(n), EqTrans(step_left, step_right)))
+    step = p3.Lam("n", MyNat, p3.Lam("ih", motive_at(n), EqTrans(EqTrans(step_left, step_middle), step_right)))
     body = p4.Induction("MyNat", motive, (base, step), b)
     proof = p3.Lam("a", MyNat, p3.Lam("b", MyNat, body))
     return proof, add_comm_type()
@@ -317,8 +360,27 @@ def add_assoc_case() -> tuple[p2.Expr, p2.Expr]:
         )
 
     motive = p3.Lam("c", MyNat, motive_at(p2.Var("c")))
-    base = p3.Refl(MyNat, p2.apps(add, a, b))
-    step = p3.Lam("n", MyNat, p3.Lam("ih", motive_at(n), p3.Rw(ih)))
+    base = EqTrans(
+        theorem_app(p2.Const("my_add_zero"), p2.apps(add, a, b)),
+        EqSymm(EqCongrAddLeft(a, theorem_app(p2.Const("my_add_zero"), b))),
+    )
+    step = p3.Lam(
+        "n",
+        MyNat,
+        p3.Lam(
+            "ih",
+            motive_at(n),
+            EqTrans(
+                EqTrans(theorem_app(p2.Const("my_add_succ"), p2.apps(add, a, b), n), p3.Rw(ih)),
+                EqSymm(
+                    EqTrans(
+                        EqCongrAddLeft(a, theorem_app(p2.Const("my_add_succ"), b, n)),
+                        theorem_app(p2.Const("my_add_succ"), a, p2.apps(add, b, n)),
+                    )
+                ),
+            ),
+        ),
+    )
     body = p4.Induction("MyNat", motive, (base, step), c)
     proof = p3.Lam("a", MyNat, p3.Lam("b", MyNat, p3.Lam("c", MyNat, body)))
     return proof, add_assoc_type()

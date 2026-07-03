@@ -30,6 +30,17 @@ class Induction(p2.Expr):
     target: p2.Expr
 
 
+@dataclass(frozen=True)
+class EqSymm(p2.Expr):
+    proof: p2.Expr
+
+
+@dataclass(frozen=True)
+class EqTrans(p2.Expr):
+    left: p2.Expr
+    right: p2.Expr
+
+
 class TypeChecker(p3.TypeChecker):
     def infer(self, expr: p2.Expr, ctx: dict[str, p2.Expr] | None = None) -> p2.Expr:
         ctx = {} if ctx is None else ctx
@@ -49,7 +60,24 @@ class TypeChecker(p3.TypeChecker):
                     self.check(case, induction_case_type(spec, constructor, motive), ctx)
 
                 self.check(target, p2.Const(type_name), ctx)
-                return p2.apps(motive, target)
+                return apply_motive(motive, target)
+            case EqSymm(proof):
+                proof_ty = self.whnf(self.infer(proof, ctx))
+                if not isinstance(proof_ty, p3.Eq):
+                    raise p2.TypeError("symm expected an equality proof")
+                return p3.Eq(proof_ty.ty, proof_ty.rhs, proof_ty.lhs)
+            case EqTrans(left, right):
+                left_ty = self.whnf(self.infer(left, ctx))
+                right_ty = self.whnf(self.infer(right, ctx))
+                if not isinstance(left_ty, p3.Eq) or not isinstance(right_ty, p3.Eq):
+                    raise p2.TypeError("trans expected equality proofs")
+                if not self.defeq(left_ty.ty, right_ty.ty):
+                    raise p2.TypeError("trans equalities are over different types")
+                if not self.defeq(left_ty.rhs, right_ty.lhs):
+                    raise p2.TypeError(
+                        f"trans midpoint mismatch: {p3.pretty(left_ty.rhs)} and {p3.pretty(right_ty.lhs)}"
+                    )
+                return p3.Eq(left_ty.ty, left_ty.lhs, right_ty.rhs)
             case _:
                 return super().infer(expr, ctx)
 
@@ -63,6 +91,10 @@ class TypeChecker(p3.TypeChecker):
                     tuple(self.normalize(case) for case in cases),
                     self.normalize(target),
                 )
+            case EqSymm(proof):
+                return EqSymm(self.normalize(proof))
+            case EqTrans(left, right):
+                return EqTrans(self.normalize(left), self.normalize(right))
             case _:
                 return super().normalize(expr)
 
@@ -79,19 +111,39 @@ def induction_case_type(spec: p2.RecursiveTypeSpec, constructor: p2.ConstructorS
     """
 
     type_const = p2.Const(spec.name)
-    arg_vars = tuple(p2.Var(f"{constructor.name}_arg{i}") for i, _ in enumerate(constructor.arg_types))
+    arg_vars = tuple(
+        p2.Var(induction_arg_name(constructor, index)) for index, _ in enumerate(constructor.arg_types)
+    )
     constructor_value = p2.apps(p2.Const(constructor.name), *arg_vars)
-    result: p2.Expr = p2.apps(motive, constructor_value)
+    result: p2.Expr = apply_motive(motive, constructor_value)
 
     binders: list[tuple[str, p2.Expr]] = []
     for arg_var, arg_type in zip(arg_vars, constructor.arg_types):
         binders.append((arg_var.name, arg_type))
         if p3.alpha_equal(arg_type, type_const):
-            binders.append((f"{arg_var.name}_ih", p2.apps(motive, arg_var)))
+            binders.append((induction_hypothesis_name(arg_var), apply_motive(motive, arg_var)))
 
     for name, ty in reversed(binders):
         result = p2.Pi(name, ty, result)
     return result
+
+
+def induction_arg_name(constructor: p2.ConstructorSpec, index: int) -> str:
+    if constructor.name == "succ" and len(constructor.arg_types) == 1:
+        return "n"
+    return f"{constructor.name}_arg{index}"
+
+
+def induction_hypothesis_name(arg_var: p2.Var) -> str:
+    if arg_var.name == "n":
+        return "ih"
+    return f"{arg_var.name}_ih"
+
+
+def apply_motive(motive: p2.Expr, value: p2.Expr) -> p2.Expr:
+    if isinstance(motive, p3.Lam):
+        return p3.subst(motive.body, motive.var, value)
+    return p2.apps(motive, value)
 
 
 def theorem_type() -> p2.Expr:
@@ -115,8 +167,25 @@ def theorem_proof() -> p2.Expr:
         )
 
     motive = p3.Lam("b", p2.MyNat, motive_at(p2.Var("b")))
-    base = p3.Refl(p2.MyNat, p2.apps(p2.succ, a))
-    step = p3.Lam("n", p2.MyNat, p3.Lam("ih", motive_at(n), p3.Rw(ih)))
+    base = EqTrans(
+        p2.apps(p2.Const("add_zero"), p2.apps(p2.succ, a)),
+        EqSymm(p3.Rw(p2.apps(p2.Const("add_zero"), a))),
+    )
+    step = p3.Lam(
+        "n",
+        p2.MyNat,
+        p3.Lam(
+            "ih",
+            motive_at(n),
+            EqTrans(
+                EqTrans(
+                    p2.apps(p2.Const("add_succ"), p2.apps(p2.succ, a), n),
+                    p3.Rw(ih),
+                ),
+                EqSymm(p3.Rw(p2.apps(p2.Const("add_succ"), a, n))),
+            ),
+        ),
+    )
     body = Induction("MyNat", motive, (base, step), p2.Var("b"))
     return p3.Lam("a", p2.MyNat, p3.Lam("b", p2.MyNat, body))
 
@@ -131,5 +200,9 @@ def pretty(expr: p2.Expr) -> str:
         case Induction(type_name, motive, cases, target):
             rendered_cases = " ".join(p3.atom(case) for case in cases)
             return f"induction[{type_name}] {p3.atom(motive)} {rendered_cases} {p3.atom(target)}"
+        case EqSymm(proof):
+            return f"symm ({pretty(proof)})"
+        case EqTrans(left, right):
+            return f"trans ({pretty(left)}) ({pretty(right)})"
         case _:
             return p3.pretty(expr)

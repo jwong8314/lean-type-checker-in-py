@@ -1,27 +1,32 @@
 # Chapter 3: Equality and Rewrites
 
-Goal: build computation and rewriting one declaration at a time.
+Goal: build equality and rewriting one declaration at a time.
 
 Nothing in this chapter should feel like a hidden compiler default. Chapter 2
 introduced equality and `rfl`; this script introduces each new computation and
 rewrite ingredient before using it:
 
 1. `add`, a `MyNat` function.
-2. `add_zero a : a + zero = a`, the first computation rule.
-3. `add_succ a b : a + succ b = succ (a + b)`, the second computation rule.
+2. `add_zero a : a + zero = a`, the first named equation for addition.
+3. `add_succ a b : a + succ b = succ (a + b)`, the second named equation.
 4. `rw`, a tiny rewrite tactic/principle under `succ`.
 5. Theorems that use those pieces.
 
-The computation rules are:
+The addition equations are:
 
 ```text
 add a zero     --> a
 add a (succ b) --> succ (add a b)
 ```
 
-So `add : MyNat -> MyNat -> MyNat` is just the shape of the function. Its behavior is
-introduced by `add_zero` and `add_succ`: those are the only equations the
-checker uses to reduce an addition expression.
+So `add : MyNat -> MyNat -> MyNat` is just the shape of the function. Its
+behavior is introduced by `add_zero` and `add_succ`: those are the only
+equations we are allowed to cite when we want to change an addition expression.
+
+The important strictness point is that the checker does not silently identify
+`a + zero` with `a`. Equality checking in this chapter is exact structural
+equality. If the goal contains `a + zero`, the proof must explicitly use
+`add_zero a`; `rfl` only works when both sides are already the same expression.
 
 Tactics are not extra kernel rules. They are a small elaboration layer that
 massages a proof script into an ordinary proof object before the type checker
