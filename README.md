@@ -54,6 +54,12 @@ python3 -B -m pylean.tutorial_type_checker 04
 python3 -B -m pylean.tutorial_type_checker 05
 ```
 
+Print the kernel expression trees produced from a chapter script:
+
+```bash
+python3 -B -m pylean.print_ast chapters/03_rewrites/script.lean
+```
+
 The runner builds the selected chapter's checker with `solution_runner.py`, then
 type-checks each declaration in that chapter's separate `script.lean` file. If
 anything fails to type check, the runner crashes with an error.
