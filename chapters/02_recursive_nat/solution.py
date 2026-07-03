@@ -2,72 +2,49 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+import importlib.util
+import sys
+from pathlib import Path
 
-from pylean.expressions import Const, Expr, Prop, Sort, Type
 from pylean.type_checker import TypeChecker as AbstractTypeChecker
 from pylean.type_checker import TypeCheckerError as TypeError
 
 
-@dataclass(frozen=True)
-class Var(Expr):
-    name: str
+def load_expressions():
+    path = Path(__file__).resolve().with_name("expressions.py")
+    spec = importlib.util.spec_from_file_location("chapter2_expressions", path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
 
 
-@dataclass(frozen=True)
-class App(Expr):
-    fn: Expr
-    arg: Expr
+exprs = load_expressions()
 
-
-@dataclass(frozen=True)
-class Pi(Expr):
-    var: str
-    domain: Expr
-    body: Expr
-
-
-@dataclass(frozen=True)
-class Lam(Expr):
-    var: str
-    domain: Expr
-    body: Expr
-
-
-@dataclass(frozen=True)
-class Eq(Expr):
-    ty: Expr
-    lhs: Expr
-    rhs: Expr
-
-
-@dataclass(frozen=True)
-class Refl(Expr):
-    ty: Expr
-    value: Expr
-
-
-@dataclass(frozen=True)
-class ConstructorSpec:
-    name: str
-    arg_types: tuple[Expr, ...]
-
-
-@dataclass(frozen=True)
-class RecursiveTypeSpec:
-    name: str
-    sort: Sort
-    constructors: tuple[ConstructorSpec, ...]
-
-
-def apps(fn: Expr, *args: Expr) -> Expr:
-    for arg in args:
-        fn = App(fn, arg)
-    return fn
-
-
-def arrow(domain: Expr, body: Expr) -> Pi:
-    return Pi("_", domain, body)
+Const = exprs.Const
+Expr = exprs.Expr
+Prop = exprs.Prop
+Sort = exprs.Sort
+Type = exprs.Type
+Var = exprs.Var
+App = exprs.App
+Pi = exprs.Pi
+Lam = exprs.Lam
+Eq = exprs.Eq
+Refl = exprs.Refl
+ConstructorSpec = exprs.ConstructorSpec
+RecursiveTypeSpec = exprs.RecursiveTypeSpec
+apps = exprs.apps
+arrow = exprs.arrow
+MyNat = exprs.MyNat
+zero = exprs.zero
+succ = exprs.succ
+EqConst = exprs.EqConst
+mynat_type_spec = exprs.mynat_type_spec
+pretty = exprs.pretty
+atom = exprs.atom
+spine = exprs.spine
 
 
 def constructor_type(result_type: Expr, arg_types: tuple[Expr, ...]) -> Expr:
@@ -163,60 +140,3 @@ class TypeChecker(AbstractTypeChecker):
                 raise TypeError("rfl expected an equality goal")
             return Refl(goal.ty, goal.rhs)
         return super().execute_tactics(goal, tactics, lower_expr)
-
-
-MyNat = Const("MyNat")
-zero = Const("zero")
-succ = Const("succ")
-EqConst = Const("Eq")
-
-
-def mynat_type_spec() -> RecursiveTypeSpec:
-    return RecursiveTypeSpec(
-        "MyNat",
-        Type,
-        (
-            ConstructorSpec("zero", ()),
-            ConstructorSpec("succ", (MyNat,)),
-        ),
-    )
-
-
-def pretty(expr: Expr) -> str:
-    match expr:
-        case Sort(0):
-            return "Prop"
-        case Sort(1):
-            return "Type"
-        case Const(name) | Var(name):
-            return name
-        case App(_, _):
-            head, args = spine(expr)
-            return f"{pretty(head)} " + " ".join(atom(arg) for arg in args)
-        case Pi("_", domain, body):
-            return f"{atom(domain)} -> {pretty(body)}"
-        case Pi(var, domain, body):
-            return f"forall ({var} : {pretty(domain)}), {pretty(body)}"
-        case Lam(var, domain, body):
-            return f"fun ({var} : {pretty(domain)}) => {pretty(body)}"
-        case Eq(_, lhs, rhs):
-            return f"{pretty(lhs)} = {pretty(rhs)}"
-        case Refl(ty, value):
-            return f"rfl@{pretty(ty)} {atom(value)}"
-        case _:
-            return repr(expr)
-
-
-def atom(expr: Expr) -> str:
-    if isinstance(expr, (Sort, Const, Var)):
-        return pretty(expr)
-    return f"({pretty(expr)})"
-
-
-def spine(expr: Expr) -> tuple[Expr, list[Expr]]:
-    args: list[Expr] = []
-    while isinstance(expr, App):
-        args.append(expr.arg)
-        expr = expr.fn
-    args.reverse()
-    return expr, args

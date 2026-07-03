@@ -1,0 +1,125 @@
+"""Chapter 2 expression nodes: variables, functions, equality, and MyNat."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from pylean.expressions import Const, Expr, Prop, Sort, Type
+
+
+@dataclass(frozen=True)
+class Var(Expr):
+    name: str
+
+
+@dataclass(frozen=True)
+class App(Expr):
+    fn: Expr
+    arg: Expr
+
+
+@dataclass(frozen=True)
+class Pi(Expr):
+    var: str
+    domain: Expr
+    body: Expr
+
+
+@dataclass(frozen=True)
+class Lam(Expr):
+    var: str
+    domain: Expr
+    body: Expr
+
+
+@dataclass(frozen=True)
+class Eq(Expr):
+    ty: Expr
+    lhs: Expr
+    rhs: Expr
+
+
+@dataclass(frozen=True)
+class Refl(Expr):
+    ty: Expr
+    value: Expr
+
+
+@dataclass(frozen=True)
+class ConstructorSpec:
+    name: str
+    arg_types: tuple[Expr, ...]
+
+
+@dataclass(frozen=True)
+class RecursiveTypeSpec:
+    name: str
+    sort: Sort
+    constructors: tuple[ConstructorSpec, ...]
+
+
+def apps(fn: Expr, *args: Expr) -> Expr:
+    for arg in args:
+        fn = App(fn, arg)
+    return fn
+
+
+def arrow(domain: Expr, body: Expr) -> Pi:
+    return Pi("_", domain, body)
+
+
+MyNat = Const("MyNat")
+zero = Const("zero")
+succ = Const("succ")
+EqConst = Const("Eq")
+
+
+def mynat_type_spec() -> RecursiveTypeSpec:
+    return RecursiveTypeSpec(
+        "MyNat",
+        Type,
+        (
+            ConstructorSpec("zero", ()),
+            ConstructorSpec("succ", (MyNat,)),
+        ),
+    )
+
+
+def pretty(expr: Expr) -> str:
+    match expr:
+        case Sort(0):
+            return "Prop"
+        case Sort(1):
+            return "Type"
+        case Const(name) | Var(name):
+            return name
+        case App(_, _):
+            head, args = spine(expr)
+            return f"{pretty(head)} " + " ".join(atom(arg) for arg in args)
+        case Pi("_", domain, body):
+            return f"{atom(domain)} -> {pretty(body)}"
+        case Pi(var, domain, body):
+            return f"forall ({var} : {pretty(domain)}), {pretty(body)}"
+        case Lam(var, domain, body):
+            return f"fun ({var} : {pretty(domain)}) => {pretty(body)}"
+        case Eq(_, lhs, rhs):
+            return f"{pretty(lhs)} = {pretty(rhs)}"
+        case Refl(ty, value):
+            return f"rfl@{pretty(ty)} {atom(value)}"
+        case _:
+            return repr(expr)
+
+
+def atom(expr: Expr) -> str:
+    if isinstance(expr, (Sort, Const, Var)):
+        return pretty(expr)
+    return f"({pretty(expr)})"
+
+
+def spine(expr: Expr) -> tuple[Expr, list[Expr]]:
+    args: list[Expr] = []
+    while isinstance(expr, App):
+        args.append(expr.arg)
+        expr = expr.fn
+    args.reverse()
+    return expr, args
