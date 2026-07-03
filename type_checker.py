@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any
 
-from expressions import Const, Expr
+from expressions import Expr
 
 
 class TypeCheckerError(Exception):
@@ -15,20 +14,9 @@ class TypeCheckerError(Exception):
 class TypeChecker(ABC):
     def __init__(self) -> None:
         self.env: dict[str, Expr] = {}
-        self.recursive_types: dict[str, Any] = {}
 
     def add(self, name: str, ty: Expr) -> None:
         self.env[name] = ty
-
-    def add_recursive_type(self, spec: Any) -> None:
-        self.recursive_types[spec.name] = spec
-        result_type = Const(spec.name)
-        self.add(spec.name, spec.sort)
-        for constructor in spec.constructors:
-            self.add(constructor.name, self.constructor_type(result_type, constructor.arg_types))
-
-    def constructor_type(self, result_type: Expr, arg_types: tuple[Expr, ...]) -> Expr:
-        raise TypeCheckerError("this phase does not support recursive constructors")
 
     @abstractmethod
     def infer(self, expr: Expr, ctx: dict[str, Expr] | None = None) -> Expr:

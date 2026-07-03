@@ -75,8 +75,16 @@ def subst(expr: Expr, var: str, replacement: Expr) -> Expr:
 
 
 class TypeChecker(AbstractTypeChecker):
-    def constructor_type(self, result_type: Expr, arg_types: tuple[Expr, ...]) -> Expr:
-        return constructor_type(result_type, arg_types)
+    def __init__(self) -> None:
+        super().__init__()
+        self.recursive_types: dict[str, RecursiveTypeSpec] = {}
+
+    def add_recursive_type(self, spec: RecursiveTypeSpec) -> None:
+        self.recursive_types[spec.name] = spec
+        result_type = Const(spec.name)
+        self.add(spec.name, spec.sort)
+        for constructor in spec.constructors:
+            self.add(constructor.name, constructor_type(result_type, constructor.arg_types))
 
     def infer(self, expr: Expr, ctx: dict[str, Expr] | None = None) -> Expr:
         ctx = {} if ctx is None else ctx

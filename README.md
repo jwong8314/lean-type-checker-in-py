@@ -16,8 +16,8 @@ environment setup for each phase. That keeps each `solution.py` focused on the
 kernel syntax and typing rules instead of also seeding known declarations.
 
 The top-level [type_checker.py](type_checker.py) defines the shared abstract
-`TypeChecker`: it owns the environment, recursive declaration registration, and
-generic `check`. Each phase customizes `infer`.
+`TypeChecker`: it owns the environment and generic `check`. Each phase
+customizes `infer`, and Phase 2 introduces recursive declaration registration.
 
 The top-level [expressions.py](expressions.py) defines the shared `Expr`, `Sort`,
 `Prop`, and `Type`. Every phase-specific expression node inherits from that
