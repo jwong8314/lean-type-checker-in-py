@@ -37,12 +37,17 @@ TrueProp = Const("True")
 FalseProp = Const("False")
 true_intro = Const("true_intro")
 
+DEFAULT_TYPES = {
+    "True": Prop,
+    "False": Prop,
+    "true_intro": TrueProp,
+}
 
-def phase1_checker() -> TypeChecker:
+
+def setting_default_types() -> TypeChecker:
     tc = TypeChecker()
-    tc.add("True", Prop)
-    tc.add("False", Prop)
-    tc.add("true_intro", TrueProp)
+    for name, ty in DEFAULT_TYPES.items():
+        tc.add(name, ty)
     return tc
 
 
@@ -60,7 +65,7 @@ def pretty(expr: Expr) -> str:
             return repr(expr)
 
 
-DEFAULT_CHECKER = phase1_checker()
+DEFAULT_CHECKER = setting_default_types()
 
 
 def infer(expr: Expr) -> Expr:
@@ -69,4 +74,3 @@ def infer(expr: Expr) -> Expr:
 
 def check(expr: Expr, expected: Expr) -> None:
     DEFAULT_CHECKER.check(expr, expected)
-
