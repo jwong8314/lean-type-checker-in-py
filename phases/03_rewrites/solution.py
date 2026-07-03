@@ -132,6 +132,18 @@ class TypeChecker(p2.TypeChecker):
     def pretty(self, expr: p2.Expr) -> str:
         return pretty(expr)
 
+    def execute_tactics(self, goal: p2.Expr, tactics, lower_expr) -> p2.Expr:
+        if len(tactics) == 1 and tactics[0].__class__.__name__ == "RflNode":
+            if not isinstance(goal, Eq):
+                raise p2.TypeError("rfl expected an equality goal")
+            return Refl(goal.ty, goal.rhs)
+        for tactic in reversed(tactics):
+            if tactic.__class__.__name__ == "RwNode":
+                if not tactic.args:
+                    raise p2.TypeError("rw expects at least one rewrite rule")
+                return Rw(lower_expr(tactic.args[-1]))
+        return super().execute_tactics(goal, tactics, lower_expr)
+
 
 add = p2.Const("add")
 EqConst = p2.Const("Eq")

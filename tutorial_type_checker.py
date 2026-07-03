@@ -61,6 +61,7 @@ def run_phase(phase_dir: Path) -> None:
     for declaration in declarations:
         if solution_runner.should_register_before_check(declaration):
             solution_runner.register_declaration(solution, checker, declaration)
+        declaration = lean_parser.elaborate_declaration_proof(solution, checker, declaration)
         checker.infer(declaration.expr)
         checker.check(declaration.expr, declaration.expected)
         if not solution_runner.should_register_before_check(declaration):

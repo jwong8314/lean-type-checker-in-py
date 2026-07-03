@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable, Sequence
 
 from expressions import Expr
 
@@ -57,3 +58,18 @@ class TypeChecker(ABC):
         """Render an expression for error messages."""
 
         return repr(expr)
+
+    def execute_tactics(
+        self,
+        goal: Expr,
+        tactics: Sequence[object],
+        lower_expr: Callable[[object], Expr],
+    ) -> Expr:
+        """Elaborate a small tactic script into a proof term.
+
+        Tactics are not kernel primitives: this helper belongs to the
+        tutorial runner/elaboration layer. Phase checkers override it as they
+        learn the proof-term constructors that tactics should produce.
+        """
+
+        raise TypeCheckerError("this phase does not support tactic execution")

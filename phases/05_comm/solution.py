@@ -113,6 +113,12 @@ class TypeChecker(p4.TypeChecker):
             case _:
                 return super().normalize(expr)
 
+    def execute_tactics(self, goal: p2.Expr, tactics, lower_expr) -> p2.Expr:
+        for tactic in reversed(tactics):
+            if tactic.__class__.__name__ == "ExactNode":
+                return lower_expr(tactic.term)
+        return super().execute_tactics(goal, tactics, lower_expr)
+
     def pretty(self, expr: p2.Expr) -> str:
         return pretty(expr)
 

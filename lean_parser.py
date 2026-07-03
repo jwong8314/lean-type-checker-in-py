@@ -122,6 +122,7 @@ class ParsedDeclaration:
     kind: str
     opaque: bool = False
     recursive_spec: object | None = None
+    proof_ast: object | None = None
 
 
 class ParseError(Exception):
@@ -234,6 +235,21 @@ def parse_script(phase_dir: Path, solution: ModuleType) -> list[ParsedDeclaratio
     declarations = [declaration for declaration in declarations if declaration is not None]
     recursive_specs = lower_recursive_specs(solution, declarations)
     return [lower_declaration(solution, declaration, recursive_specs.get(declaration.name)) for declaration in declarations]
+
+
+def elaborate_declaration_proof(solution: ModuleType, checker, declaration: ParsedDeclaration) -> ParsedDeclaration:
+    if not isinstance(declaration.proof_ast, ByNode):
+        return declaration
+    expr = lower_proof(solution, checker, declaration.name, declaration.proof_ast, declaration.expected)
+    return ParsedDeclaration(
+        declaration.name,
+        expr,
+        declaration.expected,
+        declaration.kind,
+        declaration.opaque,
+        declaration.recursive_spec,
+        declaration.proof_ast,
+    )
 
 
 def build_declaration_node(tree: Tree | Token) -> DeclarationNode | None:
@@ -407,9 +423,10 @@ def lower_declaration(solution: ModuleType, declaration: DeclarationNode, recurs
                 expected = pi_ctor(solution)(name, binder_type, expected)
         return ParsedDeclaration(
             declaration.name,
-            lower_proof(solution, declaration.name, declaration.proof, expected),
+            lower_proof(solution, None, declaration.name, declaration.proof, expected),
             expected,
             declaration.kind,
+            proof_ast=declaration.proof,
         )
     raise ParseError(f"unsupported declaration kind: {declaration.kind}")
 
@@ -446,16 +463,16 @@ def lower_type(solution: ModuleType, node: Any):
     raise ParseError(f"unsupported type AST: {node!r}")
 
 
-def lower_proof(solution: ModuleType, name: str, node: Any, expected):
+def lower_proof(solution: ModuleType, checker, name: str, node: Any, expected):
     if should_use_named_proof(solution, name, node):
         return named_proof(solution, name)
     if isinstance(node, ByNode) and isinstance(expected, pi_ctor(solution)):
-        body = lower_proof(solution, name, node, expected.body)
+        body = lower_proof(solution, checker, name, node, expected.body)
         return lam_ctor(solution)(expected.var, expected.domain, body)
     if isinstance(node, ByNode):
-        return lower_by_proof(solution, node, expected)
+        return lower_by_proof(solution, checker, node, expected)
     if isinstance(node, LambdaNode):
-        return lower_lambda(solution, node, expected)
+        return lower_lambda(solution, checker, node, expected)
     if isinstance(node, NameNode) and node.value == "true_intro":
         return solution.true_intro
     if isinstance(node, NameNode) and node.value == "rfl":
@@ -511,13 +528,10 @@ def named_proof(solution: ModuleType, name: str):
     raise ParseError(f"no proof builder for {name}")
 
 
-def lower_by_proof(solution: ModuleType, node: ByNode, expected):
-    if len(node.tactics) == 1 and isinstance(node.tactics[0], RflNode):
-        return refl_for(solution, expected)
-    for tactic in reversed(node.tactics):
-        if isinstance(tactic, RwNode):
-            return lower_rw(solution, tactic)
-    raise ParseError(f"unsupported by proof AST: {node!r}")
+def lower_by_proof(solution: ModuleType, checker, node: ByNode, expected):
+    if checker is None:
+        return unresolved_proof(solution)
+    return checker.execute_tactics(expected, node.tactics, lambda expr: lower_expr(solution, expr))
 
 
 def lower_rw(solution: ModuleType, node: RwNode):
@@ -526,18 +540,23 @@ def lower_rw(solution: ModuleType, node: RwNode):
     return rw_ctor(solution)(lower_expr(solution, node.args[-1]))
 
 
-def lower_lambda(solution: ModuleType, node: LambdaNode, expected):
-    return lower_proof_under_binders(solution, list(node.names), node.body, expected)
+def unresolved_proof(solution: ModuleType):
+    const_cls = solution.p2.Const if hasattr(solution, "p2") else solution.Const
+    return const_cls("__unresolved_by_proof__")
 
 
-def lower_proof_under_binders(solution: ModuleType, names: list[str], body: Any, expected):
+def lower_lambda(solution: ModuleType, checker, node: LambdaNode, expected):
+    return lower_proof_under_binders(solution, checker, list(node.names), node.body, expected)
+
+
+def lower_proof_under_binders(solution: ModuleType, checker, names: list[str], body: Any, expected):
     if not names:
-        return lower_proof(solution, "", body, expected)
+        return lower_proof(solution, checker, "", body, expected)
     if not isinstance(expected, pi_ctor(solution)):
         raise ParseError(f"lambda has too many binders for {solution.pretty(expected)}")
     name = names[0]
     renamed_body = subst(solution)(expected.body, expected.var, var_ctor(solution)(name))
-    proof = lower_proof_under_binders(solution, names[1:], body, renamed_body)
+    proof = lower_proof_under_binders(solution, checker, names[1:], body, renamed_body)
     return lam_ctor(solution)(name, expected.domain, proof)
 
 

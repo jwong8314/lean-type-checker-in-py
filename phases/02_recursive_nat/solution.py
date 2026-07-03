@@ -157,6 +157,13 @@ class TypeChecker(AbstractTypeChecker):
     def pretty(self, expr: Expr) -> str:
         return pretty(expr)
 
+    def execute_tactics(self, goal: Expr, tactics, lower_expr) -> Expr:
+        if len(tactics) == 1 and tactics[0].__class__.__name__ == "RflNode":
+            if not isinstance(goal, Eq):
+                raise TypeError("rfl expected an equality goal")
+            return Refl(goal.ty, goal.rhs)
+        return super().execute_tactics(goal, tactics, lower_expr)
+
 
 MyNat = Const("MyNat")
 zero = Const("zero")
