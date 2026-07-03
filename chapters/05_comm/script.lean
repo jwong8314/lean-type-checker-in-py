@@ -1,18 +1,3 @@
-inductive MyNat : Type where
-  | zero : MyNat
-  | succ : MyNat -> MyNat
-deriving Repr
-
-namespace MyNat
-
-def add : MyNat -> MyNat -> MyNat
-  | a, zero => a
-  | a, succ b => succ (add a b)
-
--- This instance lets Lean interpret `a + b` as `MyNat.add a b`.
-instance : Add MyNat where
-  add := add
-
 theorem my_add_zero (a : MyNat) : a + zero = a := by
   rfl
 
@@ -56,5 +41,3 @@ theorem add_assoc (a b c : MyNat) : a + b + c = a + (b + c) := by
 
 theorem add_right_comm (a b c : MyNat) : a + b + c = a + c + b := by
   rw [add_assoc, add_comm b c, ← add_assoc]
-
-end MyNat
