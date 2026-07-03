@@ -49,7 +49,7 @@ class TypeChecker(AbstractTypeChecker):
         actual = ...
 
         # TODO: unfold transparent definitions in the expected type too.
-        expected = ...
+        expected = None
 
         # Leave as is: the base `defeq` is exact structural equality.
         if not self.defeq(actual, expected):
@@ -59,23 +59,31 @@ class TypeChecker(AbstractTypeChecker):
         match expr:
             # TODO: if this is a defined constant, recursively unfold its value.
             case Const(name) if name in self.definitions:
-                raise NotImplementedError("TODO: unfold a transparent definition")
+                return None
 
+            # TODO: otherwise, return the expression unchanged.
             case _:
-                return expr
+                return None
 
     def pretty(self, expr: Expr) -> str:
         match expr:
             # TODO: pretty-print Prop.
             # Hint: Prop is Sort(0).
             case Sort(0):
-                raise NotImplementedError("TODO: render Prop")
+                return None
 
+            # TODO: pretty-print Type.
             case Sort(1):
-                return "Type"
+                return None
+
+            # TODO: pretty-print higher sorts.
             case Sort(level):
-                return f"Type {level - 1}"
+                return None
+
+            # TODO: pretty-print constants by name.
             case Const(name):
-                return name
+                return None
+
+            # TODO: decide how to render unknown expression forms.
             case _:
-                return repr(expr)
+                return None
