@@ -1,4 +1,4 @@
-"""Chapter 6 expression nodes for commutativity proof combinators."""
+"""Chapter 7 expression nodes for commutativity proof combinators."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from pathlib import Path
 from pylean.chapter_loader import load_solution_for_dir
 
 
-p4 = load_solution_for_dir(Path(__file__).resolve().parents[1] / "05_induction")
+p4 = load_solution_for_dir(Path(__file__).resolve().parents[1] / "06_induction")
 p3 = p4.p3
 p2 = p4.p2
 

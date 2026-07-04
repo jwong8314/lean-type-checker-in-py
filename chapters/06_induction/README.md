@@ -1,4 +1,4 @@
-# Chapter 5: Induction
+# Chapter 6: Induction
 
 Goal: use the recursive `MyNat` declaration to derive an induction rule.
 
@@ -27,5 +27,5 @@ New implementation pieces:
 Try it:
 
 ```bash
-python3 -B -m pylean.tutorial_type_checker 05
+python3 -B -m pylean.tutorial_type_checker 06
 ```

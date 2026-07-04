@@ -9,7 +9,7 @@ kernel implementation, centered on `src/kernel/type_checker.cpp` and
 
 ## What the final Python kernel supports
 
-The final Python kernel is the Chapter 6 checker in `chapters/06_comm/`. It
+The final Python kernel is the Chapter 7 checker in `chapters/07_comm/`. It
 inherits the features built in Chapters 1-4 and adds just enough equality
 machinery to check the commutativity layer for `MyNat`.
 

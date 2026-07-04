@@ -62,12 +62,13 @@ python3 -B -m pylean.tutorial_type_checker 03
 python3 -B -m pylean.tutorial_type_checker 04
 python3 -B -m pylean.tutorial_type_checker 05
 python3 -B -m pylean.tutorial_type_checker 06
+python3 -B -m pylean.tutorial_type_checker 07
 ```
 
 Trace the elaboration phase before kernel checking:
 
 ```bash
-python3 -B -m pylean.tutorial_type_checker 06 --trace-elab
+python3 -B -m pylean.tutorial_type_checker 05 --trace-elab
 ```
 
 That prints each theorem's parsed proof syntax, unresolved placeholder, and
@@ -90,7 +91,7 @@ anything fails to type check, the runner crashes with an error.
 Chapter 1 builds a tiny checker for `True`, `False`, and proof terms.
 
 Chapter 2 adds `MyNat` as a recursive type declaration, not as a built-in, and
-adds equality and explicit reflexivity proof objects.
+introduces the equality proposition former.
 
 Chapter 3 adds definitional computation for `add` and a tiny explicit rewrite
 proof constructor. Its script is already in elaborated proof-term form, so it
@@ -99,13 +100,16 @@ does not need tactic elaboration.
 Chapter 4 introduces `rfl` syntax in the elaborator. The kernel still receives a
 `Refl(...)` proof object.
 
-Chapter 5 adds induction over recursive type declarations and proves:
+Chapter 5 introduces disjunctions, the `cases` tactic, and contradiction from a
+`False` hypothesis.
+
+Chapter 6 adds induction over recursive type declarations and proves:
 
 ```text
 forall a b : MyNat, succ a + b = succ (a + b)
 ```
 
-Chapter 6 accepts the raw `MyNatSuccAdd.lean` script and proves the
+Chapter 7 accepts the raw `MyNatSuccAdd.lean` script and proves the
 commutativity layer:
 
 ```text

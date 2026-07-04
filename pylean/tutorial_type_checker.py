@@ -5,7 +5,7 @@ Usage:
     python3 -B -m pylean.tutorial_type_checker all
     python3 -B -m pylean.tutorial_type_checker 01
     python3 -B -m pylean.tutorial_type_checker 03_rewrites
-    python3 -B -m pylean.tutorial_type_checker 06_comm
+    python3 -B -m pylean.tutorial_type_checker 07_comm
 
 The scripts are intentionally tiny Lean-like files containing `constant`,
 `inductive`, `def`, and `theorem` declarations. This runner parses the small
@@ -30,8 +30,9 @@ CHAPTER_DIRS = {
     "02": ROOT / "chapters/02_recursive_nat",
     "03": ROOT / "chapters/03_rewrites",
     "04": ROOT / "chapters/04_rfl",
-    "05": ROOT / "chapters/05_induction",
-    "06": ROOT / "chapters/06_comm",
+    "05": ROOT / "chapters/05_cases",
+    "06": ROOT / "chapters/06_induction",
+    "07": ROOT / "chapters/07_comm",
 }
 
 

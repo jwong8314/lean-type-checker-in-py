@@ -1,4 +1,4 @@
-"""Chapter 6 solution: check the raw MyNat commutativity script."""
+"""Chapter 7 solution: check the raw MyNat commutativity script."""
 
 from __future__ import annotations
 

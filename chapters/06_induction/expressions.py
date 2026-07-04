@@ -1,4 +1,4 @@
-"""Chapter 5 expression nodes for induction and equality chaining."""
+"""Chapter 6 expression nodes for induction and equality chaining."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from pathlib import Path
 from pylean.chapter_loader import load_solution_for_dir
 
 
-p3 = load_solution_for_dir(Path(__file__).resolve().parents[1] / "04_rfl")
+p3 = load_solution_for_dir(Path(__file__).resolve().parents[1] / "05_cases")
 p2 = p3.p2
 
 
