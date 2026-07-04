@@ -18,7 +18,7 @@ theorem rw :
     forall x y : MyNat,
       forall h : x = y,
       succ x = succ y :=
-  fun x y h => rw h
+  fun x y h => succ_congr h
 
 theorem add_zero_from_rule : forall a : MyNat, a + zero = a :=
   fun a => add_zero a
@@ -30,4 +30,4 @@ theorem rewrite_step :
     forall a n : MyNat,
       forall ih : succ a + n = succ (a + n),
       succ (succ a + n) = succ (succ (a + n)) :=
-  fun a n ih => rw ih
+  fun a n ih => succ_congr ih

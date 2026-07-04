@@ -69,6 +69,11 @@ class TypeChecker(AbstractTypeChecker):
     def __init__(self) -> None:
         super().__init__()
         self.recursive_types: dict[str, RecursiveTypeSpec] = {}
+        self.definitions: dict[str, Expr] = {}
+
+    def add_definition(self, name: str, ty: Expr, value: Expr) -> None:
+        self.add(name, ty)
+        self.definitions[name] = value
 
     def add_recursive_type(self, spec: RecursiveTypeSpec) -> None:
         self.recursive_types[spec.name] = spec
@@ -118,6 +123,26 @@ class TypeChecker(AbstractTypeChecker):
 
     def pretty(self, expr: Expr) -> str:
         return pretty(expr)
+
+    def normalize(self, expr: Expr) -> Expr:
+        match expr:
+            case Const(name) if name in self.definitions:
+                return self.normalize(self.definitions[name])
+            case App(fn, arg):
+                return App(self.normalize(fn), self.normalize(arg))
+            case Pi(var, domain, body):
+                return Pi(var, self.normalize(domain), self.normalize(body))
+            case Lam(var, domain, body):
+                return Lam(var, self.normalize(domain), self.normalize(body))
+            case Eq(ty, lhs, rhs):
+                return Eq(self.normalize(ty), self.normalize(lhs), self.normalize(rhs))
+            case Refl(ty, value):
+                return Refl(self.normalize(ty), self.normalize(value))
+            case _:
+                return expr
+
+    def defeq(self, left: Expr, right: Expr) -> bool:
+        return self.normalize(left) == self.normalize(right)
 
     def execute_tactics(self, goal: Expr, tactics, lower_expr) -> Expr:
         if len(tactics) == 1 and tactics[0].__class__.__name__ == "RflNode":

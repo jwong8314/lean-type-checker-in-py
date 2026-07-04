@@ -6,7 +6,7 @@ import argparse
 from pathlib import Path
 
 import solution_runner
-from pylean import lean_parser
+from pylean import elaborator, lean_parser
 from pylean.tutorial_type_checker import load_solution
 
 
@@ -20,7 +20,7 @@ def print_script_ast(script_path: Path) -> None:
         if solution_runner.should_register_before_check(declaration):
             solution_runner.register_declaration(solution, checker, declaration)
 
-        declaration = lean_parser.elaborate_declaration_proof(solution, checker, declaration)
+        declaration = elaborator.elaborate_declaration(solution, checker, declaration)
         print(f"{declaration.name} :")
         print(f"  kind     = {declaration.kind}")
         print(f"  expr     = {declaration.expr!r}")

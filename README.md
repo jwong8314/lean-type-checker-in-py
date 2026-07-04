@@ -14,7 +14,7 @@ The repository is split into three conceptual layers:
 
 ```text
 solution_runner.py  # top-level orchestration for checking chapter scripts
-pylean/             # shared parser, expression nodes, and checker interface
+pylean/             # shared parser, elaborator, expression nodes, and checker interface
 chapters/           # tutorial chapters with script.lean + solution.py
 ```
 
@@ -27,6 +27,13 @@ imports every earlier chapter by parsing and registering those earlier
 [pylean/type_checker.py](pylean/type_checker.py) defines the shared abstract
 `TypeChecker`: it owns the environment and generic `check`. Each chapter
 customizes `infer`, and Chapter 2 introduces recursive declaration registration.
+
+[pylean/elaborator.py](pylean/elaborator.py) is the explicit frontend phase
+between parsing and kernel checking. It turns theorem proof syntax and tiny
+tactics such as `rfl`, `rw`, `induction`, and `exact` into kernel expression
+nodes. For example, `rfl` becomes a `Refl(...)` proof, and an induction tactic
+becomes an `Induction(...)` proof term with a motive, cases, and target. The
+kernel then checks only that elaborated proof term.
 
 [pylean/expressions.py](pylean/expressions.py) defines the shared `Expr`,
 `Sort`, `Prop`, and `Type`. Every chapter-specific expression node inherits from
@@ -54,7 +61,19 @@ python3 -B -m pylean.tutorial_type_checker 02
 python3 -B -m pylean.tutorial_type_checker 03
 python3 -B -m pylean.tutorial_type_checker 04
 python3 -B -m pylean.tutorial_type_checker 05
+python3 -B -m pylean.tutorial_type_checker 06
 ```
+
+Trace the elaboration phase before kernel checking:
+
+```bash
+python3 -B -m pylean.tutorial_type_checker 06 --trace-elab
+```
+
+That prints each theorem's parsed proof syntax, unresolved placeholder, and
+elaborated kernel expression. It is the tutorial analogue of Lean elaborating
+`by induction ...` into an explicit recursor/proof term before the kernel sees
+it.
 
 Print the kernel expression trees produced from a chapter script:
 
@@ -71,17 +90,22 @@ anything fails to type check, the runner crashes with an error.
 Chapter 1 builds a tiny checker for `True`, `False`, and proof terms.
 
 Chapter 2 adds `MyNat` as a recursive type declaration, not as a built-in, and
-introduces `rfl` for reflexive equality proofs.
+adds equality and explicit reflexivity proof objects.
 
-Chapter 3 adds definitional computation for `add` and a tiny rewrite principle.
+Chapter 3 adds definitional computation for `add` and a tiny explicit rewrite
+proof constructor. Its script is already in elaborated proof-term form, so it
+does not need tactic elaboration.
 
-Chapter 4 adds induction over recursive type declarations and proves:
+Chapter 4 introduces `rfl` syntax in the elaborator. The kernel still receives a
+`Refl(...)` proof object.
+
+Chapter 5 adds induction over recursive type declarations and proves:
 
 ```text
 forall a b : MyNat, succ a + b = succ (a + b)
 ```
 
-Chapter 5 accepts the raw `MyNatSuccAdd.lean` script and proves the
+Chapter 6 accepts the raw `MyNatSuccAdd.lean` script and proves the
 commutativity layer:
 
 ```text

@@ -10,6 +10,3 @@ def one : MyNat := succ zero
 def two : MyNat := succ one
 
 constant Eq : Type -> MyNat -> MyNat -> Prop
-
-theorem rfl_nat : forall x : MyNat, Eq MyNat x x :=
-  fun x => rfl

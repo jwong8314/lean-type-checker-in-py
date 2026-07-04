@@ -1,9 +1,10 @@
 """Lark parser for the Lean-like tutorial scripts.
 
 The parser is deliberately small, but it is real in the sense that the runner
-does not know what a chapter defines. We parse `script.lean` into declaration and
-term AST nodes, then lower those nodes into the current chapter's Python kernel
-objects.
+does not know what a chapter defines. We parse `script.lean` into declaration
+and term AST nodes, then lower declaration headers into the current chapter's
+Python kernel objects. Proof syntax is left for `pylean.elaborator`, mirroring
+Lean's split between parser/elaborator and kernel checking.
 """
 
 from __future__ import annotations
@@ -238,7 +239,7 @@ def parse_script(phase_dir: Path, solution: ModuleType) -> list[ParsedDeclaratio
 
 
 def elaborate_declaration_proof(solution: ModuleType, checker, declaration: ParsedDeclaration) -> ParsedDeclaration:
-    if not isinstance(declaration.proof_ast, ByNode):
+    if declaration.proof_ast is None:
         return declaration
     expr = lower_proof(solution, checker, declaration.name, declaration.proof_ast, declaration.expected)
     return ParsedDeclaration(
@@ -421,14 +422,25 @@ def lower_declaration(solution: ModuleType, declaration: DeclarationNode, recurs
             binder_type = lower_type(solution, binder.ty)
             for name in reversed(binder.names):
                 expected = pi_ctor(solution)(name, binder_type, expected)
+        if proof_is_explicit_core(declaration.proof):
+            return ParsedDeclaration(
+                declaration.name,
+                lower_proof(solution, None, declaration.name, declaration.proof, expected),
+                expected,
+                declaration.kind,
+            )
         return ParsedDeclaration(
             declaration.name,
-            lower_proof(solution, None, declaration.name, declaration.proof, expected),
+            unresolved_proof(solution),
             expected,
             declaration.kind,
             proof_ast=declaration.proof,
         )
     raise ParseError(f"unsupported declaration kind: {declaration.kind}")
+
+
+def proof_is_explicit_core(node: Any) -> bool:
+    return not contains_node(node, ByNode | RflNode | RwNode | InductionNode | ExactNode) and not contains_name(node, "rw") and not contains_name(node, "rfl")
 
 
 def lower_type(solution: ModuleType, node: Any):
@@ -467,7 +479,7 @@ def lower_proof(solution: ModuleType, checker, name: str, node: Any, expected):
     if should_use_named_proof(solution, name, node):
         return named_proof(solution, name)
     if isinstance(node, ByNode) and isinstance(expected, pi_ctor(solution)):
-        body = lower_proof(solution, checker, name, node, expected.body)
+        body = lower_proof(solution, None, name, node, expected.body)
         return lam_ctor(solution)(expected.var, expected.domain, body)
     if isinstance(node, ByNode):
         return lower_by_proof(solution, checker, node, expected)
@@ -557,7 +569,7 @@ def lower_lambda(solution: ModuleType, checker, node: LambdaNode, expected):
 
 def lower_proof_under_binders(solution: ModuleType, checker, names: list[str], body: Any, expected):
     if not names:
-        return lower_proof(solution, checker, "", body, expected)
+        return lower_proof(solution, None, "", body, expected)
     if not isinstance(expected, pi_ctor(solution)):
         raise ParseError(f"lambda has too many binders for {solution.pretty(expected)}")
     name = names[0]
@@ -583,6 +595,14 @@ def lower_expr(solution: ModuleType, node: Any):
         const_cls = solution.p2.Const if hasattr(solution, "p2") else solution.Const
         return const_cls(node.value)
     if isinstance(node, AppNode):
+        if isinstance(node.fn, NameNode) and node.fn.value == "succ_congr":
+            if len(node.args) != 1:
+                raise ParseError("succ_congr expects one proof")
+            return rewrite_proof_ctor(solution)(lower_expr(solution, node.args[0]))
+        if isinstance(node.fn, NameNode) and node.fn.value == "refl":
+            if len(node.args) != 2:
+                raise ParseError("refl expects a type and a value")
+            return refl_ctor(solution)(lower_type(solution, node.args[0]), lower_expr(solution, node.args[1]))
         return apps(solution)(lower_expr(solution, node.fn), *(lower_expr(solution, arg) for arg in node.args))
     if isinstance(node, AddNode):
         add = getattr(solution, "add", None) or solution.p3.add

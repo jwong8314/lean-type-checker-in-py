@@ -66,6 +66,9 @@ class TypeChecker(p2.TypeChecker):
     def whnf(self, expr: p2.Expr) -> p2.Expr:
         while True:
             match expr:
+                case p2.Const(name) if name in self.definitions:
+                    expr = self.definitions[name]
+                    continue
                 case p2.App(fn, arg):
                     fn = self.whnf(fn)
                     if isinstance(fn, Lam):
@@ -99,7 +102,7 @@ class TypeChecker(p2.TypeChecker):
                 return expr
 
     def defeq(self, left: p2.Expr, right: p2.Expr) -> bool:
-        return left == right
+        return alpha_equal(self.normalize(left), self.normalize(right))
 
     def try_reduce(self, expr: p2.Expr) -> p2.Expr | None:
         head, _ = p2.spine(expr)

@@ -1,4 +1,4 @@
-"""Chapter 4 solution: induction over the recursive MyNat declaration."""
+"""Chapter 5 solution: induction over the recursive MyNat declaration."""
 
 from __future__ import annotations
 
