@@ -39,6 +39,10 @@ kernel then checks only that elaborated proof term.
 `Sort`, `Prop`, and `Type`. Every chapter-specific expression node inherits from
 that same package-level `Expr`.
 
+See [CORE_FIDELITY.md](CORE_FIDELITY.md) for the rule that the tutorial should
+not introduce fake kernel nodes for concepts Lean core represents as constants
+and applications.
+
 ## Run
 
 Install the parser dependency:
@@ -101,7 +105,8 @@ Chapter 4 introduces `rfl` syntax in the elaborator. The kernel still receives a
 `Refl(...)` proof object.
 
 Chapter 5 introduces disjunctions, the `cases` tactic, and contradiction from a
-`False` hypothesis.
+`False` hypothesis. `Or`, `Or.inl`, `Or.inr`, `Or.elim`, and `False.elim` are
+ordinary constants applied with `App`, matching the real Lean core shape.
 
 Chapter 6 adds induction over recursive type declarations and proves:
 

@@ -465,7 +465,8 @@ def proof_is_explicit_core(node: Any) -> bool:
     )
 
 
-def lower_type(solution: ModuleType, node: Any):
+def lower_type(solution: ModuleType, node: Any, locals: dict[str, Any] | None = None):
+    locals = {} if locals is None else locals
     if isinstance(node, PropNode):
         return prop_sort(solution)
     if isinstance(node, TypeNode):
@@ -475,29 +476,28 @@ def lower_type(solution: ModuleType, node: Any):
             return const_for_name(solution, "True")
         if node.value == "MyNat":
             return mynat(solution)
-        return lower_expr(solution, node)
+        return lower_expr(solution, node, locals)
     if isinstance(node, AppNode) and isinstance(node.fn, NameNode) and node.fn.value == "Eq":
         if len(node.args) != 3:
             raise ParseError("Eq expects a type and two terms")
         return eq_ctor(solution)(
-            lower_type(solution, node.args[0]),
-            lower_expr(solution, node.args[1]),
-            lower_expr(solution, node.args[2]),
+            lower_type(solution, node.args[0], locals),
+            lower_expr(solution, node.args[1], locals),
+            lower_expr(solution, node.args[2], locals),
         )
-    if isinstance(node, AppNode) and isinstance(node.fn, NameNode) and node.fn.value == "Or":
-        if len(node.args) != 2:
-            raise ParseError("Or expects two propositions")
-        return or_ctor(solution)(lower_type(solution, node.args[0]), lower_type(solution, node.args[1]))
+    if isinstance(node, AppNode):
+        return lower_expr(solution, node, locals)
     if isinstance(node, ForallNode):
-        body = lower_type(solution, node.body)
-        domain = lower_type(solution, node.domain)
+        domain = lower_type(solution, node.domain, locals)
+        body_locals = locals | {name: domain for name in node.names}
+        body = lower_type(solution, node.body, body_locals)
         for name in reversed(node.names):
             body = pi_ctor(solution)(name, domain, body)
         return body
     if isinstance(node, ArrowNode):
-        return arrow(solution)(lower_type(solution, node.domain), lower_type(solution, node.body))
+        return arrow(solution)(lower_type(solution, node.domain, locals), lower_type(solution, node.body, locals))
     if isinstance(node, EqNode):
-        return eq_ctor(solution)(mynat(solution), lower_expr(solution, node.lhs), lower_expr(solution, node.rhs))
+        return eq_ctor(solution)(mynat(solution), lower_expr(solution, node.lhs, locals), lower_expr(solution, node.rhs, locals))
     raise ParseError(f"unsupported type AST: {node!r}")
 
 
@@ -610,9 +610,10 @@ def lower_cases(solution: ModuleType, checker, node: CasesNode, expected, locals
     target_type = locals.get(node.target)
     if target_type is None:
         raise ParseError(f"cases target {node.target!r} is not a local variable")
-    or_cls = or_ctor(solution)
-    if not isinstance(target_type, or_cls):
+    or_args = or_type_args(solution, target_type)
+    if or_args is None:
         raise ParseError("cases currently expects a disjunction target")
+    left_type, right_type = or_args
 
     case_by_name = {case.constructor: case for case in node.cases}
     left_case = case_by_name.get("inl")
@@ -624,12 +625,16 @@ def lower_cases(solution: ModuleType, checker, node: CasesNode, expected, locals
 
     left_var = left_case.binders[0]
     right_var = right_case.binders[0]
-    left_proof = lower_proof(solution, checker, "", left_case.proof, expected, locals | {left_var: target_type.left})
-    right_proof = lower_proof(solution, checker, "", right_case.proof, expected, locals | {right_var: target_type.right})
-    return or_cases_ctor(solution)(
+    left_proof = lower_proof(solution, checker, "", left_case.proof, expected, locals | {left_var: left_type})
+    right_proof = lower_proof(solution, checker, "", right_case.proof, expected, locals | {right_var: right_type})
+    return apps(solution)(
+        const_for_name(solution, "Or.elim"),
+        left_type,
+        right_type,
+        expected,
         var_ctor(solution)(node.target),
-        lam_ctor(solution)(left_var, target_type.left, left_proof),
-        lam_ctor(solution)(right_var, target_type.right, right_proof),
+        lam_ctor(solution)(left_var, left_type, left_proof),
+        lam_ctor(solution)(right_var, right_type, right_proof),
     )
 
 
@@ -637,7 +642,7 @@ def lower_contradiction(solution: ModuleType, expected, locals: dict[str, Any]):
     false = false_prop(solution)
     for name, ty in locals.items():
         if ty == false:
-            return false_elim_ctor(solution)(expected, var_ctor(solution)(name))
+            return apps(solution)(const_for_name(solution, "False.elim"), expected, var_ctor(solution)(name))
     raise ParseError("contradiction expected a local False hypothesis")
 
 
@@ -699,23 +704,29 @@ def lower_expr(solution: ModuleType, node: Any, locals: dict[str, Any] | None = 
         if isinstance(node.fn, NameNode) and node.fn.value == "or_inl":
             if len(node.args) != 3:
                 raise ParseError("or_inl expects left prop, right prop, and proof")
-            return or_inl_ctor(solution)(
-                lower_type(solution, node.args[0]),
-                lower_type(solution, node.args[1]),
+            return apps(solution)(
+                const_for_name(solution, "Or.inl"),
+                lower_type(solution, node.args[0], locals),
+                lower_type(solution, node.args[1], locals),
                 lower_expr(solution, node.args[2], locals),
             )
         if isinstance(node.fn, NameNode) and node.fn.value == "or_inr":
             if len(node.args) != 3:
                 raise ParseError("or_inr expects left prop, right prop, and proof")
-            return or_inr_ctor(solution)(
-                lower_type(solution, node.args[0]),
-                lower_type(solution, node.args[1]),
+            return apps(solution)(
+                const_for_name(solution, "Or.inr"),
+                lower_type(solution, node.args[0], locals),
+                lower_type(solution, node.args[1], locals),
                 lower_expr(solution, node.args[2], locals),
             )
         if isinstance(node.fn, NameNode) and node.fn.value == "false_elim":
             if len(node.args) != 2:
                 raise ParseError("false_elim expects a goal proposition and False proof")
-            return false_elim_ctor(solution)(lower_type(solution, node.args[0]), lower_expr(solution, node.args[1], locals))
+            return apps(solution)(
+                const_for_name(solution, "False.elim"),
+                lower_type(solution, node.args[0], locals),
+                lower_expr(solution, node.args[1], locals),
+            )
         return apps(solution)(lower_expr(solution, node.fn, locals), *(lower_expr(solution, arg, locals) for arg in node.args))
     if isinstance(node, AddNode):
         add = getattr(solution, "add", None) or solution.p3.add
@@ -765,6 +776,23 @@ def false_prop(solution: ModuleType):
     return solution.FalseProp if hasattr(solution, "FalseProp") else solution.p2.Const("False")
 
 
+def or_type_args(solution: ModuleType, expr) -> tuple[Any, Any] | None:
+    head, args = spine(solution, expr)
+    if len(args) == 2 and const_name(head) == "Or":
+        return args[0], args[1]
+    return None
+
+
+def spine(solution: ModuleType, expr) -> tuple[Any, list[Any]]:
+    if hasattr(solution, "spine"):
+        return solution.spine(expr)
+    return solution.p2.spine(expr)
+
+
+def const_name(expr) -> str | None:
+    return expr.name if hasattr(expr, "name") else None
+
+
 def var_ctor(solution: ModuleType):
     return solution.Var if hasattr(solution, "Var") else solution.p2.Var
 
@@ -787,46 +815,6 @@ def refl_ctor(solution: ModuleType):
 
 def rewrite_proof_ctor(solution: ModuleType):
     return solution.SuccCongr if hasattr(solution, "SuccCongr") else solution.p3.SuccCongr
-
-
-def or_ctor(solution: ModuleType):
-    if hasattr(solution, "Or"):
-        return solution.Or
-    if hasattr(solution, "p3") and hasattr(solution.p3, "Or"):
-        return solution.p3.Or
-    return solution.p5.Or
-
-
-def or_inl_ctor(solution: ModuleType):
-    if hasattr(solution, "OrInl"):
-        return solution.OrInl
-    if hasattr(solution, "p3") and hasattr(solution.p3, "OrInl"):
-        return solution.p3.OrInl
-    return solution.p5.OrInl
-
-
-def or_inr_ctor(solution: ModuleType):
-    if hasattr(solution, "OrInr"):
-        return solution.OrInr
-    if hasattr(solution, "p3") and hasattr(solution.p3, "OrInr"):
-        return solution.p3.OrInr
-    return solution.p5.OrInr
-
-
-def or_cases_ctor(solution: ModuleType):
-    if hasattr(solution, "OrCases"):
-        return solution.OrCases
-    if hasattr(solution, "p3") and hasattr(solution.p3, "OrCases"):
-        return solution.p3.OrCases
-    return solution.p5.OrCases
-
-
-def false_elim_ctor(solution: ModuleType):
-    if hasattr(solution, "FalseElim"):
-        return solution.FalseElim
-    if hasattr(solution, "p3") and hasattr(solution.p3, "FalseElim"):
-        return solution.p3.FalseElim
-    return solution.p5.FalseElim
 
 
 def is_tree(node: Any, data: str) -> bool:

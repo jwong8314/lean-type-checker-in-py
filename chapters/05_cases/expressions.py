@@ -1,8 +1,12 @@
-"""Chapter 5 expression nodes for disjunctions, cases, and contradiction."""
+"""Chapter 5 constants for disjunctions, cases, and contradiction.
+
+Lean core does not have separate expression nodes for `Or`, `Or.inl`,
+`Or.inr`, `Or.elim`, or `False.elim`. They are constants applied with `App`,
+so this chapter reuses the Chapter 4 kernel expression language.
+"""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from pathlib import Path
 
 from pylean.chapter_loader import load_solution_for_dir
@@ -17,37 +21,8 @@ for _name in dir(p4):
         globals()[_name] = getattr(p4, _name)
 
 FalseProp = p2.Const("False")
-
-
-@dataclass(frozen=True)
-class Or(p2.Expr):
-    left: p2.Expr
-    right: p2.Expr
-
-
-@dataclass(frozen=True)
-class OrInl(p2.Expr):
-    left: p2.Expr
-    right: p2.Expr
-    proof: p2.Expr
-
-
-@dataclass(frozen=True)
-class OrInr(p2.Expr):
-    left: p2.Expr
-    right: p2.Expr
-    proof: p2.Expr
-
-
-@dataclass(frozen=True)
-class OrCases(p2.Expr):
-    target: p2.Expr
-    left_case: p2.Expr
-    right_case: p2.Expr
-
-
-@dataclass(frozen=True)
-class FalseElim(p2.Expr):
-    goal: p2.Expr
-    proof: p2.Expr
-
+false_elim = p2.Const("False.elim")
+or_const = p2.Const("Or")
+or_inl = p2.Const("Or.inl")
+or_inr = p2.Const("Or.inr")
+or_elim = p2.Const("Or.elim")
