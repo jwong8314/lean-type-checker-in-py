@@ -1,0 +1,3996 @@
+[kernel-trace] inductive MyNat
+  params: 0
+  type:
+    Sort 1
+[kernel-trace] end MyNat
+[kernel-trace] constructor MyNat.zero
+  type:
+    Const MyNat
+[kernel-trace] end MyNat.zero
+[kernel-trace] constructor MyNat.succ
+  type:
+    Pi a._@._internal._hyg.0 (default)
+      Const MyNat
+      Const MyNat
+[kernel-trace] end MyNat.succ
+[kernel-trace] reference recursor MyNat.rec
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Pi zero (default)
+        App
+          BVar 0
+          Const MyNat.zero
+        Pi succ (default)
+          Pi a._@._internal._hyg.0 (default)
+            Const MyNat
+            Pi a_ih._@._internal._hyg.0 (default)
+              App
+                BVar 2
+                BVar 0
+              App
+                BVar 3
+                App
+                  Const MyNat.succ
+                  BVar 1
+          Pi t (default)
+            Const MyNat
+            App
+              BVar 3
+              BVar 0
+[kernel-trace] end MyNat.rec
+[kernel-trace] definition MyNat.recOn
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Pi t (default)
+        Const MyNat
+        Pi zero (default)
+          App
+            BVar 1
+            Const MyNat.zero
+          Pi succ (default)
+            Pi a._@._internal._hyg.0 (default)
+              Const MyNat
+              Pi a_ih._@._internal._hyg.0 (default)
+                App
+                  BVar 3
+                  BVar 0
+                App
+                  BVar 4
+                  App
+                    Const MyNat.succ
+                    BVar 1
+            App
+              BVar 3
+              BVar 2
+  value:
+    Lam motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Lam t (default)
+        Const MyNat
+        Lam zero (default)
+          App
+            BVar 1
+            Const MyNat.zero
+          Lam succ (default)
+            Pi a._@._internal._hyg.0 (default)
+              Const MyNat
+              Pi a_ih._@._internal._hyg.0 (default)
+                App
+                  BVar 3
+                  BVar 0
+                App
+                  BVar 4
+                  App
+                    Const MyNat.succ
+                    BVar 1
+            App
+              App
+                App
+                  App
+                    Const MyNat.rec [u]
+                    BVar 3
+                  BVar 1
+                BVar 0
+              BVar 2
+[kernel-trace] end MyNat.recOn
+[kernel-trace] definition MyNat.casesOn
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Pi t (default)
+        Const MyNat
+        Pi zero (default)
+          App
+            BVar 1
+            Const MyNat.zero
+          Pi succ (default)
+            Pi a._@._internal._hyg.0 (default)
+              Const MyNat
+              App
+                BVar 3
+                App
+                  Const MyNat.succ
+                  BVar 0
+            App
+              BVar 3
+              BVar 2
+  value:
+    Lam motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Lam t (default)
+        Const MyNat
+        Lam zero (default)
+          App
+            BVar 1
+            Const MyNat.zero
+          Lam succ (default)
+            Pi a._@._internal._hyg.0 (default)
+              Const MyNat
+              App
+                BVar 3
+                App
+                  Const MyNat.succ
+                  BVar 0
+            App
+              App
+                App
+                  App
+                    Const MyNat.rec [u]
+                    BVar 3
+                  BVar 1
+                Lam a._@._internal._hyg.0 (default)
+                  Const MyNat
+                  Lam a_ih._@._internal._hyg.0 (default)
+                    App
+                      BVar 4
+                      BVar 0
+                    App
+                      BVar 2
+                      BVar 1
+              BVar 2
+[kernel-trace] end MyNat.casesOn
+[kernel-trace] reference inductive Nat
+  params: 0
+  type:
+    Sort 1
+[kernel-trace] end Nat
+[kernel-trace] reference constructor Nat.zero
+  type:
+    Const Nat
+[kernel-trace] end Nat.zero
+[kernel-trace] reference constructor Nat.succ
+  type:
+    Pi n (default)
+      Const Nat
+      Const Nat
+[kernel-trace] end Nat.succ
+[kernel-trace] definition MyNat.ctorIdx
+  type:
+    Pi x._@.instrumentation.examples.rewrite_step.3705883368._hygCtx._hyg.7 (default)
+      Const MyNat
+      Const Nat
+  value:
+    Lam x (default)
+      Const MyNat
+      App
+        App
+          App
+            App
+              Const MyNat.casesOn [1]
+              Lam x (default)
+                Const MyNat
+                Const Nat
+            BVar 0
+          Lit nat 0
+        Lam a._@._internal._hyg.0 (default)
+          Const MyNat
+          Lit nat 1
+[kernel-trace] end MyNat.ctorIdx
+[kernel-trace] reference definition cond
+  universe params: u
+  type:
+    Pi α (implicit)
+      Sort u
+      Pi c (default)
+        Const Bool
+        Pi x (default)
+          BVar 1
+          Pi y (default)
+            BVar 2
+            BVar 3
+  value:
+    Lam α (implicit)
+      Sort u
+      Lam c (default)
+        Const Bool
+        Lam x (default)
+          BVar 1
+          Lam y (default)
+            BVar 2
+            App
+              App
+                App
+                  App
+                    Const cond.match_1 [u]
+                    Lam c._@.Init.Prelude.3301329888._hygCtx._hyg.10 (default)
+                      Const Bool
+                      BVar 4
+                  BVar 2
+                Lam _ (default)
+                  Const Unit
+                  BVar 2
+              Lam _ (default)
+                Const Unit
+                BVar 1
+[kernel-trace] end cond
+[kernel-trace] reference definition Nat.ble
+  type:
+    Pi a._@._internal._hyg.0 (default)
+      MData
+        Const Nat
+      Pi a._@._internal._hyg.0 (default)
+        MData
+          Const Nat
+        Const Bool
+  value:
+    Lam x._@.Init.Prelude.1907163184._hygCtx._hyg.9 (default)
+      Const Nat
+      Lam x._@.Init.Prelude.1907163184._hygCtx._hyg.10 (default)
+        Const Nat
+        App
+          App
+            App
+              App
+                Const Nat.brecOn [1]
+                Lam x._@.Init.Prelude.1907163184._hygCtx._hyg.9 (default)
+                  Const Nat
+                  Pi x._@.Init.Prelude.1907163184._hygCtx._hyg.10 (default)
+                    Const Nat
+                    Const Bool
+              BVar 1
+            Const Nat.ble._f
+          BVar 0
+[kernel-trace] end Nat.ble
+[kernel-trace] reference inductive PULift
+  universe params: r s
+  params: 1
+  type:
+    Pi α (default)
+      Sort s
+      Sort max s r 1
+[kernel-trace] end PULift
+[kernel-trace] reference constructor PULift.up
+  universe params: r s
+  type:
+    Pi α (implicit)
+      Sort s
+      Pi down (default)
+        BVar 0
+        App
+          Const PULift [r, s]
+          BVar 1
+[kernel-trace] end PULift.up
+[kernel-trace] reference definition Nat.brecOn
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const Nat
+        Sort u
+      Pi t (default)
+        Const Nat
+        Pi F_1 (default)
+          Pi t (default)
+            Const Nat
+            Pi f (default)
+              App
+                App
+                  Const Nat.below [u]
+                  BVar 2
+                BVar 0
+              App
+                BVar 3
+                BVar 1
+          App
+            BVar 2
+            BVar 1
+  value:
+    Lam motive (implicit)
+      Pi t (default)
+        Const Nat
+        Sort u
+      Lam t (default)
+        Const Nat
+        Lam F_1 (default)
+          Pi t (default)
+            Const Nat
+            Pi f (default)
+              App
+                App
+                  Const Nat.below [u]
+                  BVar 2
+                BVar 0
+              App
+                BVar 3
+                BVar 1
+          Proj PProd 0
+            App
+              App
+                App
+                  Const Nat.brecOn.go [u]
+                  BVar 2
+                BVar 1
+              BVar 0
+[kernel-trace] end Nat.brecOn
+[kernel-trace] reference inductive Bool
+  params: 0
+  type:
+    Sort 1
+[kernel-trace] end Bool
+[kernel-trace] reference constructor Bool.false
+  type:
+    Const Bool
+[kernel-trace] end Bool.false
+[kernel-trace] reference constructor Bool.true
+  type:
+    Const Bool
+[kernel-trace] end Bool.true
+[kernel-trace] reference definition Nat.ble._f
+  type:
+    Pi x._@.Init.Prelude.1907163184._hygCtx._hyg.9 (default)
+      Const Nat
+      Pi f (default)
+        App
+          App
+            Const Nat.below [1]
+            Lam x._@.Init.Prelude.1907163184._hygCtx._hyg.9 (default)
+              Const Nat
+              Pi x._@.Init.Prelude.1907163184._hygCtx._hyg.10 (default)
+                Const Nat
+                Const Bool
+          BVar 0
+        Pi x._@.Init.Prelude.1907163184._hygCtx._hyg.10 (default)
+          Const Nat
+          Const Bool
+  value:
+    Lam x._@.Init.Prelude.1907163184._hygCtx._hyg.9 (default)
+      Const Nat
+      Lam f (default)
+        App
+          App
+            Const Nat.below [1]
+            Lam x._@.Init.Prelude.1907163184._hygCtx._hyg.9 (default)
+              Const Nat
+              Pi x._@.Init.Prelude.1907163184._hygCtx._hyg.10 (default)
+                Const Nat
+                Const Bool
+          BVar 0
+        Lam x._@.Init.Prelude.1907163184._hygCtx._hyg.10 (default)
+          Const Nat
+          App
+            App
+              App
+                App
+                  App
+                    App
+                      App
+                        Const Nat.ble.match_1 [1]
+                        Lam x._@.Init.Prelude.1907163184._hygCtx.9.Init.Prelude.1907163184._hygCtx._hyg.28 (default)
+                          Const Nat
+                          Lam x._@.Init.Prelude.1907163184._hygCtx.10.Init.Prelude.1907163184._hygCtx._hyg.31 (default)
+                            Const Nat
+                            Pi x._@.Init.Prelude.1907163184._hygCtx._hyg.75 (default)
+                              App
+                                App
+                                  Const Nat.below [1]
+                                  Lam x._@.Init.Prelude.1907163184._hygCtx._hyg.9 (default)
+                                    Const Nat
+                                    Pi x._@.Init.Prelude.1907163184._hygCtx._hyg.10 (default)
+                                      Const Nat
+                                      Const Bool
+                                BVar 1
+                              Const Bool
+                      BVar 2
+                    BVar 0
+                  Lam x._@.Init.Prelude.1907163184._hygCtx._hyg.38 (default)
+                    Const Nat
+                    Lam x._@.Init.Prelude.1907163184._hygCtx._hyg.75 (default)
+                      App
+                        App
+                          Const Nat.below [1]
+                          Lam x._@.Init.Prelude.1907163184._hygCtx._hyg.9 (default)
+                            Const Nat
+                            Pi x._@.Init.Prelude.1907163184._hygCtx._hyg.10 (default)
+                              Const Nat
+                              Const Bool
+                        Const Nat.zero
+                      Const Bool.true
+                Lam n._@.Init.Prelude.1907163184._hygCtx._hyg.50 (default)
+                  Const Nat
+                  Lam x._@.Init.Prelude.1907163184._hygCtx._hyg.75 (default)
+                    App
+                      App
+                        Const Nat.below [1]
+                        Lam x._@.Init.Prelude.1907163184._hygCtx._hyg.9 (default)
+                          Const Nat
+                          Pi x._@.Init.Prelude.1907163184._hygCtx._hyg.10 (default)
+                            Const Nat
+                            Const Bool
+                      App
+                        Const Nat.succ
+                        BVar 0
+                    Const Bool.false
+              Lam n (default)
+                Const Nat
+                Lam m (default)
+                  Const Nat
+                  Lam x._@.Init.Prelude.1907163184._hygCtx._hyg.75 (default)
+                    App
+                      App
+                        Const Nat.below [1]
+                        Lam x._@.Init.Prelude.1907163184._hygCtx._hyg.9 (default)
+                          Const Nat
+                          Pi x._@.Init.Prelude.1907163184._hygCtx._hyg.10 (default)
+                            Const Nat
+                            Const Bool
+                      App
+                        Const Nat.succ
+                        BVar 1
+                    App
+                      Proj PProd 0
+                        BVar 0
+                      BVar 1
+            BVar 1
+[kernel-trace] end Nat.ble._f
+[kernel-trace] reference definition Nat.below
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const Nat
+        Sort u
+      Pi t (default)
+        Const Nat
+        Sort max 1 u
+  value:
+    Lam motive (implicit)
+      Pi t (default)
+        Const Nat
+        Sort u
+      Lam t (default)
+        Const Nat
+        App
+          App
+            App
+              App
+                Const Nat.rec [succ (max 1 u)]
+                Lam t (default)
+                  Const Nat
+                  Sort max 1 u
+              Const PUnit [max 1 u]
+            Lam n (default)
+              Const Nat
+              Lam n_ih (default)
+                Sort max 1 u
+                App
+                  App
+                    Const PProd [u, max 1 u]
+                    App
+                      BVar 3
+                      BVar 1
+                  BVar 0
+          BVar 0
+[kernel-trace] end Nat.below
+[kernel-trace] reference definition Nat.ble.match_1
+  universe params: u_1
+  type:
+    Pi motive (default)
+      Pi x._@.Init.Prelude.1907163184._hygCtx.9.Init.Prelude.1907163184._hygCtx._hyg.28 (default)
+        Const Nat
+        Pi x._@.Init.Prelude.1907163184._hygCtx.10.Init.Prelude.1907163184._hygCtx._hyg.31 (default)
+          Const Nat
+          Sort u_1
+      Pi x._@.Init.Prelude.1907163184._hygCtx.9.Init.Prelude.1907163184._hygCtx._hyg.28 (default)
+        Const Nat
+        Pi x._@.Init.Prelude.1907163184._hygCtx.10.Init.Prelude.1907163184._hygCtx._hyg.31 (default)
+          Const Nat
+          Pi h_1 (default)
+            Pi x._@.Init.Prelude.1907163184._hygCtx._hyg.38 (default)
+              Const Nat
+              App
+                App
+                  BVar 3
+                  Const Nat.zero
+                BVar 0
+            Pi h_2 (default)
+              Pi n._@.Init.Prelude.1907163184._hygCtx._hyg.50 (default)
+                Const Nat
+                App
+                  App
+                    BVar 4
+                    App
+                      Const Nat.succ
+                      BVar 0
+                  Const Nat.zero
+              Pi h_3 (default)
+                Pi n (default)
+                  Const Nat
+                  Pi m (default)
+                    Const Nat
+                    App
+                      App
+                        BVar 6
+                        App
+                          Const Nat.succ
+                          BVar 1
+                      App
+                        Const Nat.succ
+                        BVar 0
+                App
+                  App
+                    BVar 5
+                    BVar 4
+                  BVar 3
+  value:
+    Lam motive (default)
+      Pi x._@.Init.Prelude.1907163184._hygCtx.9.Init.Prelude.1907163184._hygCtx._hyg.28 (default)
+        Const Nat
+        Pi x._@.Init.Prelude.1907163184._hygCtx.10.Init.Prelude.1907163184._hygCtx._hyg.31 (default)
+          Const Nat
+          Sort u_1
+      Lam x._@.Init.Prelude.1907163184._hygCtx.9.Init.Prelude.1907163184._hygCtx._hyg.28 (default)
+        Const Nat
+        Lam x._@.Init.Prelude.1907163184._hygCtx.10.Init.Prelude.1907163184._hygCtx._hyg.31 (default)
+          Const Nat
+          Lam h_1 (default)
+            Pi x._@.Init.Prelude.1907163184._hygCtx._hyg.38 (default)
+              Const Nat
+              App
+                App
+                  BVar 3
+                  Const Nat.zero
+                BVar 0
+            Lam h_2 (default)
+              Pi n._@.Init.Prelude.1907163184._hygCtx._hyg.50 (default)
+                Const Nat
+                App
+                  App
+                    BVar 4
+                    App
+                      Const Nat.succ
+                      BVar 0
+                  Const Nat.zero
+              Lam h_3 (default)
+                Pi n (default)
+                  Const Nat
+                  Pi m (default)
+                    Const Nat
+                    App
+                      App
+                        BVar 6
+                        App
+                          Const Nat.succ
+                          BVar 1
+                      App
+                        Const Nat.succ
+                        BVar 0
+                App
+                  App
+                    App
+                      App
+                        Const Nat.casesOn [u_1]
+                        Lam x (default)
+                          Const Nat
+                          App
+                            App
+                              BVar 6
+                              BVar 0
+                            BVar 4
+                      BVar 4
+                    App
+                      BVar 2
+                      BVar 3
+                  Lam n._@.Init.Prelude.1907163184._hygCtx._hyg.73 (default)
+                    Const Nat
+                    App
+                      App
+                        App
+                          App
+                            Const Nat.casesOn [u_1]
+                            Lam x (default)
+                              Const Nat
+                              App
+                                App
+                                  BVar 7
+                                  App
+                                    Const Nat.succ
+                                    BVar 1
+                                BVar 0
+                          BVar 4
+                        App
+                          BVar 2
+                          BVar 0
+                      Lam n._@.Init.Prelude.1907163184._hygCtx._hyg.74 (default)
+                        Const Nat
+                        App
+                          App
+                            BVar 2
+                            BVar 1
+                          BVar 0
+[kernel-trace] end Nat.ble.match_1
+[kernel-trace] reference inductive PProd
+  universe params: u v
+  params: 2
+  type:
+    Pi α (default)
+      Sort u
+      Pi β (default)
+        Sort v
+        Sort max (max 1 u) v
+[kernel-trace] end PProd
+[kernel-trace] reference constructor PProd.mk
+  universe params: u v
+  type:
+    Pi α (implicit)
+      Sort u
+      Pi β (implicit)
+        Sort v
+        Pi fst (default)
+          BVar 1
+          Pi snd (default)
+            BVar 1
+            App
+              App
+                Const PProd [u, v]
+                BVar 3
+              BVar 2
+[kernel-trace] end PProd.mk
+[kernel-trace] reference definition Nat.casesOn
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const Nat
+        Sort u
+      Pi t (default)
+        Const Nat
+        Pi zero (default)
+          App
+            BVar 1
+            Const Nat.zero
+          Pi succ (default)
+            Pi n (default)
+              Const Nat
+              App
+                BVar 3
+                App
+                  Const Nat.succ
+                  BVar 0
+            App
+              BVar 3
+              BVar 2
+  value:
+    Lam motive (implicit)
+      Pi t (default)
+        Const Nat
+        Sort u
+      Lam t (default)
+        Const Nat
+        Lam zero (default)
+          App
+            BVar 1
+            Const Nat.zero
+          Lam succ (default)
+            Pi n (default)
+              Const Nat
+              App
+                BVar 3
+                App
+                  Const Nat.succ
+                  BVar 0
+            App
+              App
+                App
+                  App
+                    Const Nat.rec [u]
+                    BVar 3
+                  BVar 1
+                Lam n (default)
+                  Const Nat
+                  Lam n_ih (default)
+                    App
+                      BVar 4
+                      BVar 0
+                    App
+                      BVar 2
+                      BVar 1
+              BVar 2
+[kernel-trace] end Nat.casesOn
+[kernel-trace] reference recursor Nat.rec
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const Nat
+        Sort u
+      Pi zero (default)
+        App
+          BVar 0
+          Const Nat.zero
+        Pi succ (default)
+          Pi n (default)
+            Const Nat
+            Pi n_ih (default)
+              App
+                BVar 2
+                BVar 0
+              App
+                BVar 3
+                App
+                  Const Nat.succ
+                  BVar 1
+          Pi t (default)
+            Const Nat
+            App
+              BVar 3
+              BVar 0
+[kernel-trace] end Nat.rec
+[kernel-trace] reference inductive PUnit
+  universe params: u
+  params: 0
+  type:
+    Sort u
+[kernel-trace] end PUnit
+[kernel-trace] reference constructor PUnit.unit
+  universe params: u
+  type:
+    Const PUnit [u]
+[kernel-trace] end PUnit.unit
+[kernel-trace] reference definition Nat.brecOn.go
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const Nat
+        Sort u
+      Pi t (default)
+        Const Nat
+        Pi F_1 (default)
+          Pi t (default)
+            Const Nat
+            Pi f (default)
+              App
+                App
+                  Const Nat.below [u]
+                  BVar 2
+                BVar 0
+              App
+                BVar 3
+                BVar 1
+          App
+            App
+              Const PProd [u, max 1 u]
+              App
+                BVar 2
+                BVar 1
+            App
+              App
+                Const Nat.below [u]
+                BVar 2
+              BVar 1
+  value:
+    Lam motive (implicit)
+      Pi t (default)
+        Const Nat
+        Sort u
+      Lam t (default)
+        Const Nat
+        Lam F_1 (default)
+          Pi t (default)
+            Const Nat
+            Pi f (default)
+              App
+                App
+                  Const Nat.below [u]
+                  BVar 2
+                BVar 0
+              App
+                BVar 3
+                BVar 1
+          App
+            App
+              App
+                App
+                  Const Nat.rec [max 1 u]
+                  Lam t (default)
+                    Const Nat
+                    App
+                      App
+                        Const PProd [u, max 1 u]
+                        App
+                          BVar 3
+                          BVar 0
+                      App
+                        App
+                          Const Nat.below [u]
+                          BVar 3
+                        BVar 0
+                App
+                  App
+                    App
+                      App
+                        Const PProd.mk [u, max 1 u]
+                        App
+                          BVar 2
+                          Const Nat.zero
+                      Const PUnit [max 1 u]
+                    App
+                      App
+                        BVar 0
+                        Const Nat.zero
+                      Const PUnit.unit [max 1 u]
+                  Const PUnit.unit [max 1 u]
+              Lam n (default)
+                Const Nat
+                Lam n_ih (default)
+                  App
+                    App
+                      Const PProd [u, max 1 u]
+                      App
+                        BVar 3
+                        BVar 0
+                    App
+                      App
+                        Const Nat.below [u]
+                        BVar 3
+                      BVar 0
+                  App
+                    App
+                      App
+                        App
+                          Const PProd.mk [u, max 1 u]
+                          App
+                            BVar 4
+                            App
+                              Const Nat.succ
+                              BVar 1
+                        App
+                          App
+                            Const PProd [u, max 1 u]
+                            App
+                              BVar 4
+                              BVar 1
+                          App
+                            App
+                              Const Nat.below [u]
+                              BVar 4
+                            BVar 1
+                      App
+                        App
+                          BVar 2
+                          App
+                            Const Nat.succ
+                            BVar 1
+                        BVar 0
+                    BVar 0
+            BVar 1
+[kernel-trace] end Nat.brecOn.go
+[kernel-trace] reference definition cond.match_1
+  universe params: u_1
+  type:
+    Pi motive (default)
+      Pi c._@.Init.Prelude.3301329888._hygCtx._hyg.10 (default)
+        Const Bool
+        Sort u_1
+      Pi c._@.Init.Prelude.3301329888._hygCtx._hyg.10 (default)
+        Const Bool
+        Pi h_1 (default)
+          Pi _ (default)
+            Const Unit
+            App
+              BVar 2
+              Const Bool.true
+          Pi h_2 (default)
+            Pi _ (default)
+              Const Unit
+              App
+                BVar 3
+                Const Bool.false
+            App
+              BVar 3
+              BVar 2
+  value:
+    Lam motive (default)
+      Pi c._@.Init.Prelude.3301329888._hygCtx._hyg.10 (default)
+        Const Bool
+        Sort u_1
+      Lam c._@.Init.Prelude.3301329888._hygCtx._hyg.10 (default)
+        Const Bool
+        Lam h_1 (default)
+          Pi _ (default)
+            Const Unit
+            App
+              BVar 2
+              Const Bool.true
+          Lam h_2 (default)
+            Pi _ (default)
+              Const Unit
+              App
+                BVar 3
+                Const Bool.false
+            App
+              App
+                App
+                  App
+                    Const Bool.casesOn [u_1]
+                    Lam x (default)
+                      Const Bool
+                      App
+                        BVar 4
+                        BVar 0
+                  BVar 2
+                App
+                  BVar 0
+                  Const Unit.unit
+              App
+                BVar 1
+                Const Unit.unit
+[kernel-trace] end cond.match_1
+[kernel-trace] reference definition Unit
+  type:
+    Sort 1
+  value:
+    Const PUnit [1]
+[kernel-trace] end Unit
+[kernel-trace] reference definition Bool.casesOn
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const Bool
+        Sort u
+      Pi t (default)
+        Const Bool
+        Pi false (default)
+          App
+            BVar 1
+            Const Bool.false
+          Pi true (default)
+            App
+              BVar 2
+              Const Bool.true
+            App
+              BVar 3
+              BVar 2
+  value:
+    Lam motive (implicit)
+      Pi t (default)
+        Const Bool
+        Sort u
+      Lam t (default)
+        Const Bool
+        Lam false (default)
+          App
+            BVar 1
+            Const Bool.false
+          Lam true (default)
+            App
+              BVar 2
+              Const Bool.true
+            App
+              App
+                App
+                  App
+                    Const Bool.rec [u]
+                    BVar 3
+                  BVar 1
+                BVar 0
+              BVar 2
+[kernel-trace] end Bool.casesOn
+[kernel-trace] reference definition Unit.unit
+  type:
+    Const Unit
+  value:
+    Const PUnit.unit [1]
+[kernel-trace] end Unit.unit
+[kernel-trace] reference recursor Bool.rec
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const Bool
+        Sort u
+      Pi false (default)
+        App
+          BVar 0
+          Const Bool.false
+        Pi true (default)
+          App
+            BVar 1
+            Const Bool.true
+          Pi t (default)
+            Const Bool
+            App
+              BVar 3
+              BVar 0
+[kernel-trace] end Bool.rec
+[kernel-trace] definition MyNat.ctorElimType
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Pi ctorIdx (default)
+        Const Nat
+        Sort max 1 u
+  value:
+    Lam motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Lam ctorIdx (default)
+        Const Nat
+        App
+          App
+            App
+              App
+                Const cond [succ (max 1 u)]
+                Sort max 1 u
+              App
+                App
+                  Const Nat.ble
+                  BVar 0
+                Lit nat 0
+            App
+              Const PULift [u, u]
+              App
+                BVar 1
+                Const MyNat.zero
+          App
+            Const PULift [u, u]
+            Pi a._@._internal._hyg.0 (default)
+              Const MyNat
+              App
+                BVar 2
+                App
+                  Const MyNat.succ
+                  BVar 0
+[kernel-trace] end MyNat.ctorElimType
+[kernel-trace] reference inductive Eq
+  universe params: u_1
+  params: 2
+  type:
+    Pi α (implicit)
+      Sort u_1
+      Pi a._@._internal._hyg.0 (default)
+        BVar 0
+        Pi a._@._internal._hyg.0 (default)
+          BVar 1
+          Sort 0
+[kernel-trace] end Eq
+[kernel-trace] reference constructor Eq.refl
+  universe params: u_1
+  type:
+    Pi α (implicit)
+      Sort u_1
+      Pi a (default)
+        BVar 0
+        App
+          App
+            App
+              Const Eq [u_1]
+              BVar 1
+            BVar 0
+          BVar 0
+[kernel-trace] end Eq.refl
+[kernel-trace] reference definition PULift.down
+  universe params: r s
+  type:
+    Pi α (implicit)
+      Sort s
+      Pi self (default)
+        App
+          Const PULift [r, s]
+          BVar 0
+        BVar 1
+  value:
+    Lam α (default)
+      Sort s
+      Lam self (default)
+        App
+          Const PULift [r, s]
+          BVar 0
+        Proj PULift 0
+          BVar 0
+[kernel-trace] end PULift.down
+[kernel-trace] reference definition Eq.ndrec
+  universe params: u1 u2
+  type:
+    Pi α (implicit)
+      Sort u2
+      Pi a (implicit)
+        BVar 0
+        Pi motive (implicit)
+          Pi a._@._internal._hyg.0 (default)
+            BVar 1
+            Sort u1
+          Pi m (default)
+            App
+              BVar 0
+              BVar 1
+            Pi b (implicit)
+              BVar 3
+              Pi h (default)
+                App
+                  App
+                    App
+                      Const Eq [u2]
+                      BVar 4
+                    BVar 3
+                  BVar 0
+                App
+                  BVar 3
+                  BVar 1
+  value:
+    Lam α (implicit)
+      Sort u2
+      Lam a (implicit)
+        BVar 0
+        Lam motive (implicit)
+          Pi a._@._internal._hyg.0 (default)
+            BVar 1
+            Sort u1
+          Lam m (default)
+            App
+              BVar 0
+              BVar 1
+            Lam b (implicit)
+              BVar 3
+              Lam h (default)
+                App
+                  App
+                    App
+                      Const Eq [u2]
+                      BVar 4
+                    BVar 3
+                  BVar 0
+                App
+                  App
+                    App
+                      App
+                        App
+                          App
+                            Const Eq.rec [u1, u2]
+                            BVar 5
+                          BVar 4
+                        Lam x._@.Init.Prelude.2055208596._hygCtx._hyg.17 (default)
+                          BVar 5
+                          Lam x._@.Init.Prelude.2055208596._hygCtx._hyg.16 (default)
+                            App
+                              App
+                                App
+                                  Const Eq [u2]
+                                  BVar 6
+                                BVar 5
+                              BVar 0
+                            App
+                              BVar 5
+                              BVar 1
+                      BVar 2
+                    BVar 1
+                  BVar 0
+[kernel-trace] end Eq.ndrec
+[kernel-trace] reference recursor Eq.rec
+  universe params: u u_1
+  type:
+    Pi α (implicit)
+      Sort u_1
+      Pi a._@._internal._hyg.0 (implicit)
+        BVar 0
+        Pi motive (implicit)
+          Pi a._@._internal._hyg.0 (default)
+            BVar 1
+            Pi t (default)
+              App
+                App
+                  App
+                    Const Eq [u_1]
+                    BVar 2
+                  BVar 1
+                BVar 0
+              Sort u
+          Pi refl (default)
+            App
+              App
+                BVar 0
+                BVar 1
+              App
+                App
+                  Const Eq.refl [u_1]
+                  BVar 2
+                BVar 1
+            Pi a._@._internal._hyg.0 (implicit)
+              BVar 3
+              Pi t (default)
+                App
+                  App
+                    App
+                      Const Eq [u_1]
+                      BVar 4
+                    BVar 3
+                  BVar 0
+                App
+                  App
+                    BVar 3
+                    BVar 1
+                  BVar 0
+[kernel-trace] end Eq.rec
+[kernel-trace] definition MyNat.ctorElim
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Pi ctorIdx (default)
+        Const Nat
+        Pi t (default)
+          Const MyNat
+          Pi h (default)
+            App
+              App
+                App
+                  Const Eq [1]
+                  Const Nat
+                BVar 1
+              App
+                Const MyNat.ctorIdx
+                BVar 0
+            Pi k (default)
+              App
+                App
+                  Const MyNat.ctorElimType [u]
+                  BVar 3
+                BVar 2
+              App
+                BVar 4
+                BVar 2
+  value:
+    Lam motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Lam ctorIdx (default)
+        Const Nat
+        Lam t (default)
+          Const MyNat
+          Lam h (default)
+            App
+              App
+                App
+                  Const Eq [1]
+                  Const Nat
+                BVar 1
+              App
+                Const MyNat.ctorIdx
+                BVar 0
+            Lam k (default)
+              App
+                App
+                  Const MyNat.ctorElimType [u]
+                  BVar 3
+                BVar 2
+              App
+                App
+                  App
+                    App
+                      App
+                        Const MyNat.casesOn [u]
+                        Lam t (default)
+                          Const MyNat
+                          Pi x._@.instrumentation.examples.rewrite_step.3705883368._hygCtx._hyg.8 (default)
+                            App
+                              App
+                                App
+                                  Const Eq [1]
+                                  Const Nat
+                                BVar 4
+                              App
+                                Const MyNat.ctorIdx
+                                BVar 0
+                            App
+                              BVar 6
+                              BVar 1
+                      BVar 2
+                    Lam h (default)
+                      App
+                        App
+                          App
+                            Const Eq [1]
+                            Const Nat
+                          BVar 3
+                        Lit nat 0
+                      App
+                        App
+                          Const PULift.down [u, u]
+                          App
+                            BVar 5
+                            Const MyNat.zero
+                        App
+                          App
+                            App
+                              App
+                                App
+                                  App
+                                    Const Eq.ndrec [max 1 u, 1]
+                                    Const Nat
+                                  BVar 4
+                                App
+                                  Const MyNat.ctorElimType [u]
+                                  BVar 5
+                              BVar 1
+                            Lit nat 0
+                          BVar 0
+                  Lam a._@._internal._hyg.0 (default)
+                    Const MyNat
+                    Lam h (default)
+                      App
+                        App
+                          App
+                            Const Eq [1]
+                            Const Nat
+                          BVar 4
+                        Lit nat 1
+                      App
+                        App
+                          App
+                            Const PULift.down [u, u]
+                            Pi a._@._internal._hyg.0 (default)
+                              Const MyNat
+                              App
+                                BVar 7
+                                App
+                                  Const MyNat.succ
+                                  BVar 0
+                          App
+                            App
+                              App
+                                App
+                                  App
+                                    App
+                                      Const Eq.ndrec [max 1 u, 1]
+                                      Const Nat
+                                    BVar 5
+                                  App
+                                    Const MyNat.ctorElimType [u]
+                                    BVar 6
+                                BVar 2
+                              Lit nat 1
+                            BVar 0
+                        BVar 1
+                BVar 1
+[kernel-trace] end MyNat.ctorElim
+[kernel-trace] reference theorem Eq.symm
+  universe params: u
+  type:
+    Pi α (implicit)
+      Sort u
+      Pi a (implicit)
+        BVar 0
+        Pi b (implicit)
+          BVar 1
+          Pi h (default)
+            App
+              App
+                App
+                  Const Eq [u]
+                  BVar 2
+                BVar 1
+              BVar 0
+            App
+              App
+                App
+                  Const Eq [u]
+                  BVar 3
+                BVar 1
+              BVar 2
+[kernel-trace] end Eq.symm
+[kernel-trace] definition MyNat.zero.elim
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Pi t (default)
+        Const MyNat
+        Pi h (default)
+          App
+            App
+              App
+                Const Eq [1]
+                Const Nat
+              App
+                Const MyNat.ctorIdx
+                BVar 0
+            Lit nat 0
+          Pi zero (default)
+            App
+              BVar 2
+              Const MyNat.zero
+            App
+              BVar 3
+              BVar 2
+  value:
+    Lam motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Lam t (default)
+        Const MyNat
+        Lam h (default)
+          App
+            App
+              App
+                Const Eq [1]
+                Const Nat
+              App
+                Const MyNat.ctorIdx
+                BVar 0
+            Lit nat 0
+          Lam zero (default)
+            App
+              BVar 2
+              Const MyNat.zero
+            App
+              App
+                App
+                  App
+                    App
+                      Const MyNat.ctorElim [u]
+                      BVar 3
+                    Lit nat 0
+                  BVar 2
+                App
+                  App
+                    App
+                      App
+                        Const Eq.symm [1]
+                        Const Nat
+                      App
+                        Const MyNat.ctorIdx
+                        BVar 2
+                    Lit nat 0
+                  BVar 1
+              App
+                App
+                  Const PULift.up [u, u]
+                  App
+                    BVar 3
+                    Const MyNat.zero
+                BVar 0
+[kernel-trace] end MyNat.zero.elim
+[kernel-trace] definition MyNat.succ.elim
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Pi t (default)
+        Const MyNat
+        Pi h (default)
+          App
+            App
+              App
+                Const Eq [1]
+                Const Nat
+              App
+                Const MyNat.ctorIdx
+                BVar 0
+            Lit nat 1
+          Pi succ (default)
+            Pi a._@._internal._hyg.0 (default)
+              Const MyNat
+              App
+                BVar 3
+                App
+                  Const MyNat.succ
+                  BVar 0
+            App
+              BVar 3
+              BVar 2
+  value:
+    Lam motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Lam t (default)
+        Const MyNat
+        Lam h (default)
+          App
+            App
+              App
+                Const Eq [1]
+                Const Nat
+              App
+                Const MyNat.ctorIdx
+                BVar 0
+            Lit nat 1
+          Lam succ (default)
+            Pi a._@._internal._hyg.0 (default)
+              Const MyNat
+              App
+                BVar 3
+                App
+                  Const MyNat.succ
+                  BVar 0
+            App
+              App
+                App
+                  App
+                    App
+                      Const MyNat.ctorElim [u]
+                      BVar 3
+                    Lit nat 1
+                  BVar 2
+                App
+                  App
+                    App
+                      App
+                        Const Eq.symm [1]
+                        Const Nat
+                      App
+                        Const MyNat.ctorIdx
+                        BVar 2
+                    Lit nat 1
+                  BVar 1
+              App
+                App
+                  Const PULift.up [u, u]
+                  Pi a._@._internal._hyg.0 (default)
+                    Const MyNat
+                    App
+                      BVar 4
+                      App
+                        Const MyNat.succ
+                        BVar 0
+                BVar 0
+[kernel-trace] end MyNat.succ.elim
+[kernel-trace] definition MyNat.noConfusionType
+  universe params: u
+  type:
+    Pi P (default)
+      Sort u
+      Pi t (default)
+        Const MyNat
+        Pi t' (default)
+          Const MyNat
+          Sort u
+  value:
+    Lam P (default)
+      Sort u
+      Lam t (default)
+        Const MyNat
+        Lam t' (default)
+          Const MyNat
+          App
+            App
+              App
+                App
+                  Const MyNat.casesOn [succ u]
+                  Lam t (default)
+                    Const MyNat
+                    Sort u
+                BVar 1
+              App
+                App
+                  App
+                    App
+                      Const MyNat.casesOn [succ u]
+                      Lam t (default)
+                        Const MyNat
+                        Sort u
+                    BVar 0
+                  Pi x._@.instrumentation.examples.rewrite_step.3705883368._hygCtx._hyg.9 (default)
+                    BVar 2
+                    BVar 3
+                Lam a._@._internal._hyg.0 (default)
+                  Const MyNat
+                  BVar 3
+            Lam a._@._internal._hyg.0 (default)
+              Const MyNat
+              App
+                App
+                  App
+                    App
+                      Const MyNat.casesOn [succ u]
+                      Lam t (default)
+                        Const MyNat
+                        Sort u
+                    BVar 1
+                  BVar 3
+                Lam a._@._internal._hyg.0 (default)
+                  Const MyNat
+                  Pi x._@.instrumentation.examples.rewrite_step.3705883368._hygCtx._hyg.10 (default)
+                    Pi a_eq._@._internal._hyg.0 (default)
+                      App
+                        App
+                          App
+                            Const Eq [1]
+                            Const MyNat
+                          BVar 1
+                        BVar 0
+                      BVar 5
+                    BVar 5
+[kernel-trace] end MyNat.noConfusionType
+[kernel-trace] definition MyNat.noConfusion
+  universe params: u
+  type:
+    Pi P (implicit)
+      Sort u
+      Pi t (implicit)
+        Const MyNat
+        Pi t' (implicit)
+          Const MyNat
+          Pi eq (default)
+            App
+              App
+                App
+                  Const Eq [1]
+                  Const MyNat
+                BVar 1
+              BVar 0
+            App
+              App
+                App
+                  Const MyNat.noConfusionType [u]
+                  BVar 3
+                BVar 2
+              BVar 1
+  value:
+    Lam P (implicit)
+      Sort u
+      Lam t (implicit)
+        Const MyNat
+        Lam t' (implicit)
+          Const MyNat
+          Lam eq (default)
+            App
+              App
+                App
+                  Const Eq [1]
+                  Const MyNat
+                BVar 1
+              BVar 0
+            App
+              App
+                App
+                  App
+                    App
+                      App
+                        Const Eq.ndrec [u, 1]
+                        Const MyNat
+                      BVar 2
+                    Lam t' (implicit)
+                      Const MyNat
+                      App
+                        App
+                          App
+                            Const MyNat.noConfusionType [u]
+                            BVar 4
+                          BVar 3
+                        BVar 0
+                  App
+                    App
+                      App
+                        App
+                          Const MyNat.casesOn [u]
+                          Lam t (implicit)
+                            Const MyNat
+                            App
+                              App
+                                App
+                                  Const MyNat.noConfusionType [u]
+                                  BVar 4
+                                BVar 0
+                              BVar 0
+                        BVar 2
+                      Lam k (default)
+                        BVar 3
+                        BVar 0
+                    Lam a._@._internal._hyg.0 (default)
+                      Const MyNat
+                      Lam k (default)
+                        Pi a_eq._@._internal._hyg.0 (default)
+                          App
+                            App
+                              App
+                                Const Eq [1]
+                                Const MyNat
+                              BVar 0
+                            BVar 0
+                          BVar 5
+                        App
+                          BVar 0
+                          App
+                            App
+                              Const Eq.refl [1]
+                              Const MyNat
+                            BVar 1
+                BVar 1
+              BVar 0
+[kernel-trace] end MyNat.noConfusion
+[kernel-trace] reference definition id
+  universe params: u
+  type:
+    Pi α (implicit)
+      Sort u
+      Pi a (default)
+        BVar 0
+        BVar 1
+  value:
+    Lam α (implicit)
+      Sort u
+      Lam a (default)
+        BVar 0
+        BVar 0
+[kernel-trace] end id
+[kernel-trace] definition MyNat.succ.noConfusion
+  universe params: u
+  type:
+    Pi P (implicit)
+      Sort u
+      Pi a._@._internal._hyg.0 (implicit)
+        Const MyNat
+        Pi a'._@._internal._hyg.0 (implicit)
+          Const MyNat
+          Pi eq (default)
+            App
+              App
+                App
+                  Const Eq [1]
+                  Const MyNat
+                App
+                  Const MyNat.succ
+                  BVar 1
+              App
+                Const MyNat.succ
+                BVar 0
+            Pi k (default)
+              Pi a_eq._@._internal._hyg.0 (default)
+                App
+                  App
+                    App
+                      Const Eq [1]
+                      Const MyNat
+                    BVar 2
+                  BVar 1
+                BVar 4
+              BVar 4
+  value:
+    Lam P (implicit)
+      Sort u
+      Lam a._@._internal._hyg.0 (implicit)
+        Const MyNat
+        Lam a'._@._internal._hyg.0 (implicit)
+          Const MyNat
+          Lam eq (default)
+            App
+              App
+                App
+                  Const Eq [1]
+                  Const MyNat
+                App
+                  Const MyNat.succ
+                  BVar 1
+              App
+                Const MyNat.succ
+                BVar 0
+            Lam k (default)
+              Pi a_eq._@._internal._hyg.0 (default)
+                App
+                  App
+                    App
+                      Const Eq [1]
+                      Const MyNat
+                    BVar 2
+                  BVar 1
+                BVar 4
+              App
+                App
+                  Const id [u]
+                  BVar 4
+                App
+                  App
+                    App
+                      App
+                        App
+                          Const MyNat.noConfusion [u]
+                          BVar 4
+                        App
+                          Const MyNat.succ
+                          BVar 3
+                      App
+                        Const MyNat.succ
+                        BVar 2
+                    BVar 1
+                  BVar 0
+[kernel-trace] end MyNat.succ.noConfusion
+[kernel-trace] definition MyNat.below
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Pi t (default)
+        Const MyNat
+        Sort max 1 u
+  value:
+    Lam motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Lam t (default)
+        Const MyNat
+        App
+          App
+            App
+              App
+                Const MyNat.rec [succ (max 1 u)]
+                Lam t (default)
+                  Const MyNat
+                  Sort max 1 u
+              Const PUnit [max 1 u]
+            Lam a._@._internal._hyg.0 (default)
+              Const MyNat
+              Lam a_ih._@._internal._hyg.0 (default)
+                Sort max 1 u
+                App
+                  App
+                    Const PProd [u, max 1 u]
+                    App
+                      BVar 3
+                      BVar 1
+                  BVar 0
+          BVar 0
+[kernel-trace] end MyNat.below
+[kernel-trace] definition MyNat.brecOn.go
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Pi t (default)
+        Const MyNat
+        Pi F_1 (default)
+          Pi t (default)
+            Const MyNat
+            Pi f (default)
+              App
+                App
+                  Const MyNat.below [u]
+                  BVar 2
+                BVar 0
+              App
+                BVar 3
+                BVar 1
+          App
+            App
+              Const PProd [u, max 1 u]
+              App
+                BVar 2
+                BVar 1
+            App
+              App
+                Const MyNat.below [u]
+                BVar 2
+              BVar 1
+  value:
+    Lam motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Lam t (default)
+        Const MyNat
+        Lam F_1 (default)
+          Pi t (default)
+            Const MyNat
+            Pi f (default)
+              App
+                App
+                  Const MyNat.below [u]
+                  BVar 2
+                BVar 0
+              App
+                BVar 3
+                BVar 1
+          App
+            App
+              App
+                App
+                  Const MyNat.rec [max 1 u]
+                  Lam t (default)
+                    Const MyNat
+                    App
+                      App
+                        Const PProd [u, max 1 u]
+                        App
+                          BVar 3
+                          BVar 0
+                      App
+                        App
+                          Const MyNat.below [u]
+                          BVar 3
+                        BVar 0
+                App
+                  App
+                    App
+                      App
+                        Const PProd.mk [u, max 1 u]
+                        App
+                          BVar 2
+                          Const MyNat.zero
+                      Const PUnit [max 1 u]
+                    App
+                      App
+                        BVar 0
+                        Const MyNat.zero
+                      Const PUnit.unit [max 1 u]
+                  Const PUnit.unit [max 1 u]
+              Lam a._@._internal._hyg.0 (default)
+                Const MyNat
+                Lam a_ih._@._internal._hyg.0 (default)
+                  App
+                    App
+                      Const PProd [u, max 1 u]
+                      App
+                        BVar 3
+                        BVar 0
+                    App
+                      App
+                        Const MyNat.below [u]
+                        BVar 3
+                      BVar 0
+                  App
+                    App
+                      App
+                        App
+                          Const PProd.mk [u, max 1 u]
+                          App
+                            BVar 4
+                            App
+                              Const MyNat.succ
+                              BVar 1
+                        App
+                          App
+                            Const PProd [u, max 1 u]
+                            App
+                              BVar 4
+                              BVar 1
+                          App
+                            App
+                              Const MyNat.below [u]
+                              BVar 4
+                            BVar 1
+                      App
+                        App
+                          BVar 2
+                          App
+                            Const MyNat.succ
+                            BVar 1
+                        BVar 0
+                    BVar 0
+            BVar 1
+[kernel-trace] end MyNat.brecOn.go
+[kernel-trace] definition MyNat.brecOn
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Pi t (default)
+        Const MyNat
+        Pi F_1 (default)
+          Pi t (default)
+            Const MyNat
+            Pi f (default)
+              App
+                App
+                  Const MyNat.below [u]
+                  BVar 2
+                BVar 0
+              App
+                BVar 3
+                BVar 1
+          App
+            BVar 2
+            BVar 1
+  value:
+    Lam motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Lam t (default)
+        Const MyNat
+        Lam F_1 (default)
+          Pi t (default)
+            Const MyNat
+            Pi f (default)
+              App
+                App
+                  Const MyNat.below [u]
+                  BVar 2
+                BVar 0
+              App
+                BVar 3
+                BVar 1
+          Proj PProd 0
+            App
+              App
+                App
+                  Const MyNat.brecOn.go [u]
+                  BVar 2
+                BVar 1
+              BVar 0
+[kernel-trace] end MyNat.brecOn
+[kernel-trace] theorem MyNat.brecOn.eq
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Pi t (default)
+        Const MyNat
+        Pi F_1 (default)
+          Pi t (default)
+            Const MyNat
+            Pi f (default)
+              App
+                App
+                  Const MyNat.below [u]
+                  BVar 2
+                BVar 0
+              App
+                BVar 3
+                BVar 1
+          App
+            App
+              App
+                Const Eq [u]
+                App
+                  BVar 2
+                  BVar 1
+              App
+                App
+                  App
+                    Const MyNat.brecOn [u]
+                    BVar 2
+                  BVar 1
+                BVar 0
+            App
+              App
+                BVar 0
+                BVar 1
+              Proj PProd 1
+                App
+                  App
+                    App
+                      Const MyNat.brecOn.go [u]
+                      BVar 2
+                    BVar 1
+                  BVar 0
+  value:
+    Lam motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Lam t (default)
+        Const MyNat
+        Lam F_1 (default)
+          Pi t (default)
+            Const MyNat
+            Pi f (default)
+              App
+                App
+                  Const MyNat.below [u]
+                  BVar 2
+                BVar 0
+              App
+                BVar 3
+                BVar 1
+          App
+            App
+              App
+                App
+                  Const MyNat.casesOn [0]
+                  Lam x (default)
+                    Const MyNat
+                    App
+                      App
+                        App
+                          Const Eq [u]
+                          App
+                            BVar 3
+                            BVar 0
+                        App
+                          App
+                            App
+                              Const MyNat.brecOn [u]
+                              BVar 3
+                            BVar 0
+                          BVar 1
+                      App
+                        App
+                          BVar 1
+                          BVar 0
+                        Proj PProd 1
+                          App
+                            App
+                              App
+                                Const MyNat.brecOn.go [u]
+                                BVar 3
+                              BVar 0
+                            BVar 1
+                BVar 1
+              App
+                App
+                  Const Eq.refl [u]
+                  App
+                    BVar 2
+                    Const MyNat.zero
+                App
+                  App
+                    App
+                      Const MyNat.brecOn [u]
+                      BVar 2
+                    Const MyNat.zero
+                  BVar 0
+            Lam a._@._internal.0.instrumentation.examples.rewrite_step.3705883368._hygCtx._hyg.11 (default)
+              Const MyNat
+              App
+                App
+                  Const Eq.refl [u]
+                  App
+                    BVar 3
+                    App
+                      Const MyNat.succ
+                      BVar 0
+                App
+                  App
+                    App
+                      Const MyNat.brecOn [u]
+                      BVar 3
+                    App
+                      Const MyNat.succ
+                      BVar 0
+                  BVar 1
+[kernel-trace] end MyNat.brecOn.eq
+[kernel-trace] reference definition OfNat.ofNat
+  universe params: u
+  type:
+    Pi α (implicit)
+      Sort succ u
+      Pi x._@.Init.Prelude.1822880135._hygCtx._hyg.3 (default)
+        Const Nat
+        Pi self (inst_implicit)
+          App
+            App
+              Const OfNat [u]
+              BVar 1
+            BVar 0
+          BVar 2
+  value:
+    Lam α (default)
+      Sort succ u
+      Lam x._@.Init.Prelude.1822880135._hygCtx._hyg.3 (default)
+        Const Nat
+        Lam self (inst_implicit)
+          App
+            App
+              Const OfNat [u]
+              BVar 1
+            BVar 0
+          Proj OfNat 0
+            BVar 0
+[kernel-trace] end OfNat.ofNat
+[kernel-trace] reference definition instOfNatNat
+  type:
+    Pi n (default)
+      Const Nat
+      App
+        App
+          Const OfNat [0]
+          Const Nat
+        BVar 0
+  value:
+    Lam n (default)
+      Const Nat
+      App
+        App
+          App
+            Const OfNat.mk [0]
+            Const Nat
+          BVar 0
+        BVar 0
+[kernel-trace] end instOfNatNat
+[kernel-trace] reference definition HAdd.hAdd
+  universe params: u v w
+  type:
+    Pi α (implicit)
+      Sort succ u
+      Pi β (implicit)
+        Sort succ v
+        Pi γ (implicit)
+          App
+            Const outParam [succ (succ w)]
+            Sort succ w
+          Pi self (inst_implicit)
+            App
+              App
+                App
+                  Const HAdd [u, v, w]
+                  BVar 2
+                BVar 1
+              BVar 0
+            Pi a._@._internal._hyg.0 (default)
+              BVar 3
+              Pi a._@._internal._hyg.0 (default)
+                BVar 3
+                BVar 3
+  value:
+    Lam α (default)
+      Sort succ u
+      Lam β (default)
+        Sort succ v
+        Lam γ (implicit)
+          App
+            Const outParam [succ (succ w)]
+            Sort succ w
+          Lam self (inst_implicit)
+            App
+              App
+                App
+                  Const HAdd [u, v, w]
+                  BVar 2
+                BVar 1
+              BVar 0
+            Proj HAdd 0
+              BVar 0
+[kernel-trace] end HAdd.hAdd
+[kernel-trace] reference definition instHAdd
+  universe params: u_1
+  type:
+    Pi α (implicit)
+      Sort succ u_1
+      Pi inst._@.Init.Prelude.1910291827._hygCtx._hyg.5 (inst_implicit)
+        App
+          Const Add [u_1]
+          BVar 0
+        App
+          App
+            App
+              Const HAdd [u_1, u_1, u_1]
+              BVar 1
+            BVar 1
+          BVar 1
+  value:
+    Lam α (implicit)
+      Sort succ u_1
+      Lam inst._@.Init.Prelude.1910291827._hygCtx._hyg.5 (inst_implicit)
+        App
+          Const Add [u_1]
+          BVar 0
+        App
+          App
+            App
+              App
+                Const HAdd.mk [u_1, u_1, u_1]
+                BVar 1
+              BVar 1
+            BVar 1
+          Lam a (default)
+            BVar 1
+            Lam b (default)
+              BVar 2
+              App
+                App
+                  App
+                    App
+                      Const Add.add [u_1]
+                      BVar 3
+                    BVar 2
+                  BVar 1
+                BVar 0
+[kernel-trace] end instHAdd
+[kernel-trace] reference definition instAddNat
+  type:
+    App
+      Const Add [0]
+      Const Nat
+  value:
+    App
+      App
+        Const Add.mk [0]
+        Const Nat
+      Const Nat.add
+[kernel-trace] end instAddNat
+[kernel-trace] reference inductive Add
+  universe params: u
+  params: 1
+  type:
+    Pi α (default)
+      Sort succ u
+      Sort succ u
+[kernel-trace] end Add
+[kernel-trace] reference constructor Add.mk
+  universe params: u
+  type:
+    Pi α (implicit)
+      Sort succ u
+      Pi add (default)
+        Pi a._@._internal._hyg.0 (default)
+          BVar 0
+          Pi a._@._internal._hyg.0 (default)
+            BVar 1
+            BVar 2
+        App
+          Const Add [u]
+          BVar 1
+[kernel-trace] end Add.mk
+[kernel-trace] reference definition Nat.add
+  type:
+    Pi a._@._internal._hyg.0 (default)
+      MData
+        Const Nat
+      Pi a._@._internal._hyg.0 (default)
+        MData
+          Const Nat
+        Const Nat
+  value:
+    Lam x._@.Init.Prelude.2314059840._hygCtx._hyg.13 (default)
+      Const Nat
+      Lam x._@.Init.Prelude.2314059840._hygCtx._hyg.14 (default)
+        Const Nat
+        App
+          App
+            App
+              App
+                Const Nat.brecOn [1]
+                Lam x._@.Init.Prelude.2314059840._hygCtx._hyg.14 (default)
+                  Const Nat
+                  Pi x._@.Init.Prelude.2314059840._hygCtx._hyg.13 (default)
+                    Const Nat
+                    Const Nat
+              BVar 0
+            Const Nat.add._f
+          BVar 1
+[kernel-trace] end Nat.add
+[kernel-trace] reference definition Nat.add._f
+  type:
+    Pi x._@.Init.Prelude.2314059840._hygCtx._hyg.14 (default)
+      Const Nat
+      Pi f (default)
+        App
+          App
+            Const Nat.below [1]
+            Lam x._@.Init.Prelude.2314059840._hygCtx._hyg.14 (default)
+              Const Nat
+              Pi x._@.Init.Prelude.2314059840._hygCtx._hyg.13 (default)
+                Const Nat
+                Const Nat
+          BVar 0
+        Pi x._@.Init.Prelude.2314059840._hygCtx._hyg.13 (default)
+          Const Nat
+          Const Nat
+  value:
+    Lam x._@.Init.Prelude.2314059840._hygCtx._hyg.14 (default)
+      Const Nat
+      Lam f (default)
+        App
+          App
+            Const Nat.below [1]
+            Lam x._@.Init.Prelude.2314059840._hygCtx._hyg.14 (default)
+              Const Nat
+              Pi x._@.Init.Prelude.2314059840._hygCtx._hyg.13 (default)
+                Const Nat
+                Const Nat
+          BVar 0
+        Lam x._@.Init.Prelude.2314059840._hygCtx._hyg.13 (default)
+          Const Nat
+          App
+            App
+              App
+                App
+                  App
+                    App
+                      Const Nat.add.match_1 [1]
+                      Lam x._@.Init.Prelude.2314059840._hygCtx.13.Init.Prelude.2314059840._hygCtx._hyg.32 (default)
+                        Const Nat
+                        Lam x._@.Init.Prelude.2314059840._hygCtx.14.Init.Prelude.2314059840._hygCtx._hyg.35 (default)
+                          Const Nat
+                          Pi x._@.Init.Prelude.2314059840._hygCtx._hyg.65 (default)
+                            App
+                              App
+                                Const Nat.below [1]
+                                Lam x._@.Init.Prelude.2314059840._hygCtx._hyg.14 (default)
+                                  Const Nat
+                                  Pi x._@.Init.Prelude.2314059840._hygCtx._hyg.13 (default)
+                                    Const Nat
+                                    Const Nat
+                              BVar 0
+                            Const Nat
+                    BVar 0
+                  BVar 2
+                Lam a (default)
+                  Const Nat
+                  Lam x._@.Init.Prelude.2314059840._hygCtx._hyg.65 (default)
+                    App
+                      App
+                        Const Nat.below [1]
+                        Lam x._@.Init.Prelude.2314059840._hygCtx._hyg.14 (default)
+                          Const Nat
+                          Pi x._@.Init.Prelude.2314059840._hygCtx._hyg.13 (default)
+                            Const Nat
+                            Const Nat
+                      Const Nat.zero
+                    BVar 1
+              Lam a (default)
+                Const Nat
+                Lam b (default)
+                  Const Nat
+                  Lam x._@.Init.Prelude.2314059840._hygCtx._hyg.65 (default)
+                    App
+                      App
+                        Const Nat.below [1]
+                        Lam x._@.Init.Prelude.2314059840._hygCtx._hyg.14 (default)
+                          Const Nat
+                          Pi x._@.Init.Prelude.2314059840._hygCtx._hyg.13 (default)
+                            Const Nat
+                            Const Nat
+                      App
+                        Const Nat.succ
+                        BVar 0
+                    App
+                      Const Nat.succ
+                      App
+                        Proj PProd 0
+                          BVar 0
+                        BVar 2
+            BVar 1
+[kernel-trace] end Nat.add._f
+[kernel-trace] reference definition Nat.add.match_1
+  universe params: u_1
+  type:
+    Pi motive (default)
+      Pi x._@.Init.Prelude.2314059840._hygCtx.13.Init.Prelude.2314059840._hygCtx._hyg.32 (default)
+        Const Nat
+        Pi x._@.Init.Prelude.2314059840._hygCtx.14.Init.Prelude.2314059840._hygCtx._hyg.35 (default)
+          Const Nat
+          Sort u_1
+      Pi x._@.Init.Prelude.2314059840._hygCtx.13.Init.Prelude.2314059840._hygCtx._hyg.32 (default)
+        Const Nat
+        Pi x._@.Init.Prelude.2314059840._hygCtx.14.Init.Prelude.2314059840._hygCtx._hyg.35 (default)
+          Const Nat
+          Pi h_1 (default)
+            Pi a (default)
+              Const Nat
+              App
+                App
+                  BVar 3
+                  BVar 0
+                Const Nat.zero
+            Pi h_2 (default)
+              Pi a (default)
+                Const Nat
+                Pi b (default)
+                  Const Nat
+                  App
+                    App
+                      BVar 5
+                      BVar 1
+                    App
+                      Const Nat.succ
+                      BVar 0
+              App
+                App
+                  BVar 4
+                  BVar 3
+                BVar 2
+  value:
+    Lam motive (default)
+      Pi x._@.Init.Prelude.2314059840._hygCtx.13.Init.Prelude.2314059840._hygCtx._hyg.32 (default)
+        Const Nat
+        Pi x._@.Init.Prelude.2314059840._hygCtx.14.Init.Prelude.2314059840._hygCtx._hyg.35 (default)
+          Const Nat
+          Sort u_1
+      Lam x._@.Init.Prelude.2314059840._hygCtx.13.Init.Prelude.2314059840._hygCtx._hyg.32 (default)
+        Const Nat
+        Lam x._@.Init.Prelude.2314059840._hygCtx.14.Init.Prelude.2314059840._hygCtx._hyg.35 (default)
+          Const Nat
+          Lam h_1 (default)
+            Pi a (default)
+              Const Nat
+              App
+                App
+                  BVar 3
+                  BVar 0
+                Const Nat.zero
+            Lam h_2 (default)
+              Pi a (default)
+                Const Nat
+                Pi b (default)
+                  Const Nat
+                  App
+                    App
+                      BVar 5
+                      BVar 1
+                    App
+                      Const Nat.succ
+                      BVar 0
+              App
+                App
+                  App
+                    App
+                      Const Nat.casesOn [u_1]
+                      Lam x (default)
+                        Const Nat
+                        App
+                          App
+                            BVar 5
+                            BVar 4
+                          BVar 0
+                    BVar 2
+                  App
+                    BVar 1
+                    BVar 3
+                Lam n._@.Init.Prelude.2314059840._hygCtx._hyg.62 (default)
+                  Const Nat
+                  App
+                    App
+                      BVar 1
+                      BVar 4
+                    BVar 0
+[kernel-trace] end Nat.add.match_1
+[kernel-trace] reference inductive HAdd
+  universe params: u v w
+  params: 3
+  type:
+    Pi α (default)
+      Sort succ u
+      Pi β (default)
+        Sort succ v
+        Pi γ (default)
+          App
+            Const outParam [succ (succ w)]
+            Sort succ w
+          Sort max (max (succ u) (succ v)) (succ w)
+[kernel-trace] end HAdd
+[kernel-trace] reference constructor HAdd.mk
+  universe params: u v w
+  type:
+    Pi α (implicit)
+      Sort succ u
+      Pi β (implicit)
+        Sort succ v
+        Pi γ (implicit)
+          App
+            Const outParam [succ (succ w)]
+            Sort succ w
+          Pi hAdd (default)
+            Pi a._@._internal._hyg.0 (default)
+              BVar 2
+              Pi a._@._internal._hyg.0 (default)
+                BVar 2
+                BVar 2
+            App
+              App
+                App
+                  Const HAdd [u, v, w]
+                  BVar 3
+                BVar 2
+              BVar 1
+[kernel-trace] end HAdd.mk
+[kernel-trace] reference definition Add.add
+  universe params: u
+  type:
+    Pi α (implicit)
+      Sort succ u
+      Pi self (inst_implicit)
+        App
+          Const Add [u]
+          BVar 0
+        Pi a._@._internal._hyg.0 (default)
+          BVar 1
+          Pi a._@._internal._hyg.0 (default)
+            BVar 2
+            BVar 3
+  value:
+    Lam α (default)
+      Sort succ u
+      Lam self (inst_implicit)
+        App
+          Const Add [u]
+          BVar 0
+        Proj Add 0
+          BVar 0
+[kernel-trace] end Add.add
+[kernel-trace] reference definition outParam
+  universe params: u
+  type:
+    Pi α (default)
+      Sort u
+      Sort u
+  value:
+    Lam α (default)
+      Sort u
+      BVar 0
+[kernel-trace] end outParam
+[kernel-trace] reference inductive OfNat
+  universe params: u
+  params: 2
+  type:
+    Pi α (default)
+      Sort succ u
+      Pi x._@.Init.Prelude.1822880135._hygCtx._hyg.3 (default)
+        Const Nat
+        Sort succ u
+[kernel-trace] end OfNat
+[kernel-trace] reference constructor OfNat.mk
+  universe params: u
+  type:
+    Pi α (implicit)
+      Sort succ u
+      Pi x._@.Init.Prelude.1822880135._hygCtx._hyg.3 (implicit)
+        Const Nat
+        Pi ofNat (default)
+          BVar 1
+          App
+            App
+              Const OfNat [u]
+              BVar 2
+            BVar 1
+[kernel-trace] end OfNat.mk
+[kernel-trace] definition MyNat._sizeOf_1
+  type:
+    Pi t (default)
+      Const MyNat
+      Const Nat
+  value:
+    Lam t (default)
+      Const MyNat
+      App
+        App
+          App
+            App
+              Const MyNat.rec [1]
+              Lam t (default)
+                Const MyNat
+                Const Nat
+            App
+              App
+                App
+                  Const OfNat.ofNat [0]
+                  Const Nat
+                Lit nat 1
+              App
+                Const instOfNatNat
+                Lit nat 1
+          Lam a._@._internal._hyg.0 (default)
+            Const MyNat
+            Lam a_ih._@._internal._hyg.0 (default)
+              Const Nat
+              App
+                App
+                  App
+                    App
+                      App
+                        App
+                          Const HAdd.hAdd [0, 0, 0]
+                          Const Nat
+                        Const Nat
+                      Const Nat
+                    App
+                      App
+                        Const instHAdd [0]
+                        Const Nat
+                      Const instAddNat
+                  App
+                    App
+                      App
+                        Const OfNat.ofNat [0]
+                        Const Nat
+                      Lit nat 1
+                    App
+                      Const instOfNatNat
+                      Lit nat 1
+                BVar 0
+        BVar 0
+[kernel-trace] end MyNat._sizeOf_1
+[kernel-trace] reference inductive SizeOf
+  universe params: u
+  params: 1
+  type:
+    Pi α (default)
+      Sort u
+      Sort max 1 u
+[kernel-trace] end SizeOf
+[kernel-trace] reference constructor SizeOf.mk
+  universe params: u
+  type:
+    Pi α (implicit)
+      Sort u
+      Pi sizeOf (default)
+        Pi a._@._internal._hyg.0 (default)
+          BVar 0
+          Const Nat
+        App
+          Const SizeOf [u]
+          BVar 1
+[kernel-trace] end SizeOf.mk
+[kernel-trace] definition MyNat._sizeOf_inst
+  type:
+    App
+      Const SizeOf [1]
+      Const MyNat
+  value:
+    App
+      App
+        Const SizeOf.mk [1]
+        Const MyNat
+      Lam m (default)
+        Const MyNat
+        App
+          Const MyNat._sizeOf_1
+          BVar 0
+[kernel-trace] end MyNat._sizeOf_inst
+[kernel-trace] reference definition SizeOf.sizeOf
+  universe params: u
+  type:
+    Pi α (implicit)
+      Sort u
+      Pi self (inst_implicit)
+        App
+          Const SizeOf [u]
+          BVar 0
+        Pi a._@._internal._hyg.0 (default)
+          BVar 1
+          Const Nat
+  value:
+    Lam α (default)
+      Sort u
+      Lam self (inst_implicit)
+        App
+          Const SizeOf [u]
+          BVar 0
+        Proj SizeOf 0
+          BVar 0
+[kernel-trace] end SizeOf.sizeOf
+[kernel-trace] theorem MyNat.zero.sizeOf_spec
+  type:
+    App
+      App
+        App
+          Const Eq [1]
+          Const Nat
+        App
+          App
+            App
+              Const SizeOf.sizeOf [1]
+              Const MyNat
+            Const MyNat._sizeOf_inst
+          Const MyNat.zero
+      App
+        App
+          App
+            Const OfNat.ofNat [0]
+            Const Nat
+          Lit nat 1
+        App
+          Const instOfNatNat
+          Lit nat 1
+  value:
+    App
+      App
+        Const Eq.refl [1]
+        Const Nat
+      App
+        App
+          App
+            Const OfNat.ofNat [0]
+            Const Nat
+          Lit nat 1
+        App
+          Const instOfNatNat
+          Lit nat 1
+[kernel-trace] end MyNat.zero.sizeOf_spec
+[kernel-trace] theorem MyNat.succ.sizeOf_spec
+  type:
+    Pi a._@._internal._hyg.0 (default)
+      Const MyNat
+      App
+        App
+          App
+            Const Eq [1]
+            Const Nat
+          App
+            App
+              App
+                Const SizeOf.sizeOf [1]
+                Const MyNat
+              Const MyNat._sizeOf_inst
+            App
+              Const MyNat.succ
+              BVar 0
+        App
+          App
+            App
+              App
+                App
+                  App
+                    Const HAdd.hAdd [0, 0, 0]
+                    Const Nat
+                  Const Nat
+                Const Nat
+              App
+                App
+                  Const instHAdd [0]
+                  Const Nat
+                Const instAddNat
+            App
+              App
+                App
+                  Const OfNat.ofNat [0]
+                  Const Nat
+                Lit nat 1
+              App
+                Const instOfNatNat
+                Lit nat 1
+          App
+            App
+              App
+                Const SizeOf.sizeOf [1]
+                Const MyNat
+              Const MyNat._sizeOf_inst
+            BVar 0
+  value:
+    Lam a._@._internal._hyg.0 (default)
+      Const MyNat
+      App
+        App
+          Const Eq.refl [1]
+          Const Nat
+        App
+          App
+            App
+              App
+                App
+                  App
+                    Const HAdd.hAdd [0, 0, 0]
+                    Const Nat
+                  Const Nat
+                Const Nat
+              App
+                App
+                  Const instHAdd [0]
+                  Const Nat
+                Const instAddNat
+            App
+              App
+                App
+                  Const OfNat.ofNat [0]
+                  Const Nat
+                Lit nat 1
+              App
+                Const instOfNatNat
+                Lit nat 1
+          App
+            App
+              App
+                Const SizeOf.sizeOf [1]
+                Const MyNat
+              Const MyNat._sizeOf_inst
+            BVar 0
+[kernel-trace] end MyNat.succ.sizeOf_spec
+[kernel-trace] theorem MyNat.succ.inj
+  type:
+    Pi a._@._internal._hyg.0 (implicit)
+      Const MyNat
+      Pi a._@._internal._hyg.0 (implicit)
+        Const MyNat
+        Pi x._@.instrumentation.examples.rewrite_step.3705883368._hygCtx._hyg.12 (default)
+          App
+            App
+              App
+                Const Eq [1]
+                Const MyNat
+              App
+                Const MyNat.succ
+                BVar 1
+            App
+              Const MyNat.succ
+              BVar 0
+          App
+            App
+              App
+                Const Eq [1]
+                Const MyNat
+              BVar 2
+            BVar 1
+  value:
+    Lam a._@._internal._hyg.0 (implicit)
+      Const MyNat
+      Lam a._@._internal._hyg.0 (implicit)
+        Const MyNat
+        Lam x._@.instrumentation.examples.rewrite_step.3705883368._hygCtx._hyg.12 (default)
+          App
+            App
+              App
+                Const Eq [1]
+                Const MyNat
+              App
+                Const MyNat.succ
+                BVar 1
+            App
+              Const MyNat.succ
+              BVar 0
+          App
+            App
+              App
+                App
+                  App
+                    Const MyNat.succ.noConfusion [0]
+                    App
+                      App
+                        App
+                          Const Eq [1]
+                          Const MyNat
+                        BVar 2
+                      BVar 1
+                  BVar 2
+                BVar 1
+              BVar 0
+            Lam a_eq._@._internal.0.instrumentation.examples.rewrite_step.3705883368._hygCtx._hyg.13 (default)
+              App
+                App
+                  App
+                    Const Eq [1]
+                    Const MyNat
+                  BVar 2
+                BVar 1
+              BVar 0
+[kernel-trace] end MyNat.succ.inj
+[kernel-trace] reference theorem Eq.propIntro
+  type:
+    Pi a (implicit)
+      Sort 0
+      Pi b (implicit)
+        Sort 0
+        Pi h₁ (default)
+          Pi a._@._internal._hyg.0 (default)
+            BVar 1
+            BVar 1
+          Pi h₂ (default)
+            Pi a._@._internal._hyg.0 (default)
+              BVar 1
+              BVar 3
+            App
+              App
+                App
+                  Const Eq [1]
+                  Sort 0
+                BVar 3
+              BVar 2
+[kernel-trace] end Eq.propIntro
+[kernel-trace] theorem MyNat.succ.injEq
+  type:
+    Pi a._@._internal._hyg.0 (default)
+      Const MyNat
+      Pi a._@._internal._hyg.0 (default)
+        Const MyNat
+        App
+          App
+            App
+              Const Eq [1]
+              Sort 0
+            App
+              App
+                App
+                  Const Eq [1]
+                  Const MyNat
+                App
+                  Const MyNat.succ
+                  BVar 1
+              App
+                Const MyNat.succ
+                BVar 0
+          App
+            App
+              App
+                Const Eq [1]
+                Const MyNat
+              BVar 1
+            BVar 0
+  value:
+    Lam a._@._internal._hyg.0 (default)
+      Const MyNat
+      Lam a._@._internal._hyg.0 (default)
+        Const MyNat
+        App
+          App
+            App
+              App
+                Const Eq.propIntro
+                App
+                  App
+                    App
+                      Const Eq [1]
+                      Const MyNat
+                    App
+                      Const MyNat.succ
+                      BVar 1
+                  App
+                    Const MyNat.succ
+                    BVar 0
+              App
+                App
+                  App
+                    Const Eq [1]
+                    Const MyNat
+                  BVar 1
+                BVar 0
+            App
+              App
+                Const MyNat.succ.inj
+                BVar 1
+              BVar 0
+          App
+            App
+              App
+                App
+                  App
+                    Const Eq.ndrec [0, 1]
+                    Const MyNat
+                  BVar 1
+                Lam a._@._internal._hyg.0 (default)
+                  Const MyNat
+                  App
+                    App
+                      App
+                        Const Eq [1]
+                        Const MyNat
+                      App
+                        Const MyNat.succ
+                        BVar 2
+                    App
+                      Const MyNat.succ
+                      BVar 0
+              App
+                App
+                  Const Eq.refl [1]
+                  Const MyNat
+                App
+                  Const MyNat.succ
+                  BVar 1
+            BVar 0
+[kernel-trace] end MyNat.succ.injEq
+[kernel-trace] definition MyNat.add.match_1
+  universe params: u_1
+  type:
+    Pi motive (default)
+      Pi x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx.7.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.26 (default)
+        Const MyNat
+        Pi x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx.8.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.29 (default)
+          Const MyNat
+          Sort u_1
+      Pi x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx.7.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.26 (default)
+        Const MyNat
+        Pi x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx.8.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.29 (default)
+          Const MyNat
+          Pi h_1 (default)
+            Pi a (default)
+              Const MyNat
+              App
+                App
+                  BVar 3
+                  BVar 0
+                Const MyNat.zero
+            Pi h_2 (default)
+              Pi a (default)
+                Const MyNat
+                Pi b (default)
+                  Const MyNat
+                  App
+                    App
+                      BVar 5
+                      BVar 1
+                    App
+                      Const MyNat.succ
+                      BVar 0
+              App
+                App
+                  BVar 4
+                  BVar 3
+                BVar 2
+  value:
+    Lam motive (default)
+      Pi x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx.7.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.26 (default)
+        Const MyNat
+        Pi x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx.8.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.29 (default)
+          Const MyNat
+          Sort u_1
+      Lam x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx.7.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.26 (default)
+        Const MyNat
+        Lam x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx.8.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.29 (default)
+          Const MyNat
+          Lam h_1 (default)
+            Pi a (default)
+              Const MyNat
+              App
+                App
+                  BVar 3
+                  BVar 0
+                Const MyNat.zero
+            Lam h_2 (default)
+              Pi a (default)
+                Const MyNat
+                Pi b (default)
+                  Const MyNat
+                  App
+                    App
+                      BVar 5
+                      BVar 1
+                    App
+                      Const MyNat.succ
+                      BVar 0
+              App
+                App
+                  App
+                    App
+                      Const MyNat.casesOn [u_1]
+                      Lam x (default)
+                        Const MyNat
+                        App
+                          App
+                            BVar 5
+                            BVar 4
+                          BVar 0
+                    BVar 2
+                  App
+                    BVar 1
+                    BVar 3
+                Lam a._@._internal.0.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.56 (default)
+                  Const MyNat
+                  App
+                    App
+                      BVar 1
+                      BVar 4
+                    BVar 0
+[kernel-trace] end MyNat.add.match_1
+[kernel-trace] axiom MyNat.add
+  type:
+    Pi a._@._internal._hyg.0 (default)
+      Const MyNat
+      Pi a._@._internal._hyg.0 (default)
+        Const MyNat
+        Const MyNat
+[kernel-trace] end MyNat.add
+[kernel-trace] definition MyNat.add._f
+  type:
+    Pi x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.8 (default)
+      Const MyNat
+      Pi f (default)
+        App
+          App
+            Const MyNat.below [1]
+            Lam x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.8 (default)
+              Const MyNat
+              Pi x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.7 (default)
+                Const MyNat
+                Const MyNat
+          BVar 0
+        Pi x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.7 (default)
+          Const MyNat
+          Const MyNat
+  value:
+    Lam x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.8 (default)
+      Const MyNat
+      Lam f (default)
+        App
+          App
+            Const MyNat.below [1]
+            Lam x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.8 (default)
+              Const MyNat
+              Pi x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.7 (default)
+                Const MyNat
+                Const MyNat
+          BVar 0
+        Lam x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.7 (default)
+          Const MyNat
+          App
+            App
+              App
+                App
+                  App
+                    App
+                      Const MyNat.add.match_1 [1]
+                      Lam x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx.7.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.26 (default)
+                        Const MyNat
+                        Lam x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx.8.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.29 (default)
+                          Const MyNat
+                          Pi x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.59 (default)
+                            App
+                              App
+                                Const MyNat.below [1]
+                                Lam x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.8 (default)
+                                  Const MyNat
+                                  Pi x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.7 (default)
+                                    Const MyNat
+                                    Const MyNat
+                              BVar 0
+                            Const MyNat
+                    BVar 0
+                  BVar 2
+                Lam a (default)
+                  Const MyNat
+                  Lam x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.59 (default)
+                    App
+                      App
+                        Const MyNat.below [1]
+                        Lam x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.8 (default)
+                          Const MyNat
+                          Pi x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.7 (default)
+                            Const MyNat
+                            Const MyNat
+                      Const MyNat.zero
+                    BVar 1
+              Lam a (default)
+                Const MyNat
+                Lam b (default)
+                  Const MyNat
+                  Lam x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.59 (default)
+                    App
+                      App
+                        Const MyNat.below [1]
+                        Lam x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.8 (default)
+                          Const MyNat
+                          Pi x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.7 (default)
+                            Const MyNat
+                            Const MyNat
+                      App
+                        Const MyNat.succ
+                        BVar 0
+                    App
+                      Const MyNat.succ
+                      App
+                        Proj PProd 0
+                          BVar 0
+                        BVar 2
+            BVar 1
+[kernel-trace] end MyNat.add._f
+[kernel-trace] axiom MyNat.add
+  type:
+    Pi a._@._internal._hyg.0 (default)
+      Const MyNat
+      Pi a._@._internal._hyg.0 (default)
+        Const MyNat
+        Const MyNat
+[kernel-trace] end MyNat.add
+[kernel-trace] axiom MyNat.add
+  type:
+    Pi a._@._internal._hyg.0 (default)
+      Const MyNat
+      Pi a._@._internal._hyg.0 (default)
+        Const MyNat
+        Const MyNat
+[kernel-trace] end MyNat.add
+[kernel-trace] axiom MyNat.add
+  type:
+    Pi a._@._internal._hyg.0 (default)
+      Const MyNat
+      Pi a._@._internal._hyg.0 (default)
+        Const MyNat
+        Const MyNat
+[kernel-trace] end MyNat.add
+[kernel-trace] axiom MyNat.add
+  type:
+    Pi a._@._internal._hyg.0 (default)
+      Const MyNat
+      Pi a._@._internal._hyg.0 (default)
+        Const MyNat
+        Const MyNat
+[kernel-trace] end MyNat.add
+[kernel-trace] definition MyNat.add
+  type:
+    Pi a._@._internal._hyg.0 (default)
+      Const MyNat
+      Pi a._@._internal._hyg.0 (default)
+        Const MyNat
+        Const MyNat
+  value:
+    Lam x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.7 (default)
+      Const MyNat
+      Lam x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.8 (default)
+        Const MyNat
+        App
+          App
+            App
+              App
+                Const MyNat.brecOn [1]
+                Lam x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.8 (default)
+                  Const MyNat
+                  Pi x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.7 (default)
+                    Const MyNat
+                    Const MyNat
+              BVar 0
+            Const MyNat.add._f
+          BVar 1
+[kernel-trace] end MyNat.add
+[kernel-trace] mutual definition MyNat.add._unsafe_rec
+  safety: partial
+  type:
+    Pi a._@._internal._hyg.0 (default)
+      Const MyNat
+      Pi a._@._internal._hyg.0 (default)
+        Const MyNat
+        Const MyNat
+  value:
+    Lam x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.7 (default)
+      Const MyNat
+      Lam x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.8 (default)
+        Const MyNat
+        App
+          App
+            App
+              App
+                App
+                  Const MyNat.add.match_1 [1]
+                  Lam x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx.7.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.26 (default)
+                    Const MyNat
+                    Lam x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx.8.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.29 (default)
+                      Const MyNat
+                      Const MyNat
+                BVar 1
+              BVar 0
+            Lam a (default)
+              Const MyNat
+              BVar 0
+          Lam a (default)
+            Const MyNat
+            Lam b (default)
+              Const MyNat
+              App
+                Const MyNat.succ
+                App
+                  App
+                    Const MyNat.add._unsafe_rec
+                    BVar 1
+                  BVar 0
+[kernel-trace] end MyNat.add._unsafe_rec
+[kernel-trace] definition MyNat.add._sunfold
+  type:
+    Pi a._@._internal._hyg.0 (default)
+      Const MyNat
+      Pi a._@._internal._hyg.0 (default)
+        Const MyNat
+        Const MyNat
+  value:
+    Lam x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.7 (default)
+      Const MyNat
+      Lam x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.8 (default)
+        Const MyNat
+        MData
+          App
+            App
+              App
+                App
+                  App
+                    Const MyNat.add.match_1 [1]
+                    Lam x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx.7.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.26 (default)
+                      Const MyNat
+                      Lam x._@.instrumentation.examples.rewrite_step.2314059840._hygCtx.8.instrumentation.examples.rewrite_step.2314059840._hygCtx._hyg.29 (default)
+                        Const MyNat
+                        Const MyNat
+                  BVar 1
+                BVar 0
+              Lam a (default)
+                Const MyNat
+                MData
+                  BVar 0
+            Lam a (default)
+              Const MyNat
+              Lam b (default)
+                Const MyNat
+                MData
+                  App
+                    Const MyNat.succ
+                    App
+                      App
+                        Const MyNat.add
+                        BVar 1
+                      BVar 0
+[kernel-trace] end MyNat.add._sunfold
+[kernel-trace] definition MyNat.instAdd
+  type:
+    App
+      Const Add [0]
+      Const MyNat
+  value:
+    App
+      App
+        Const Add.mk [0]
+        Const MyNat
+      Const MyNat.add
+[kernel-trace] end MyNat.instAdd
+[kernel-trace] reference definition Eq.mpr
+  universe params: u
+  type:
+    Pi α (implicit)
+      Sort u
+      Pi β (implicit)
+        Sort u
+        Pi h (default)
+          App
+            App
+              App
+                Const Eq [succ u]
+                Sort u
+              BVar 1
+            BVar 0
+          Pi b (default)
+            BVar 1
+            BVar 3
+  value:
+    Lam α (implicit)
+      Sort u
+      Lam β (implicit)
+        Sort u
+        Lam h (default)
+          App
+            App
+              App
+                Const Eq [succ u]
+                Sort u
+              BVar 1
+            BVar 0
+          Lam b (default)
+            BVar 1
+            App
+              App
+                App
+                  App
+                    App
+                      App
+                        Const Eq.rec [u, succ u]
+                        Sort u
+                      BVar 2
+                    Lam x._@.Init.Core.2537982879._hygCtx._hyg.14 (default)
+                      Sort u
+                      Lam h._@.Init.Core.2537982879._hygCtx._hyg.15 (default)
+                        App
+                          App
+                            App
+                              Const Eq [succ u]
+                              Sort u
+                            BVar 3
+                          BVar 0
+                        BVar 1
+                  BVar 0
+                BVar 3
+              App
+                App
+                  App
+                    App
+                      Const Eq.symm [succ u]
+                      Sort u
+                    BVar 3
+                  BVar 2
+                BVar 1
+[kernel-trace] end Eq.mpr
+[kernel-trace] reference theorem congrArg
+  universe params: u v
+  type:
+    Pi α (implicit)
+      Sort u
+      Pi β (implicit)
+        Sort v
+        Pi a₁ (implicit)
+          BVar 1
+          Pi a₂ (implicit)
+            BVar 2
+            Pi f (default)
+              Pi a._@._internal._hyg.0 (default)
+                BVar 3
+                BVar 3
+              Pi h (default)
+                App
+                  App
+                    App
+                      Const Eq [u]
+                      BVar 4
+                    BVar 2
+                  BVar 1
+                App
+                  App
+                    App
+                      Const Eq [v]
+                      BVar 4
+                    App
+                      BVar 1
+                      BVar 3
+                  App
+                    BVar 1
+                    BVar 2
+[kernel-trace] end congrArg
+[kernel-trace] theorem MyNat.rewrite_step
+  type:
+    Pi a (default)
+      Const MyNat
+      Pi n (default)
+        Const MyNat
+        Pi ih (default)
+          App
+            App
+              App
+                Const Eq [1]
+                Const MyNat
+              App
+                App
+                  App
+                    App
+                      App
+                        App
+                          Const HAdd.hAdd [0, 0, 0]
+                          Const MyNat
+                        Const MyNat
+                      Const MyNat
+                    App
+                      App
+                        Const instHAdd [0]
+                        Const MyNat
+                      Const MyNat.instAdd
+                  App
+                    Const MyNat.succ
+                    BVar 1
+                BVar 0
+            App
+              Const MyNat.succ
+              App
+                App
+                  App
+                    App
+                      App
+                        App
+                          Const HAdd.hAdd [0, 0, 0]
+                          Const MyNat
+                        Const MyNat
+                      Const MyNat
+                    App
+                      App
+                        Const instHAdd [0]
+                        Const MyNat
+                      Const MyNat.instAdd
+                  BVar 1
+                BVar 0
+          App
+            App
+              App
+                Const Eq [1]
+                Const MyNat
+              App
+                Const MyNat.succ
+                App
+                  App
+                    App
+                      App
+                        App
+                          App
+                            Const HAdd.hAdd [0, 0, 0]
+                            Const MyNat
+                          Const MyNat
+                        Const MyNat
+                      App
+                        App
+                          Const instHAdd [0]
+                          Const MyNat
+                        Const MyNat.instAdd
+                    App
+                      Const MyNat.succ
+                      BVar 2
+                  BVar 1
+            App
+              Const MyNat.succ
+              App
+                Const MyNat.succ
+                App
+                  App
+                    App
+                      App
+                        App
+                          App
+                            Const HAdd.hAdd [0, 0, 0]
+                            Const MyNat
+                          Const MyNat
+                        Const MyNat
+                      App
+                        App
+                          Const instHAdd [0]
+                          Const MyNat
+                        Const MyNat.instAdd
+                    BVar 2
+                  BVar 1
+  value:
+    Lam a (default)
+      Const MyNat
+      Lam n (default)
+        Const MyNat
+        Lam ih (default)
+          App
+            App
+              App
+                Const Eq [1]
+                Const MyNat
+              App
+                App
+                  App
+                    App
+                      App
+                        App
+                          Const HAdd.hAdd [0, 0, 0]
+                          Const MyNat
+                        Const MyNat
+                      Const MyNat
+                    App
+                      App
+                        Const instHAdd [0]
+                        Const MyNat
+                      Const MyNat.instAdd
+                  App
+                    Const MyNat.succ
+                    BVar 1
+                BVar 0
+            App
+              Const MyNat.succ
+              App
+                App
+                  App
+                    App
+                      App
+                        App
+                          Const HAdd.hAdd [0, 0, 0]
+                          Const MyNat
+                        Const MyNat
+                      Const MyNat
+                    App
+                      App
+                        Const instHAdd [0]
+                        Const MyNat
+                      Const MyNat.instAdd
+                  BVar 1
+                BVar 0
+          App
+            App
+              App
+                App
+                  Const Eq.mpr [0]
+                  App
+                    App
+                      App
+                        Const Eq [1]
+                        Const MyNat
+                      App
+                        Const MyNat.succ
+                        App
+                          App
+                            App
+                              App
+                                App
+                                  App
+                                    Const HAdd.hAdd [0, 0, 0]
+                                    Const MyNat
+                                  Const MyNat
+                                Const MyNat
+                              App
+                                App
+                                  Const instHAdd [0]
+                                  Const MyNat
+                                Const MyNat.instAdd
+                            App
+                              Const MyNat.succ
+                              BVar 2
+                          BVar 1
+                    App
+                      Const MyNat.succ
+                      App
+                        Const MyNat.succ
+                        App
+                          App
+                            App
+                              App
+                                App
+                                  App
+                                    Const HAdd.hAdd [0, 0, 0]
+                                    Const MyNat
+                                  Const MyNat
+                                Const MyNat
+                              App
+                                App
+                                  Const instHAdd [0]
+                                  Const MyNat
+                                Const MyNat.instAdd
+                            BVar 2
+                          BVar 1
+                App
+                  App
+                    App
+                      Const Eq [1]
+                      Const MyNat
+                    App
+                      Const MyNat.succ
+                      App
+                        Const MyNat.succ
+                        App
+                          App
+                            App
+                              App
+                                App
+                                  App
+                                    Const HAdd.hAdd [0, 0, 0]
+                                    Const MyNat
+                                  Const MyNat
+                                Const MyNat
+                              App
+                                App
+                                  Const instHAdd [0]
+                                  Const MyNat
+                                Const MyNat.instAdd
+                            BVar 2
+                          BVar 1
+                  App
+                    Const MyNat.succ
+                    App
+                      Const MyNat.succ
+                      App
+                        App
+                          App
+                            App
+                              App
+                                App
+                                  Const HAdd.hAdd [0, 0, 0]
+                                  Const MyNat
+                                Const MyNat
+                              Const MyNat
+                            App
+                              App
+                                Const instHAdd [0]
+                                Const MyNat
+                              Const MyNat.instAdd
+                          BVar 2
+                        BVar 1
+              App
+                App
+                  Const id [0]
+                  App
+                    App
+                      App
+                        Const Eq [1]
+                        Sort 0
+                      App
+                        App
+                          App
+                            Const Eq [1]
+                            Const MyNat
+                          App
+                            Const MyNat.succ
+                            App
+                              App
+                                App
+                                  App
+                                    App
+                                      App
+                                        Const HAdd.hAdd [0, 0, 0]
+                                        Const MyNat
+                                      Const MyNat
+                                    Const MyNat
+                                  App
+                                    App
+                                      Const instHAdd [0]
+                                      Const MyNat
+                                    Const MyNat.instAdd
+                                App
+                                  Const MyNat.succ
+                                  BVar 2
+                              BVar 1
+                        App
+                          Const MyNat.succ
+                          App
+                            Const MyNat.succ
+                            App
+                              App
+                                App
+                                  App
+                                    App
+                                      App
+                                        Const HAdd.hAdd [0, 0, 0]
+                                        Const MyNat
+                                      Const MyNat
+                                    Const MyNat
+                                  App
+                                    App
+                                      Const instHAdd [0]
+                                      Const MyNat
+                                    Const MyNat.instAdd
+                                BVar 2
+                              BVar 1
+                    App
+                      App
+                        App
+                          Const Eq [1]
+                          Const MyNat
+                        App
+                          Const MyNat.succ
+                          App
+                            Const MyNat.succ
+                            App
+                              App
+                                App
+                                  App
+                                    App
+                                      App
+                                        Const HAdd.hAdd [0, 0, 0]
+                                        Const MyNat
+                                      Const MyNat
+                                    Const MyNat
+                                  App
+                                    App
+                                      Const instHAdd [0]
+                                      Const MyNat
+                                    Const MyNat.instAdd
+                                BVar 2
+                              BVar 1
+                      App
+                        Const MyNat.succ
+                        App
+                          Const MyNat.succ
+                          App
+                            App
+                              App
+                                App
+                                  App
+                                    App
+                                      Const HAdd.hAdd [0, 0, 0]
+                                      Const MyNat
+                                    Const MyNat
+                                  Const MyNat
+                                App
+                                  App
+                                    Const instHAdd [0]
+                                    Const MyNat
+                                  Const MyNat.instAdd
+                              BVar 2
+                            BVar 1
+                App
+                  App
+                    App
+                      App
+                        App
+                          App
+                            Const congrArg [1, 1]
+                            Const MyNat
+                          Sort 0
+                        App
+                          App
+                            App
+                              App
+                                App
+                                  App
+                                    Const HAdd.hAdd [0, 0, 0]
+                                    Const MyNat
+                                  Const MyNat
+                                Const MyNat
+                              App
+                                App
+                                  Const instHAdd [0]
+                                  Const MyNat
+                                Const MyNat.instAdd
+                            App
+                              Const MyNat.succ
+                              BVar 2
+                          BVar 1
+                      App
+                        Const MyNat.succ
+                        App
+                          App
+                            App
+                              App
+                                App
+                                  App
+                                    Const HAdd.hAdd [0, 0, 0]
+                                    Const MyNat
+                                  Const MyNat
+                                Const MyNat
+                              App
+                                App
+                                  Const instHAdd [0]
+                                  Const MyNat
+                                Const MyNat.instAdd
+                            BVar 2
+                          BVar 1
+                    Lam _a (default)
+                      Const MyNat
+                      App
+                        App
+                          App
+                            Const Eq [1]
+                            Const MyNat
+                          App
+                            Const MyNat.succ
+                            BVar 0
+                        App
+                          Const MyNat.succ
+                          App
+                            Const MyNat.succ
+                            App
+                              App
+                                App
+                                  App
+                                    App
+                                      App
+                                        Const HAdd.hAdd [0, 0, 0]
+                                        Const MyNat
+                                      Const MyNat
+                                    Const MyNat
+                                  App
+                                    App
+                                      Const instHAdd [0]
+                                      Const MyNat
+                                    Const MyNat.instAdd
+                                BVar 3
+                              BVar 2
+                  BVar 0
+            App
+              App
+                Const Eq.refl [1]
+                Const MyNat
+              App
+                Const MyNat.succ
+                App
+                  Const MyNat.succ
+                  App
+                    App
+                      App
+                        App
+                          App
+                            App
+                              Const HAdd.hAdd [0, 0, 0]
+                              Const MyNat
+                            Const MyNat
+                          Const MyNat
+                        App
+                          App
+                            Const instHAdd [0]
+                            Const MyNat
+                          Const MyNat.instAdd
+                      BVar 2
+                    BVar 1
+[kernel-trace] end MyNat.rewrite_step

@@ -1,0 +1,276 @@
+diff --git i/src/kernel/environment.cpp w/src/kernel/environment.cpp
+index 8c5d2b1..a72db1e 100644
+--- i/src/kernel/environment.cpp
++++ w/src/kernel/environment.cpp
+@@ -7,6 +7,12 @@ Author: Leonardo de Moura
+ #include <utility>
+ #include <vector>
+ #include <limits>
++#include <cstdlib>
++#include <iostream>
++#include <sstream>
++#include <string>
++#include <set>
++#include <mutex>
+ #include "runtime/sstream.h"
+ #include "runtime/thread.h"
+ #include "runtime/sharecommon.h"
+@@ -16,6 +22,7 @@ Author: Leonardo de Moura
+ #include "kernel/kernel_exception.h"
+ #include "kernel/type_checker.h"
+ #include "kernel/quot.h"
++#include "kernel/for_each_fn.h"
+ 
+ namespace lean {
+ extern "C" object* lean_environment_add(object*, object*);
+@@ -256,7 +263,250 @@ environment environment::add_mutual(declaration const & d, bool check) const {
+     return diag.update(new_env);
+ }
+ 
++/* ------------------------------------------------------------------------
++   Tutorial instrumentation (not part of upstream Lean).
++
++   When the environment variable LEAN_KERNEL_TRACE is set, every declaration
++   whose name starts with that prefix is printed to stderr as a raw expression
++   tree immediately before the kernel type checks it. Use `*` to trace every
++   declaration.
++   ------------------------------------------------------------------------ */
++static bool trace_should_print(name const & n) {
++    static char const * filter = std::getenv("LEAN_KERNEL_TRACE");
++    if (!filter || !*filter) return false;
++    if (filter[0] == '*' && filter[1] == 0) return true;
++    std::ostringstream s; s << n;
++    return s.str().rfind(filter, 0) == 0;
++}
++
++static char const * trace_binder_info(binder_info bi) {
++    switch (bi) {
++    case binder_info::Default:        return "default";
++    case binder_info::Implicit:       return "implicit";
++    case binder_info::StrictImplicit: return "strict_implicit";
++    case binder_info::InstImplicit:   return "inst_implicit";
++    case binder_info::Rec:            return "rec";
++    }
++    return "?";
++}
++
++static void trace_expr(std::ostream & out, expr const & e, unsigned depth) {
++    for (unsigned i = 0; i < depth; i++) out << "  ";
++    switch (e.kind()) {
++    case expr_kind::BVar:  out << "BVar " << bvar_idx(e) << "\n"; break;
++    case expr_kind::FVar:  out << "FVar " << fvar_name(e) << "\n"; break;
++    case expr_kind::MVar:  out << "MVar " << mvar_name(e) << "\n"; break;
++    case expr_kind::Sort:  out << "Sort " << sort_level(e) << "\n"; break;
++    case expr_kind::Const:
++        out << "Const " << const_name(e);
++        if (!empty(const_levels(e))) {
++            out << " [";
++            bool first = true;
++            for (level const & l : const_levels(e)) {
++                if (!first) out << ", ";
++                first = false;
++                out << l;
++            }
++            out << "]";
++        }
++        out << "\n";
++        break;
++    case expr_kind::App:
++        out << "App\n";
++        trace_expr(out, app_fn(e), depth + 1);
++        trace_expr(out, app_arg(e), depth + 1);
++        break;
++    case expr_kind::Lambda:
++    case expr_kind::Pi:
++        out << (is_lambda(e) ? "Lam " : "Pi ") << binding_name(e)
++            << " (" << trace_binder_info(binding_info(e)) << ")\n";
++        trace_expr(out, binding_domain(e), depth + 1);
++        trace_expr(out, binding_body(e), depth + 1);
++        break;
++    case expr_kind::Let:
++        out << "Let " << let_name(e) << "\n";
++        trace_expr(out, let_type(e), depth + 1);
++        trace_expr(out, let_value(e), depth + 1);
++        trace_expr(out, let_body(e), depth + 1);
++        break;
++    case expr_kind::Lit:
++        if (lit_value(e).kind() == literal_kind::Nat)
++            out << "Lit nat " << lit_value(e).get_nat() << "\n";
++        else
++            out << "Lit string \"" << lit_value(e).get_string().to_std_string() << "\"\n";
++        break;
++    case expr_kind::MData:
++        out << "MData\n";
++        trace_expr(out, mdata_expr(e), depth + 1);
++        break;
++    case expr_kind::Proj:
++        out << "Proj " << proj_sname(e) << " " << proj_idx(e) << "\n";
++        trace_expr(out, proj_expr(e), depth + 1);
++        break;
++    }
++}
++
++/* Names already printed in this process, so each constant appears once. */
++static std::set<std::string> & trace_seen() { static std::set<std::string> s; return s; }
++static std::mutex & trace_mutex() { static std::mutex m; return m; }
++
++static std::string trace_name_str(name const & n) { std::ostringstream s; s << n; return s.str(); }
++
++/* Print one block. `nparams < 0` and `safety == nullptr` mean "not applicable". */
++static void trace_block(std::ostream & out, char const * kind, name const & n, names const & lparams,
++                        int nparams, char const * safety, expr const & type, expr const * value) {
++    out << "[kernel-trace] " << kind << " " << n << "\n";
++    if (!empty(lparams)) {
++        out << "  universe params:";
++        for (name const & p : lparams) out << " " << p;
++        out << "\n";
++    }
++    if (nparams >= 0) out << "  params: " << nparams << "\n";
++    if (safety) out << "  safety: " << safety << "\n";
++    out << "  type:\n";
++    trace_expr(out, type, 2);
++    if (value) {
++        out << "  value:\n";
++        trace_expr(out, *value, 2);
++    }
++    out << "[kernel-trace] end " << n << "\n";
++}
++
++/* Print every constant that `e` mentions and that has not been printed yet,
++   then the constants those mention, and so on. These constants are already
++   in the environment (the kernel checked them when their own file was
++   compiled); they are printed so that the trace is self-contained.
++
++   - inductive types are printed with all their constructors,
++   - definitions are printed with their value, because the kernel may unfold them,
++   - theorems, axioms, opaque constants and recursors are printed with their type only. */
++static void trace_references(std::ostream & out, environment const & env, expr const & e) {
++    std::vector<expr> todo;
++    todo.push_back(e);
++    while (!todo.empty()) {
++        expr curr = todo.back();
++        todo.pop_back();
++        std::vector<name> found;
++        for_each(curr, [&](expr const & sub) {
++            if (is_const(sub)) found.push_back(const_name(sub));
++            else if (is_proj(sub)) found.push_back(proj_sname(sub));
++            return true;
++        });
++        for (name c : found) {
++            if (trace_seen().count(trace_name_str(c))) continue;
++            optional<constant_info> info = env.find(c);
++            if (!info) { trace_seen().insert(trace_name_str(c)); continue; }
++            if (info->is_constructor()) {
++                /* Print the whole inductive type instead. */
++                c = info->to_constructor_val().get_induct();
++                info = env.find(c);
++                if (!info || trace_seen().count(trace_name_str(c))) continue;
++            }
++            trace_seen().insert(trace_name_str(c));
++            if (info->is_inductive()) {
++                inductive_val const & v = info->to_inductive_val();
++                trace_block(out, "reference inductive", c, info->get_lparams(), v.get_nparams(), nullptr,
++                            info->get_type(), nullptr);
++                todo.push_back(info->get_type());
++                for (name const & ctor : v.get_cnstrs()) {
++                    trace_seen().insert(trace_name_str(ctor));
++                    constant_info ctor_info = env.get(ctor);
++                    trace_block(out, "reference constructor", ctor, ctor_info.get_lparams(), -1, nullptr,
++                                ctor_info.get_type(), nullptr);
++                    todo.push_back(ctor_info.get_type());
++                }
++            } else if (info->is_definition()) {
++                definition_val const & v = info->to_definition_val();
++                char const * safety = v.get_safety() == definition_safety::unsafe ? "unsafe"
++                                    : v.get_safety() == definition_safety::partial ? "partial" : nullptr;
++                trace_block(out, "reference definition", c, info->get_lparams(), -1, safety,
++                            info->get_type(), &v.get_value());
++                todo.push_back(info->get_type());
++                todo.push_back(v.get_value());
++            } else {
++                char const * kind = info->is_theorem()  ? "reference theorem"
++                                  : info->is_axiom()    ? "reference axiom"
++                                  : info->is_opaque()   ? "reference opaque"
++                                  : info->is_recursor() ? "reference recursor"
++                                  :                       "reference quot";
++                trace_block(out, kind, c, info->get_lparams(), -1, nullptr, info->get_type(), nullptr);
++                todo.push_back(info->get_type());
++            }
++        }
++    }
++}
++
++static void trace_constant(std::ostream & out, environment const & env, char const * kind, name const & n,
++                           names const & lparams, int nparams, char const * safety,
++                           expr const & type, expr const * value) {
++    trace_seen().insert(trace_name_str(n));
++    trace_references(out, env, type);
++    if (value) trace_references(out, env, *value);
++    trace_block(out, kind, n, lparams, nparams, safety, type, value);
++}
++
++static char const * trace_safety(definition_safety s) {
++    return s == definition_safety::unsafe ? "unsafe" : s == definition_safety::partial ? "partial" : nullptr;
++}
++
++static void trace_declaration(environment const & env, declaration const & d) {
++    std::lock_guard<std::mutex> lock(trace_mutex());
++    std::ostringstream out;
++    switch (d.kind()) {
++    case declaration_kind::Axiom: {
++        axiom_val const & v = d.to_axiom_val();
++        if (!trace_should_print(v.get_name())) return;
++        trace_constant(out, env, "axiom", v.get_name(), v.get_lparams(), -1, nullptr, v.get_type(), nullptr);
++        break;
++    }
++    case declaration_kind::Definition: {
++        definition_val const & v = d.to_definition_val();
++        if (!trace_should_print(v.get_name())) return;
++        trace_constant(out, env, "definition", v.get_name(), v.get_lparams(), -1, trace_safety(v.get_safety()),
++                       v.get_type(), &v.get_value());
++        break;
++    }
++    case declaration_kind::Theorem: {
++        theorem_val const & v = d.to_theorem_val();
++        if (!trace_should_print(v.get_name())) return;
++        trace_constant(out, env, "theorem", v.get_name(), v.get_lparams(), -1, nullptr, v.get_type(), &v.get_value());
++        break;
++    }
++    case declaration_kind::Opaque: {
++        opaque_val const & v = d.to_opaque_val();
++        if (!trace_should_print(v.get_name())) return;
++        trace_constant(out, env, "opaque", v.get_name(), v.get_lparams(), -1, nullptr, v.get_type(), &v.get_value());
++        break;
++    }
++    case declaration_kind::MutualDefinition:
++        for (definition_val const & v : d.to_definition_vals()) {
++            if (!trace_should_print(v.get_name())) continue;
++            /* Mark the whole group first: its members refer to each other. */
++            for (definition_val const & w : d.to_definition_vals()) trace_seen().insert(trace_name_str(w.get_name()));
++            trace_constant(out, env, "mutual definition", v.get_name(), v.get_lparams(), -1,
++                           trace_safety(v.get_safety()), v.get_type(), &v.get_value());
++        }
++        break;
++    case declaration_kind::Inductive: {
++        inductive_decl ind(d);
++        int nparams = static_cast<int>(ind.get_nparams().get_small_value());
++        for (inductive_type const & t : ind.get_types()) trace_seen().insert(trace_name_str(t.get_name()));
++        for (inductive_type const & t : ind.get_types()) {
++            if (!trace_should_print(t.get_name())) continue;
++            trace_constant(out, env, "inductive", t.get_name(), ind.get_lparams(), nparams, nullptr, t.get_type(), nullptr);
++            for (constructor const & c : t.get_cnstrs())
++                trace_constant(out, env, "constructor", c.fst(), ind.get_lparams(), -1, nullptr, c.snd(), nullptr);
++        }
++        break;
++    }
++    case declaration_kind::Quot:
++        return;
++    }
++    std::cerr << out.str() << std::flush;
++}
++
+ environment environment::add(declaration const & d, bool check) const {
++    if (check) trace_declaration(*this, d);
+     switch (d.kind()) {
+     case declaration_kind::Axiom:            return add_axiom(d, check);
+     case declaration_kind::Definition:       return add_definition(d, check);

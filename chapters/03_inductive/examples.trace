@@ -1,0 +1,1059 @@
+[kernel-trace] axiom lcErased
+  type:
+    Sort 1
+[kernel-trace] end lcErased
+[kernel-trace] axiom lcAny
+  type:
+    Sort 1
+[kernel-trace] end lcAny
+[kernel-trace] definition id
+  universe params: u
+  type:
+    Pi α (implicit)
+      Sort u
+      Pi a (default)
+        BVar 0
+        BVar 1
+  value:
+    Lam α (implicit)
+      Sort u
+      Lam a (default)
+        BVar 0
+        BVar 0
+[kernel-trace] end id
+[kernel-trace] definition const
+  universe params: u v
+  type:
+    Pi α (implicit)
+      Sort u
+      Pi β (implicit)
+        Sort v
+        Pi a (default)
+          BVar 1
+          Pi b (default)
+            BVar 1
+            BVar 3
+  value:
+    Lam α (implicit)
+      Sort u
+      Lam β (implicit)
+        Sort v
+        Lam a (default)
+          BVar 1
+          Lam b (default)
+            BVar 1
+            BVar 1
+[kernel-trace] end const
+[kernel-trace] inductive False
+  params: 0
+  type:
+    Sort 0
+[kernel-trace] end False
+[kernel-trace] reference recursor False.rec
+  universe params: u
+  type:
+    Pi motive (default)
+      Pi t (default)
+        Const False
+        Sort u
+      Pi t (default)
+        Const False
+        App
+          BVar 1
+          BVar 0
+[kernel-trace] end False.rec
+[kernel-trace] definition False.recOn
+  universe params: u
+  type:
+    Pi motive (default)
+      Pi t (default)
+        Const False
+        Sort u
+      Pi t (default)
+        Const False
+        App
+          BVar 1
+          BVar 0
+  value:
+    Lam motive (default)
+      Pi t (default)
+        Const False
+        Sort u
+      Lam t (default)
+        Const False
+        App
+          App
+            Const False.rec [u]
+            BVar 1
+          BVar 0
+[kernel-trace] end False.recOn
+[kernel-trace] inductive True
+  params: 0
+  type:
+    Sort 0
+[kernel-trace] end True
+[kernel-trace] constructor True.intro
+  type:
+    Const True
+[kernel-trace] end True.intro
+[kernel-trace] reference recursor True.rec
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const True
+        Sort u
+      Pi intro (default)
+        App
+          BVar 0
+          Const True.intro
+        Pi t (default)
+          Const True
+          App
+            BVar 2
+            BVar 0
+[kernel-trace] end True.rec
+[kernel-trace] definition True.recOn
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const True
+        Sort u
+      Pi t (default)
+        Const True
+        Pi intro (default)
+          App
+            BVar 1
+            Const True.intro
+          App
+            BVar 2
+            BVar 1
+  value:
+    Lam motive (implicit)
+      Pi t (default)
+        Const True
+        Sort u
+      Lam t (default)
+        Const True
+        Lam intro (default)
+          App
+            BVar 1
+            Const True.intro
+          App
+            App
+              App
+                Const True.rec [u]
+                BVar 2
+              BVar 0
+            BVar 1
+[kernel-trace] end True.recOn
+[kernel-trace] inductive And
+  params: 2
+  type:
+    Pi a (default)
+      Sort 0
+      Pi b (default)
+        Sort 0
+        Sort 0
+[kernel-trace] end And
+[kernel-trace] constructor And.intro
+  type:
+    Pi a (implicit)
+      Sort 0
+      Pi b (implicit)
+        Sort 0
+        Pi a._@._internal._hyg.0 (default)
+          BVar 1
+          Pi a._@._internal._hyg.0 (default)
+            BVar 1
+            App
+              App
+                Const And
+                BVar 3
+              BVar 2
+[kernel-trace] end And.intro
+[kernel-trace] reference recursor And.rec
+  universe params: u
+  type:
+    Pi a (implicit)
+      Sort 0
+      Pi b (implicit)
+        Sort 0
+        Pi motive (implicit)
+          Pi t (default)
+            App
+              App
+                Const And
+                BVar 1
+              BVar 0
+            Sort u
+          Pi intro (default)
+            Pi a._@._internal._hyg.0 (default)
+              BVar 2
+              Pi a._@._internal._hyg.0 (default)
+                BVar 2
+                App
+                  BVar 2
+                  App
+                    App
+                      App
+                        App
+                          Const And.intro
+                          BVar 4
+                        BVar 3
+                      BVar 1
+                    BVar 0
+            Pi t (default)
+              App
+                App
+                  Const And
+                  BVar 3
+                BVar 2
+              App
+                BVar 2
+                BVar 0
+[kernel-trace] end And.rec
+[kernel-trace] definition And.recOn
+  universe params: u
+  type:
+    Pi a (implicit)
+      Sort 0
+      Pi b (implicit)
+        Sort 0
+        Pi motive (implicit)
+          Pi t (default)
+            App
+              App
+                Const And
+                BVar 1
+              BVar 0
+            Sort u
+          Pi t (default)
+            App
+              App
+                Const And
+                BVar 2
+              BVar 1
+            Pi intro (default)
+              Pi a._@._internal._hyg.0 (default)
+                BVar 3
+                Pi a._@._internal._hyg.0 (default)
+                  BVar 3
+                  App
+                    BVar 3
+                    App
+                      App
+                        App
+                          App
+                            Const And.intro
+                            BVar 5
+                          BVar 4
+                        BVar 1
+                      BVar 0
+              App
+                BVar 2
+                BVar 1
+  value:
+    Lam a (implicit)
+      Sort 0
+      Lam b (implicit)
+        Sort 0
+        Lam motive (implicit)
+          Pi t (default)
+            App
+              App
+                Const And
+                BVar 1
+              BVar 0
+            Sort u
+          Lam t (default)
+            App
+              App
+                Const And
+                BVar 2
+              BVar 1
+            Lam intro (default)
+              Pi a._@._internal._hyg.0 (default)
+                BVar 3
+                Pi a._@._internal._hyg.0 (default)
+                  BVar 3
+                  App
+                    BVar 3
+                    App
+                      App
+                        App
+                          App
+                            Const And.intro
+                            BVar 5
+                          BVar 4
+                        BVar 1
+                      BVar 0
+              App
+                App
+                  App
+                    App
+                      App
+                        Const And.rec [u]
+                        BVar 4
+                      BVar 3
+                    BVar 2
+                  BVar 0
+                BVar 1
+[kernel-trace] end And.recOn
+[kernel-trace] inductive Or
+  params: 2
+  type:
+    Pi a (default)
+      Sort 0
+      Pi b (default)
+        Sort 0
+        Sort 0
+[kernel-trace] end Or
+[kernel-trace] constructor Or.inl
+  type:
+    Pi a (implicit)
+      Sort 0
+      Pi b (implicit)
+        Sort 0
+        Pi a._@._internal._hyg.0 (default)
+          BVar 1
+          App
+            App
+              Const Or
+              BVar 2
+            BVar 1
+[kernel-trace] end Or.inl
+[kernel-trace] constructor Or.inr
+  type:
+    Pi a (implicit)
+      Sort 0
+      Pi b (implicit)
+        Sort 0
+        Pi a._@._internal._hyg.0 (default)
+          BVar 0
+          App
+            App
+              Const Or
+              BVar 2
+            BVar 1
+[kernel-trace] end Or.inr
+[kernel-trace] reference recursor Or.rec
+  type:
+    Pi a (implicit)
+      Sort 0
+      Pi b (implicit)
+        Sort 0
+        Pi motive (implicit)
+          Pi t (default)
+            App
+              App
+                Const Or
+                BVar 1
+              BVar 0
+            Sort 0
+          Pi inl (default)
+            Pi a._@._internal._hyg.0 (default)
+              BVar 2
+              App
+                BVar 1
+                App
+                  App
+                    App
+                      Const Or.inl
+                      BVar 3
+                    BVar 2
+                  BVar 0
+            Pi inr (default)
+              Pi a._@._internal._hyg.0 (default)
+                BVar 2
+                App
+                  BVar 2
+                  App
+                    App
+                      App
+                        Const Or.inr
+                        BVar 4
+                      BVar 3
+                    BVar 0
+              Pi t (default)
+                App
+                  App
+                    Const Or
+                    BVar 4
+                  BVar 3
+                App
+                  BVar 3
+                  BVar 0
+[kernel-trace] end Or.rec
+[kernel-trace] definition Or.recOn
+  type:
+    Pi a (implicit)
+      Sort 0
+      Pi b (implicit)
+        Sort 0
+        Pi motive (implicit)
+          Pi t (default)
+            App
+              App
+                Const Or
+                BVar 1
+              BVar 0
+            Sort 0
+          Pi t (default)
+            App
+              App
+                Const Or
+                BVar 2
+              BVar 1
+            Pi inl (default)
+              Pi a._@._internal._hyg.0 (default)
+                BVar 3
+                App
+                  BVar 2
+                  App
+                    App
+                      App
+                        Const Or.inl
+                        BVar 4
+                      BVar 3
+                    BVar 0
+              Pi inr (default)
+                Pi a._@._internal._hyg.0 (default)
+                  BVar 3
+                  App
+                    BVar 3
+                    App
+                      App
+                        App
+                          Const Or.inr
+                          BVar 5
+                        BVar 4
+                      BVar 0
+                App
+                  BVar 3
+                  BVar 2
+  value:
+    Lam a (implicit)
+      Sort 0
+      Lam b (implicit)
+        Sort 0
+        Lam motive (implicit)
+          Pi t (default)
+            App
+              App
+                Const Or
+                BVar 1
+              BVar 0
+            Sort 0
+          Lam t (default)
+            App
+              App
+                Const Or
+                BVar 2
+              BVar 1
+            Lam inl (default)
+              Pi a._@._internal._hyg.0 (default)
+                BVar 3
+                App
+                  BVar 2
+                  App
+                    App
+                      App
+                        Const Or.inl
+                        BVar 4
+                      BVar 3
+                    BVar 0
+              Lam inr (default)
+                Pi a._@._internal._hyg.0 (default)
+                  BVar 3
+                  App
+                    BVar 3
+                    App
+                      App
+                        App
+                          Const Or.inr
+                          BVar 5
+                        BVar 4
+                      BVar 0
+                App
+                  App
+                    App
+                      App
+                        App
+                          App
+                            Const Or.rec
+                            BVar 5
+                          BVar 4
+                        BVar 3
+                      BVar 1
+                    BVar 0
+                  BVar 2
+[kernel-trace] end Or.recOn
+[kernel-trace] inductive MyNat
+  params: 0
+  type:
+    Sort 1
+[kernel-trace] end MyNat
+[kernel-trace] constructor MyNat.zero
+  type:
+    Const MyNat
+[kernel-trace] end MyNat.zero
+[kernel-trace] constructor MyNat.succ
+  type:
+    Pi a._@._internal._hyg.0 (default)
+      Const MyNat
+      Const MyNat
+[kernel-trace] end MyNat.succ
+[kernel-trace] reference recursor MyNat.rec
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Pi zero (default)
+        App
+          BVar 0
+          Const MyNat.zero
+        Pi succ (default)
+          Pi a._@._internal._hyg.0 (default)
+            Const MyNat
+            Pi a_ih._@._internal._hyg.0 (default)
+              App
+                BVar 2
+                BVar 0
+              App
+                BVar 3
+                App
+                  Const MyNat.succ
+                  BVar 1
+          Pi t (default)
+            Const MyNat
+            App
+              BVar 3
+              BVar 0
+[kernel-trace] end MyNat.rec
+[kernel-trace] definition MyNat.recOn
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Pi t (default)
+        Const MyNat
+        Pi zero (default)
+          App
+            BVar 1
+            Const MyNat.zero
+          Pi succ (default)
+            Pi a._@._internal._hyg.0 (default)
+              Const MyNat
+              Pi a_ih._@._internal._hyg.0 (default)
+                App
+                  BVar 3
+                  BVar 0
+                App
+                  BVar 4
+                  App
+                    Const MyNat.succ
+                    BVar 1
+            App
+              BVar 3
+              BVar 2
+  value:
+    Lam motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Lam t (default)
+        Const MyNat
+        Lam zero (default)
+          App
+            BVar 1
+            Const MyNat.zero
+          Lam succ (default)
+            Pi a._@._internal._hyg.0 (default)
+              Const MyNat
+              Pi a_ih._@._internal._hyg.0 (default)
+                App
+                  BVar 3
+                  BVar 0
+                App
+                  BVar 4
+                  App
+                    Const MyNat.succ
+                    BVar 1
+            App
+              App
+                App
+                  App
+                    Const MyNat.rec [u]
+                    BVar 3
+                  BVar 1
+                BVar 0
+              BVar 2
+[kernel-trace] end MyNat.recOn
+[kernel-trace] inductive Prod
+  universe params: u v
+  params: 2
+  type:
+    Pi α (default)
+      Sort succ u
+      Pi β (default)
+        Sort succ v
+        Sort succ (max u v)
+[kernel-trace] end Prod
+[kernel-trace] constructor Prod.mk
+  universe params: u v
+  type:
+    Pi α (implicit)
+      Sort succ u
+      Pi β (implicit)
+        Sort succ v
+        Pi a._@._internal._hyg.0 (default)
+          BVar 1
+          Pi a._@._internal._hyg.0 (default)
+            BVar 1
+            App
+              App
+                Const Prod [u, v]
+                BVar 3
+              BVar 2
+[kernel-trace] end Prod.mk
+[kernel-trace] reference recursor Prod.rec
+  universe params: u_1 u v
+  type:
+    Pi α (implicit)
+      Sort succ u
+      Pi β (implicit)
+        Sort succ v
+        Pi motive (implicit)
+          Pi t (default)
+            App
+              App
+                Const Prod [u, v]
+                BVar 1
+              BVar 0
+            Sort u_1
+          Pi mk (default)
+            Pi a._@._internal._hyg.0 (default)
+              BVar 2
+              Pi a._@._internal._hyg.0 (default)
+                BVar 2
+                App
+                  BVar 2
+                  App
+                    App
+                      App
+                        App
+                          Const Prod.mk [u, v]
+                          BVar 4
+                        BVar 3
+                      BVar 1
+                    BVar 0
+            Pi t (default)
+              App
+                App
+                  Const Prod [u, v]
+                  BVar 3
+                BVar 2
+              App
+                BVar 2
+                BVar 0
+[kernel-trace] end Prod.rec
+[kernel-trace] definition Prod.recOn
+  universe params: u_1 u v
+  type:
+    Pi α (implicit)
+      Sort succ u
+      Pi β (implicit)
+        Sort succ v
+        Pi motive (implicit)
+          Pi t (default)
+            App
+              App
+                Const Prod [u, v]
+                BVar 1
+              BVar 0
+            Sort u_1
+          Pi t (default)
+            App
+              App
+                Const Prod [u, v]
+                BVar 2
+              BVar 1
+            Pi mk (default)
+              Pi a._@._internal._hyg.0 (default)
+                BVar 3
+                Pi a._@._internal._hyg.0 (default)
+                  BVar 3
+                  App
+                    BVar 3
+                    App
+                      App
+                        App
+                          App
+                            Const Prod.mk [u, v]
+                            BVar 5
+                          BVar 4
+                        BVar 1
+                      BVar 0
+              App
+                BVar 2
+                BVar 1
+  value:
+    Lam α (implicit)
+      Sort succ u
+      Lam β (implicit)
+        Sort succ v
+        Lam motive (implicit)
+          Pi t (default)
+            App
+              App
+                Const Prod [u, v]
+                BVar 1
+              BVar 0
+            Sort u_1
+          Lam t (default)
+            App
+              App
+                Const Prod [u, v]
+                BVar 2
+              BVar 1
+            Lam mk (default)
+              Pi a._@._internal._hyg.0 (default)
+                BVar 3
+                Pi a._@._internal._hyg.0 (default)
+                  BVar 3
+                  App
+                    BVar 3
+                    App
+                      App
+                        App
+                          App
+                            Const Prod.mk [u, v]
+                            BVar 5
+                          BVar 4
+                        BVar 1
+                      BVar 0
+              App
+                App
+                  App
+                    App
+                      App
+                        Const Prod.rec [u_1, u, v]
+                        BVar 4
+                      BVar 3
+                    BVar 2
+                  BVar 0
+                BVar 1
+[kernel-trace] end Prod.recOn
+[kernel-trace] definition MyNat.add
+  type:
+    Pi a (default)
+      Const MyNat
+      Pi b (default)
+        Const MyNat
+        Const MyNat
+  value:
+    Lam a (default)
+      Const MyNat
+      Lam b (default)
+        Const MyNat
+        App
+          App
+            App
+              App
+                Const MyNat.rec [1]
+                Lam x._@.Documents.lean-kernel.chapters_new.03_inductive.examples.2314059840._hygCtx._hyg.10 (default)
+                  Const MyNat
+                  Const MyNat
+              BVar 1
+            Lam x._@.Documents.lean-kernel.chapters_new.03_inductive.examples.2314059840._hygCtx._hyg.18 (default)
+              Const MyNat
+              Lam ih (default)
+                Const MyNat
+                App
+                  Const MyNat.succ
+                  BVar 0
+          BVar 0
+[kernel-trace] end MyNat.add
+[kernel-trace] definition MyNat.one
+  type:
+    Const MyNat
+  value:
+    App
+      Const MyNat.succ
+      Const MyNat.zero
+[kernel-trace] end MyNat.one
+[kernel-trace] definition MyNat.two
+  type:
+    Const MyNat
+  value:
+    App
+      Const MyNat.succ
+      Const MyNat.one
+[kernel-trace] end MyNat.two
+[kernel-trace] definition MyNat.three
+  type:
+    Const MyNat
+  value:
+    App
+      Const MyNat.succ
+      Const MyNat.two
+[kernel-trace] end MyNat.three
+[kernel-trace] definition MyNat.one_plus_two
+  type:
+    Const MyNat
+  value:
+    App
+      App
+        Const MyNat.add
+        Const MyNat.one
+      Const MyNat.two
+[kernel-trace] end MyNat.one_plus_two
+[kernel-trace] theorem False.elim
+  type:
+    Pi p (implicit)
+      Sort 0
+      Pi h (default)
+        Const False
+        BVar 1
+  value:
+    Lam p (implicit)
+      Sort 0
+      Lam h (default)
+        Const False
+        App
+          App
+            Const False.rec [0]
+            Lam x._@.Documents.lean-kernel.chapters_new.03_inductive.examples.2135250726._hygCtx._hyg.10 (default)
+              Const False
+              BVar 2
+          BVar 0
+[kernel-trace] end False.elim
+[kernel-trace] theorem And.left
+  type:
+    Pi a (implicit)
+      Sort 0
+      Pi b (implicit)
+        Sort 0
+        Pi h (default)
+          App
+            App
+              Const And
+              BVar 1
+            BVar 0
+          BVar 2
+  value:
+    Lam a (implicit)
+      Sort 0
+      Lam b (implicit)
+        Sort 0
+        Lam h (default)
+          App
+            App
+              Const And
+              BVar 1
+            BVar 0
+          App
+            App
+              App
+                App
+                  App
+                    Const And.rec [0]
+                    BVar 2
+                  BVar 1
+                Lam x._@.Documents.lean-kernel.chapters_new.03_inductive.examples.1888824956._hygCtx._hyg.15 (default)
+                  App
+                    App
+                      Const And
+                      BVar 2
+                    BVar 1
+                  BVar 3
+              Lam ha (default)
+                BVar 2
+                Lam x._@.Documents.lean-kernel.chapters_new.03_inductive.examples.1888824956._hygCtx._hyg.23 (default)
+                  BVar 2
+                  BVar 1
+            BVar 0
+[kernel-trace] end And.left
+[kernel-trace] theorem And.swap
+  type:
+    Pi a (implicit)
+      Sort 0
+      Pi b (implicit)
+        Sort 0
+        Pi h (default)
+          App
+            App
+              Const And
+              BVar 1
+            BVar 0
+          App
+            App
+              Const And
+              BVar 1
+            BVar 2
+  value:
+    Lam a (implicit)
+      Sort 0
+      Lam b (implicit)
+        Sort 0
+        Lam h (default)
+          App
+            App
+              Const And
+              BVar 1
+            BVar 0
+          App
+            App
+              App
+                App
+                  App
+                    Const And.rec [0]
+                    BVar 2
+                  BVar 1
+                Lam x._@.Documents.lean-kernel.chapters_new.03_inductive.examples.2605673588._hygCtx._hyg.17 (default)
+                  App
+                    App
+                      Const And
+                      BVar 2
+                    BVar 1
+                  App
+                    App
+                      Const And
+                      BVar 2
+                    BVar 3
+              Lam ha (default)
+                BVar 2
+                Lam hb (default)
+                  BVar 2
+                  App
+                    App
+                      App
+                        App
+                          Const And.intro
+                          BVar 3
+                        BVar 4
+                      BVar 0
+                    BVar 1
+            BVar 0
+[kernel-trace] end And.swap
+[kernel-trace] theorem Or.swap
+  type:
+    Pi a (implicit)
+      Sort 0
+      Pi b (implicit)
+        Sort 0
+        Pi h (default)
+          App
+            App
+              Const Or
+              BVar 1
+            BVar 0
+          App
+            App
+              Const Or
+              BVar 1
+            BVar 2
+  value:
+    Lam a (implicit)
+      Sort 0
+      Lam b (implicit)
+        Sort 0
+        Lam h (default)
+          App
+            App
+              Const Or
+              BVar 1
+            BVar 0
+          App
+            App
+              App
+                App
+                  App
+                    App
+                      Const Or.rec
+                      BVar 2
+                    BVar 1
+                  Lam x._@.Documents.lean-kernel.chapters_new.03_inductive.examples.2605673589._hygCtx._hyg.17 (default)
+                    App
+                      App
+                        Const Or
+                        BVar 2
+                      BVar 1
+                    App
+                      App
+                        Const Or
+                        BVar 2
+                      BVar 3
+                Lam ha (default)
+                  BVar 2
+                  App
+                    App
+                      App
+                        Const Or.inr
+                        BVar 2
+                      BVar 3
+                    BVar 0
+              Lam hb (default)
+                BVar 1
+                App
+                  App
+                    App
+                      Const Or.inl
+                      BVar 2
+                    BVar 3
+                  BVar 0
+            BVar 0
+[kernel-trace] end Or.swap
+[kernel-trace] definition Prod.fst
+  universe params: u v
+  type:
+    Pi α (implicit)
+      Sort succ u
+      Pi β (implicit)
+        Sort succ v
+        Pi p (default)
+          App
+            App
+              Const Prod [u, v]
+              BVar 1
+            BVar 0
+          BVar 2
+  value:
+    Lam α (implicit)
+      Sort succ u
+      Lam β (implicit)
+        Sort succ v
+        Lam p (default)
+          App
+            App
+              Const Prod [u, v]
+              BVar 1
+            BVar 0
+          App
+            App
+              App
+                App
+                  App
+                    Const Prod.rec [succ u, u, v]
+                    BVar 2
+                  BVar 1
+                Lam x._@.Documents.lean-kernel.chapters_new.03_inductive.examples.3714179503._hygCtx._hyg.15 (default)
+                  App
+                    App
+                      Const Prod [u, v]
+                      BVar 2
+                    BVar 1
+                  BVar 3
+              Lam a (default)
+                BVar 2
+                Lam x._@.Documents.lean-kernel.chapters_new.03_inductive.examples.3714179503._hygCtx._hyg.23 (default)
+                  BVar 2
+                  BVar 1
+            BVar 0
+[kernel-trace] end Prod.fst

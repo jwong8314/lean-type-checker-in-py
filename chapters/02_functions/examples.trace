@@ -1,0 +1,213 @@
+[kernel-trace] inductive False
+  params: 0
+  type:
+    Sort 0
+[kernel-trace] end False
+[kernel-trace] reference recursor False.rec
+  universe params: u
+  type:
+    Pi motive (default)
+      Pi t (default)
+        Const False
+        Sort u
+      Pi t (default)
+        Const False
+        App
+          BVar 1
+          BVar 0
+[kernel-trace] end False.rec
+[kernel-trace] definition False.recOn
+  universe params: u
+  type:
+    Pi motive (default)
+      Pi t (default)
+        Const False
+        Sort u
+      Pi t (default)
+        Const False
+        App
+          BVar 1
+          BVar 0
+  value:
+    Lam motive (default)
+      Pi t (default)
+        Const False
+        Sort u
+      Lam t (default)
+        Const False
+        App
+          App
+            Const False.rec [u]
+            BVar 1
+          BVar 0
+[kernel-trace] end False.recOn
+[kernel-trace] theorem id_proof
+  type:
+    Pi p (default)
+      Sort 0
+      Pi a._@._internal._hyg.0 (default)
+        BVar 0
+        BVar 1
+  value:
+    Lam p (default)
+      Sort 0
+      Lam h (default)
+        BVar 0
+        BVar 0
+[kernel-trace] end id_proof
+[kernel-trace] theorem modus_ponens
+  type:
+    Pi p (default)
+      Sort 0
+      Pi q (default)
+        Sort 0
+        Pi a._@._internal._hyg.0 (default)
+          Pi a._@._internal._hyg.0 (default)
+            BVar 1
+            BVar 1
+          Pi a._@._internal._hyg.0 (default)
+            BVar 2
+            BVar 2
+  value:
+    Lam p (default)
+      Sort 0
+      Lam q (default)
+        Sort 0
+        Lam f (default)
+          Pi a._@._internal._hyg.0 (default)
+            BVar 1
+            BVar 1
+          Lam h (default)
+            BVar 2
+            App
+              BVar 1
+              BVar 0
+[kernel-trace] end modus_ponens
+[kernel-trace] theorem compose
+  type:
+    Pi p (default)
+      Sort 0
+      Pi q (default)
+        Sort 0
+        Pi r (default)
+          Sort 0
+          Pi a._@._internal._hyg.0 (default)
+            Pi a._@._internal._hyg.0 (default)
+              BVar 2
+              BVar 2
+            Pi a._@._internal._hyg.0 (default)
+              Pi a._@._internal._hyg.0 (default)
+                BVar 2
+                BVar 2
+              Pi a._@._internal._hyg.0 (default)
+                BVar 4
+                BVar 3
+  value:
+    Lam p (default)
+      Sort 0
+      Lam q (default)
+        Sort 0
+        Lam r (default)
+          Sort 0
+          Lam f (default)
+            Pi a._@._internal._hyg.0 (default)
+              BVar 2
+              BVar 2
+            Lam g (default)
+              Pi a._@._internal._hyg.0 (default)
+                BVar 2
+                BVar 2
+              Lam h (default)
+                BVar 4
+                App
+                  BVar 1
+                  App
+                    BVar 2
+                    BVar 0
+[kernel-trace] end compose
+[kernel-trace] definition Implies
+  type:
+    Pi p (default)
+      Sort 0
+      Pi q (default)
+        Sort 0
+        Sort 0
+  value:
+    Lam p (default)
+      Sort 0
+      Lam q (default)
+        Sort 0
+        Pi a._@._internal._hyg.0 (default)
+          BVar 1
+          BVar 1
+[kernel-trace] end Implies
+[kernel-trace] definition Not
+  type:
+    Pi p (default)
+      Sort 0
+      Sort 0
+  value:
+    Lam p (default)
+      Sort 0
+      Pi a._@._internal._hyg.0 (default)
+        BVar 0
+        Const False
+[kernel-trace] end Not
+[kernel-trace] theorem implies_refl
+  type:
+    Pi p (default)
+      Sort 0
+      App
+        App
+          Const Implies
+          BVar 0
+        BVar 0
+  value:
+    Lam p (default)
+      Sort 0
+      Lam h (default)
+        BVar 0
+        BVar 0
+[kernel-trace] end implies_refl
+[kernel-trace] theorem not_not_intro
+  type:
+    Pi p (default)
+      Sort 0
+      Pi a._@._internal._hyg.0 (default)
+        BVar 0
+        App
+          Const Not
+          App
+            Const Not
+            BVar 1
+  value:
+    Lam p (default)
+      Sort 0
+      Lam h (default)
+        BVar 0
+        Lam notp (default)
+          App
+            Const Not
+            BVar 1
+          App
+            BVar 0
+            BVar 1
+[kernel-trace] end not_not_intro
+[kernel-trace] theorem beta_in_type
+  type:
+    Pi p (default)
+      Sort 0
+      App
+        Lam q (default)
+          Sort 0
+          Pi a._@._internal._hyg.0 (default)
+            BVar 0
+            BVar 1
+        BVar 0
+  value:
+    Lam p (default)
+      Sort 0
+      Lam h (default)
+        BVar 0
+        BVar 0
+[kernel-trace] end beta_in_type

@@ -1,0 +1,122 @@
+[kernel-trace] inductive True
+  params: 0
+  type:
+    Sort 0
+[kernel-trace] end True
+[kernel-trace] constructor True.intro
+  type:
+    Const True
+[kernel-trace] end True.intro
+[kernel-trace] reference recursor True.rec
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const True
+        Sort u
+      Pi intro (default)
+        App
+          BVar 0
+          Const True.intro
+        Pi t (default)
+          Const True
+          App
+            BVar 2
+            BVar 0
+[kernel-trace] end True.rec
+[kernel-trace] definition True.recOn
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const True
+        Sort u
+      Pi t (default)
+        Const True
+        Pi intro (default)
+          App
+            BVar 1
+            Const True.intro
+          App
+            BVar 2
+            BVar 1
+  value:
+    Lam motive (implicit)
+      Pi t (default)
+        Const True
+        Sort u
+      Lam t (default)
+        Const True
+        Lam intro (default)
+          App
+            BVar 1
+            Const True.intro
+          App
+            App
+              App
+                Const True.rec [u]
+                BVar 2
+              BVar 0
+            BVar 1
+[kernel-trace] end True.recOn
+[kernel-trace] inductive False
+  params: 0
+  type:
+    Sort 0
+[kernel-trace] end False
+[kernel-trace] reference recursor False.rec
+  universe params: u
+  type:
+    Pi motive (default)
+      Pi t (default)
+        Const False
+        Sort u
+      Pi t (default)
+        Const False
+        App
+          BVar 1
+          BVar 0
+[kernel-trace] end False.rec
+[kernel-trace] definition False.recOn
+  universe params: u
+  type:
+    Pi motive (default)
+      Pi t (default)
+        Const False
+        Sort u
+      Pi t (default)
+        Const False
+        App
+          BVar 1
+          BVar 0
+  value:
+    Lam motive (default)
+      Pi t (default)
+        Const False
+        Sort u
+      Lam t (default)
+        Const False
+        App
+          App
+            Const False.rec [u]
+            BVar 1
+          BVar 0
+[kernel-trace] end False.recOn
+[kernel-trace] definition TrueProp
+  type:
+    Sort 0
+  value:
+    Const True
+[kernel-trace] end TrueProp
+[kernel-trace] theorem true_intro
+  type:
+    Const TrueProp
+  value:
+    Const True.intro
+[kernel-trace] end true_intro
+[kernel-trace] theorem true_is_true
+  type:
+    Const TrueProp
+  value:
+    Const true_intro
+[kernel-trace] end true_is_true

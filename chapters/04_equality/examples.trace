@@ -1,0 +1,1055 @@
+[kernel-trace] inductive MyNat
+  params: 0
+  type:
+    Sort 1
+[kernel-trace] end MyNat
+[kernel-trace] constructor MyNat.zero
+  type:
+    Const MyNat
+[kernel-trace] end MyNat.zero
+[kernel-trace] constructor MyNat.succ
+  type:
+    Pi a._@._internal._hyg.0 (default)
+      Const MyNat
+      Const MyNat
+[kernel-trace] end MyNat.succ
+[kernel-trace] reference recursor MyNat.rec
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Pi zero (default)
+        App
+          BVar 0
+          Const MyNat.zero
+        Pi succ (default)
+          Pi a._@._internal._hyg.0 (default)
+            Const MyNat
+            Pi a_ih._@._internal._hyg.0 (default)
+              App
+                BVar 2
+                BVar 0
+              App
+                BVar 3
+                App
+                  Const MyNat.succ
+                  BVar 1
+          Pi t (default)
+            Const MyNat
+            App
+              BVar 3
+              BVar 0
+[kernel-trace] end MyNat.rec
+[kernel-trace] definition MyNat.recOn
+  universe params: u
+  type:
+    Pi motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Pi t (default)
+        Const MyNat
+        Pi zero (default)
+          App
+            BVar 1
+            Const MyNat.zero
+          Pi succ (default)
+            Pi a._@._internal._hyg.0 (default)
+              Const MyNat
+              Pi a_ih._@._internal._hyg.0 (default)
+                App
+                  BVar 3
+                  BVar 0
+                App
+                  BVar 4
+                  App
+                    Const MyNat.succ
+                    BVar 1
+            App
+              BVar 3
+              BVar 2
+  value:
+    Lam motive (implicit)
+      Pi t (default)
+        Const MyNat
+        Sort u
+      Lam t (default)
+        Const MyNat
+        Lam zero (default)
+          App
+            BVar 1
+            Const MyNat.zero
+          Lam succ (default)
+            Pi a._@._internal._hyg.0 (default)
+              Const MyNat
+              Pi a_ih._@._internal._hyg.0 (default)
+                App
+                  BVar 3
+                  BVar 0
+                App
+                  BVar 4
+                  App
+                    Const MyNat.succ
+                    BVar 1
+            App
+              App
+                App
+                  App
+                    Const MyNat.rec [u]
+                    BVar 3
+                  BVar 1
+                BVar 0
+              BVar 2
+[kernel-trace] end MyNat.recOn
+[kernel-trace] inductive Eq
+  universe params: u
+  params: 2
+  type:
+    Pi α (implicit)
+      Sort u
+      Pi a._@._internal._hyg.0 (default)
+        BVar 0
+        Pi a._@._internal._hyg.0 (default)
+          BVar 1
+          Sort 0
+[kernel-trace] end Eq
+[kernel-trace] constructor Eq.refl
+  universe params: u
+  type:
+    Pi α (implicit)
+      Sort u
+      Pi a (default)
+        BVar 0
+        App
+          App
+            App
+              Const Eq [u]
+              BVar 1
+            BVar 0
+          BVar 0
+[kernel-trace] end Eq.refl
+[kernel-trace] reference recursor Eq.rec
+  universe params: u_1 u
+  type:
+    Pi α (implicit)
+      Sort u
+      Pi a._@._internal._hyg.0 (implicit)
+        BVar 0
+        Pi motive (implicit)
+          Pi a._@._internal._hyg.0 (default)
+            BVar 1
+            Pi t (default)
+              App
+                App
+                  App
+                    Const Eq [u]
+                    BVar 2
+                  BVar 1
+                BVar 0
+              Sort u_1
+          Pi refl (default)
+            App
+              App
+                BVar 0
+                BVar 1
+              App
+                App
+                  Const Eq.refl [u]
+                  BVar 2
+                BVar 1
+            Pi a._@._internal._hyg.0 (implicit)
+              BVar 3
+              Pi t (default)
+                App
+                  App
+                    App
+                      Const Eq [u]
+                      BVar 4
+                    BVar 3
+                  BVar 0
+                App
+                  App
+                    BVar 3
+                    BVar 1
+                  BVar 0
+[kernel-trace] end Eq.rec
+[kernel-trace] definition Eq.recOn
+  universe params: u_1 u
+  type:
+    Pi α (implicit)
+      Sort u
+      Pi a._@._internal._hyg.0 (implicit)
+        BVar 0
+        Pi motive (implicit)
+          Pi a._@._internal._hyg.0 (default)
+            BVar 1
+            Pi t (default)
+              App
+                App
+                  App
+                    Const Eq [u]
+                    BVar 2
+                  BVar 1
+                BVar 0
+              Sort u_1
+          Pi a._@._internal._hyg.0 (implicit)
+            BVar 2
+            Pi t (default)
+              App
+                App
+                  App
+                    Const Eq [u]
+                    BVar 3
+                  BVar 2
+                BVar 0
+              Pi refl (default)
+                App
+                  App
+                    BVar 2
+                    BVar 3
+                  App
+                    App
+                      Const Eq.refl [u]
+                      BVar 4
+                    BVar 3
+                App
+                  App
+                    BVar 3
+                    BVar 2
+                  BVar 1
+  value:
+    Lam α (implicit)
+      Sort u
+      Lam a._@._internal._hyg.0 (implicit)
+        BVar 0
+        Lam motive (implicit)
+          Pi a._@._internal._hyg.0 (default)
+            BVar 1
+            Pi t (default)
+              App
+                App
+                  App
+                    Const Eq [u]
+                    BVar 2
+                  BVar 1
+                BVar 0
+              Sort u_1
+          Lam a._@._internal._hyg.0 (implicit)
+            BVar 2
+            Lam t (default)
+              App
+                App
+                  App
+                    Const Eq [u]
+                    BVar 3
+                  BVar 2
+                BVar 0
+              Lam refl (default)
+                App
+                  App
+                    BVar 2
+                    BVar 3
+                  App
+                    App
+                      Const Eq.refl [u]
+                      BVar 4
+                    BVar 3
+                App
+                  App
+                    App
+                      App
+                        App
+                          App
+                            Const Eq.rec [u_1, u]
+                            BVar 5
+                          BVar 4
+                        BVar 3
+                      BVar 0
+                    BVar 2
+                  BVar 1
+[kernel-trace] end Eq.recOn
+[kernel-trace] theorem Eq.symm
+  universe params: u
+  type:
+    Pi α (implicit)
+      Sort u
+      Pi a (implicit)
+        BVar 0
+        Pi b (implicit)
+          BVar 1
+          Pi h (default)
+            App
+              App
+                App
+                  Const Eq [u]
+                  BVar 2
+                BVar 1
+              BVar 0
+            App
+              App
+                App
+                  Const Eq [u]
+                  BVar 3
+                BVar 1
+              BVar 2
+  value:
+    Lam α (implicit)
+      Sort u
+      Lam a (implicit)
+        BVar 0
+        Lam b (implicit)
+          BVar 1
+          Lam h (default)
+            App
+              App
+                App
+                  Const Eq [u]
+                  BVar 2
+                BVar 1
+              BVar 0
+            App
+              App
+                App
+                  App
+                    App
+                      App
+                        Const Eq.rec [0, u]
+                        BVar 3
+                      BVar 2
+                    Lam x (default)
+                      BVar 3
+                      Lam x._@.Documents.lean-kernel.chapters_new.04_equality.examples.2345006592._hygCtx._hyg.19 (default)
+                        App
+                          App
+                            App
+                              Const Eq [u]
+                              BVar 4
+                            BVar 3
+                          BVar 0
+                        App
+                          App
+                            App
+                              Const Eq [u]
+                              BVar 5
+                            BVar 1
+                          BVar 4
+                  App
+                    App
+                      Const Eq.refl [u]
+                      BVar 3
+                    BVar 2
+                BVar 1
+              BVar 0
+[kernel-trace] end Eq.symm
+[kernel-trace] theorem Eq.trans
+  universe params: u
+  type:
+    Pi α (implicit)
+      Sort u
+      Pi a (implicit)
+        BVar 0
+        Pi b (implicit)
+          BVar 1
+          Pi c (implicit)
+            BVar 2
+            Pi h₁ (default)
+              App
+                App
+                  App
+                    Const Eq [u]
+                    BVar 3
+                  BVar 2
+                BVar 1
+              Pi h₂ (default)
+                App
+                  App
+                    App
+                      Const Eq [u]
+                      BVar 4
+                    BVar 2
+                  BVar 1
+                App
+                  App
+                    App
+                      Const Eq [u]
+                      BVar 5
+                    BVar 4
+                  BVar 2
+  value:
+    Lam α (implicit)
+      Sort u
+      Lam a (implicit)
+        BVar 0
+        Lam b (implicit)
+          BVar 1
+          Lam c (implicit)
+            BVar 2
+            Lam h₁ (default)
+              App
+                App
+                  App
+                    Const Eq [u]
+                    BVar 3
+                  BVar 2
+                BVar 1
+              Lam h₂ (default)
+                App
+                  App
+                    App
+                      Const Eq [u]
+                      BVar 4
+                    BVar 2
+                  BVar 1
+                App
+                  App
+                    App
+                      App
+                        App
+                          App
+                            Const Eq.rec [0, u]
+                            BVar 5
+                          BVar 3
+                        Lam x (default)
+                          BVar 5
+                          Lam x._@.Documents.lean-kernel.chapters_new.04_equality.examples.4164849530._hygCtx._hyg.23 (default)
+                            App
+                              App
+                                App
+                                  Const Eq [u]
+                                  BVar 6
+                                BVar 4
+                              BVar 0
+                            App
+                              App
+                                App
+                                  Const Eq [u]
+                                  BVar 7
+                                BVar 6
+                              BVar 1
+                      BVar 1
+                    BVar 2
+                  BVar 0
+[kernel-trace] end Eq.trans
+[kernel-trace] theorem Eq.congrArg
+  universe params: u v
+  type:
+    Pi α (implicit)
+      Sort u
+      Pi β (implicit)
+        Sort v
+        Pi a (implicit)
+          BVar 1
+          Pi b (implicit)
+            BVar 2
+            Pi f (default)
+              Pi a._@._internal._hyg.0 (default)
+                BVar 3
+                BVar 3
+              Pi h (default)
+                App
+                  App
+                    App
+                      Const Eq [u]
+                      BVar 4
+                    BVar 2
+                  BVar 1
+                App
+                  App
+                    App
+                      Const Eq [v]
+                      BVar 4
+                    App
+                      BVar 1
+                      BVar 3
+                  App
+                    BVar 1
+                    BVar 2
+  value:
+    Lam α (implicit)
+      Sort u
+      Lam β (implicit)
+        Sort v
+        Lam a (implicit)
+          BVar 1
+          Lam b (implicit)
+            BVar 2
+            Lam f (default)
+              Pi a._@._internal._hyg.0 (default)
+                BVar 3
+                BVar 3
+              Lam h (default)
+                App
+                  App
+                    App
+                      Const Eq [u]
+                      BVar 4
+                    BVar 2
+                  BVar 1
+                App
+                  App
+                    App
+                      App
+                        App
+                          App
+                            Const Eq.rec [0, u]
+                            BVar 5
+                          BVar 3
+                        Lam x (default)
+                          BVar 5
+                          Lam x._@.Documents.lean-kernel.chapters_new.04_equality.examples.2375064143._hygCtx._hyg.29 (default)
+                            App
+                              App
+                                App
+                                  Const Eq [u]
+                                  BVar 6
+                                BVar 4
+                              BVar 0
+                            App
+                              App
+                                App
+                                  Const Eq [v]
+                                  BVar 6
+                                App
+                                  BVar 3
+                                  BVar 5
+                              App
+                                BVar 3
+                                BVar 1
+                      App
+                        App
+                          Const Eq.refl [v]
+                          BVar 4
+                        App
+                          BVar 1
+                          BVar 3
+                    BVar 2
+                  BVar 0
+[kernel-trace] end Eq.congrArg
+[kernel-trace] definition MyNat.add
+  type:
+    Pi a (default)
+      Const MyNat
+      Pi b (default)
+        Const MyNat
+        Const MyNat
+  value:
+    Lam a (default)
+      Const MyNat
+      Lam b (default)
+        Const MyNat
+        App
+          App
+            App
+              App
+                Const MyNat.rec [1]
+                Lam x._@.Documents.lean-kernel.chapters_new.04_equality.examples.2314059840._hygCtx._hyg.10 (default)
+                  Const MyNat
+                  Const MyNat
+              BVar 1
+            Lam x._@.Documents.lean-kernel.chapters_new.04_equality.examples.2314059840._hygCtx._hyg.18 (default)
+              Const MyNat
+              Lam ih (default)
+                Const MyNat
+                App
+                  Const MyNat.succ
+                  BVar 0
+          BVar 0
+[kernel-trace] end MyNat.add
+[kernel-trace] definition MyNat.one
+  type:
+    Const MyNat
+  value:
+    App
+      Const MyNat.succ
+      Const MyNat.zero
+[kernel-trace] end MyNat.one
+[kernel-trace] definition MyNat.two
+  type:
+    Const MyNat
+  value:
+    App
+      Const MyNat.succ
+      Const MyNat.one
+[kernel-trace] end MyNat.two
+[kernel-trace] definition MyNat.four
+  type:
+    Const MyNat
+  value:
+    App
+      Const MyNat.succ
+      App
+        Const MyNat.succ
+        Const MyNat.two
+[kernel-trace] end MyNat.four
+[kernel-trace] theorem MyNat.two_add_two
+  type:
+    App
+      App
+        App
+          Const Eq [1]
+          Const MyNat
+        App
+          App
+            Const MyNat.add
+            Const MyNat.two
+          Const MyNat.two
+      Const MyNat.four
+  value:
+    App
+      App
+        Const Eq.refl [1]
+        Const MyNat
+      Const MyNat.four
+[kernel-trace] end MyNat.two_add_two
+[kernel-trace] theorem MyNat.add_zero
+  type:
+    Pi a (default)
+      Const MyNat
+      App
+        App
+          App
+            Const Eq [1]
+            Const MyNat
+          App
+            App
+              Const MyNat.add
+              BVar 0
+            Const MyNat.zero
+        BVar 0
+  value:
+    Lam a (default)
+      Const MyNat
+      App
+        App
+          Const Eq.refl [1]
+          Const MyNat
+        BVar 0
+[kernel-trace] end MyNat.add_zero
+[kernel-trace] theorem MyNat.add_succ
+  type:
+    Pi a (default)
+      Const MyNat
+      Pi b (default)
+        Const MyNat
+        App
+          App
+            App
+              Const Eq [1]
+              Const MyNat
+            App
+              App
+                Const MyNat.add
+                BVar 1
+              App
+                Const MyNat.succ
+                BVar 0
+          App
+            Const MyNat.succ
+            App
+              App
+                Const MyNat.add
+                BVar 1
+              BVar 0
+  value:
+    Lam a (default)
+      Const MyNat
+      Lam b (default)
+        Const MyNat
+        App
+          App
+            Const Eq.refl [1]
+            Const MyNat
+          App
+            Const MyNat.succ
+            App
+              App
+                Const MyNat.add
+                BVar 1
+              BVar 0
+[kernel-trace] end MyNat.add_succ
+[kernel-trace] theorem MyNat.zero_add
+  type:
+    Pi a (default)
+      Const MyNat
+      App
+        App
+          App
+            Const Eq [1]
+            Const MyNat
+          App
+            App
+              Const MyNat.add
+              Const MyNat.zero
+            BVar 0
+        BVar 0
+  value:
+    Lam a (default)
+      Const MyNat
+      App
+        App
+          App
+            App
+              Const MyNat.rec [0]
+              Lam n (default)
+                Const MyNat
+                App
+                  App
+                    App
+                      Const Eq [1]
+                      Const MyNat
+                    App
+                      App
+                        Const MyNat.add
+                        Const MyNat.zero
+                      BVar 0
+                  BVar 0
+            App
+              App
+                Const Eq.refl [1]
+                Const MyNat
+              Const MyNat.zero
+          Lam n (default)
+            Const MyNat
+            Lam ih (default)
+              App
+                App
+                  App
+                    Const Eq [1]
+                    Const MyNat
+                  App
+                    App
+                      Const MyNat.add
+                      Const MyNat.zero
+                    BVar 0
+                BVar 0
+              App
+                App
+                  App
+                    App
+                      App
+                        App
+                          Const Eq.congrArg [1, 1]
+                          Const MyNat
+                        Const MyNat
+                      App
+                        App
+                          App
+                            App
+                              Const MyNat.rec [1]
+                              Lam x._@.Documents.lean-kernel.chapters_new.04_equality.examples.2314059840._hygCtx._hyg.10 (default)
+                                Const MyNat
+                                Const MyNat
+                            Const MyNat.zero
+                          Lam x._@.Documents.lean-kernel.chapters_new.04_equality.examples.2314059840._hygCtx._hyg.18 (default)
+                            Const MyNat
+                            Lam ih (default)
+                              Const MyNat
+                              App
+                                Const MyNat.succ
+                                BVar 0
+                        BVar 1
+                    BVar 1
+                  Const MyNat.succ
+                BVar 0
+        BVar 0
+[kernel-trace] end MyNat.zero_add
+[kernel-trace] theorem MyNat.succ_add
+  type:
+    Pi a (default)
+      Const MyNat
+      Pi b (default)
+        Const MyNat
+        App
+          App
+            App
+              Const Eq [1]
+              Const MyNat
+            App
+              App
+                Const MyNat.add
+                App
+                  Const MyNat.succ
+                  BVar 1
+              BVar 0
+          App
+            Const MyNat.succ
+            App
+              App
+                Const MyNat.add
+                BVar 1
+              BVar 0
+  value:
+    Lam a (default)
+      Const MyNat
+      Lam b (default)
+        Const MyNat
+        App
+          App
+            App
+              App
+                Const MyNat.rec [0]
+                Lam n (default)
+                  Const MyNat
+                  App
+                    App
+                      App
+                        Const Eq [1]
+                        Const MyNat
+                      App
+                        App
+                          Const MyNat.add
+                          App
+                            Const MyNat.succ
+                            BVar 2
+                        BVar 0
+                    App
+                      Const MyNat.succ
+                      App
+                        App
+                          Const MyNat.add
+                          BVar 2
+                        BVar 0
+              App
+                App
+                  Const Eq.refl [1]
+                  Const MyNat
+                App
+                  Const MyNat.succ
+                  BVar 1
+            Lam n (default)
+              Const MyNat
+              Lam ih (default)
+                App
+                  App
+                    App
+                      Const Eq [1]
+                      Const MyNat
+                    App
+                      App
+                        Const MyNat.add
+                        App
+                          Const MyNat.succ
+                          BVar 2
+                      BVar 0
+                  App
+                    Const MyNat.succ
+                    App
+                      App
+                        Const MyNat.add
+                        BVar 2
+                      BVar 0
+                App
+                  App
+                    App
+                      App
+                        App
+                          App
+                            Const Eq.congrArg [1, 1]
+                            Const MyNat
+                          Const MyNat
+                        App
+                          App
+                            App
+                              App
+                                Const MyNat.rec [1]
+                                Lam x._@.Documents.lean-kernel.chapters_new.04_equality.examples.2314059840._hygCtx._hyg.10 (default)
+                                  Const MyNat
+                                  Const MyNat
+                              App
+                                Const MyNat.succ
+                                BVar 3
+                            Lam x._@.Documents.lean-kernel.chapters_new.04_equality.examples.2314059840._hygCtx._hyg.18 (default)
+                              Const MyNat
+                              Lam ih (default)
+                                Const MyNat
+                                App
+                                  Const MyNat.succ
+                                  BVar 0
+                          BVar 1
+                      App
+                        App
+                          Const MyNat.add
+                          BVar 3
+                        App
+                          Const MyNat.succ
+                          BVar 1
+                    Const MyNat.succ
+                  BVar 0
+          BVar 0
+[kernel-trace] end MyNat.succ_add
+[kernel-trace] theorem MyNat.add_comm
+  type:
+    Pi a (default)
+      Const MyNat
+      Pi b (default)
+        Const MyNat
+        App
+          App
+            App
+              Const Eq [1]
+              Const MyNat
+            App
+              App
+                Const MyNat.add
+                BVar 1
+              BVar 0
+          App
+            App
+              Const MyNat.add
+              BVar 0
+            BVar 1
+  value:
+    Lam a (default)
+      Const MyNat
+      Lam b (default)
+        Const MyNat
+        App
+          App
+            App
+              App
+                Const MyNat.rec [0]
+                Lam n (default)
+                  Const MyNat
+                  App
+                    App
+                      App
+                        Const Eq [1]
+                        Const MyNat
+                      App
+                        App
+                          Const MyNat.add
+                          BVar 2
+                        BVar 0
+                    App
+                      App
+                        Const MyNat.add
+                        BVar 0
+                      BVar 2
+              App
+                App
+                  App
+                    App
+                      Const Eq.symm [1]
+                      Const MyNat
+                    App
+                      App
+                        Const MyNat.add
+                        Const MyNat.zero
+                      BVar 1
+                  App
+                    App
+                      Const MyNat.add
+                      BVar 1
+                    Const MyNat.zero
+                App
+                  Const MyNat.zero_add
+                  BVar 1
+            Lam n (default)
+              Const MyNat
+              Lam ih (default)
+                App
+                  App
+                    App
+                      Const Eq [1]
+                      Const MyNat
+                    App
+                      App
+                        Const MyNat.add
+                        BVar 2
+                      BVar 0
+                  App
+                    App
+                      Const MyNat.add
+                      BVar 0
+                    BVar 2
+                App
+                  App
+                    App
+                      App
+                        App
+                          App
+                            Const Eq.trans [1]
+                            Const MyNat
+                          App
+                            App
+                              Const MyNat.add
+                              BVar 3
+                            App
+                              Const MyNat.succ
+                              BVar 1
+                        App
+                          Const MyNat.succ
+                          App
+                            App
+                              Const MyNat.add
+                              BVar 1
+                            BVar 3
+                      App
+                        App
+                          Const MyNat.add
+                          App
+                            Const MyNat.succ
+                            BVar 1
+                        BVar 3
+                    App
+                      App
+                        App
+                          App
+                            App
+                              App
+                                Const Eq.congrArg [1, 1]
+                                Const MyNat
+                              Const MyNat
+                            App
+                              App
+                                App
+                                  App
+                                    Const MyNat.rec [1]
+                                    Lam x._@.Documents.lean-kernel.chapters_new.04_equality.examples.2314059840._hygCtx._hyg.10 (default)
+                                      Const MyNat
+                                      Const MyNat
+                                  BVar 3
+                                Lam x._@.Documents.lean-kernel.chapters_new.04_equality.examples.2314059840._hygCtx._hyg.18 (default)
+                                  Const MyNat
+                                  Lam ih (default)
+                                    Const MyNat
+                                    App
+                                      Const MyNat.succ
+                                      BVar 0
+                              BVar 1
+                          App
+                            App
+                              Const MyNat.add
+                              BVar 1
+                            BVar 3
+                        Const MyNat.succ
+                      BVar 0
+                  App
+                    App
+                      App
+                        App
+                          Const Eq.symm [1]
+                          Const MyNat
+                        App
+                          App
+                            Const MyNat.add
+                            App
+                              Const MyNat.succ
+                              BVar 1
+                          BVar 3
+                      App
+                        Const MyNat.succ
+                        App
+                          App
+                            Const MyNat.add
+                            BVar 1
+                          BVar 3
+                    App
+                      App
+                        Const MyNat.succ_add
+                        BVar 1
+                      BVar 3
+          BVar 0
+[kernel-trace] end MyNat.add_comm
