@@ -20,6 +20,17 @@ The directory cpp-lean-kernel/ contains source code copied from Lean 4
 License. It remains under the Apache License, Version 2.0, a copy of
 which is in cpp-lean-kernel/LICENSE, and the copyright of its authors.
 
+The file instrumentation/kernel-trace.patch modifies the Lean 4 kernel
+source (src/kernel/environment.cpp). It is not covered by this License.
+It is distributed under the Apache License, Version 2.0, the same terms
+as the code it modifies.
+
+The trace files (*.trace) under chapters/ and instrumentation/traces/
+were produced by running the patched Lean 4. Where they reproduce
+declarations from Lean 4's own library (for example in "reference"
+blocks), that content is not covered by this License. It remains under
+the Apache License, Version 2.0, and the copyright of its authors.
+
 ----------------------------------------------------------------------
 
 Non-Commercial License Agreement for lean-type-checker-in-py
